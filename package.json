@@ -1,0 +1,149 @@
+{
+  "name": "ui5-tools",
+  "displayName": "UI5 Tools for VSCode",
+  "description": "Local development tools for UI5",
+  "version": "0.0.1",
+  "publisher": "CarlosOrozco88",
+  "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
+  "contributors": [
+    "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CarlosOrozco88/ui5-tools"
+  },
+  "bus": {
+    "url": "https://github.com/CarlosOrozco88/ui5-tools/issues"
+  },
+  "engines": {
+    "vscode": "^1.44.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./ui5-tools/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ui5-tools.server.start",
+        "title": "UI5 Tools: Server > Start"
+      },
+      {
+        "command": "ui5-tools.server.stop",
+        "title": "UI5 Tools: Server > Stop"
+      },
+      {
+        "command": "ui5-tools.server.restart",
+        "title": "UI5 Tools: Server > Restart"
+      },
+      {
+        "command": "ui5-tools.server.configureOdataProvider",
+        "title": "UI5 Tools: Server > Configure odata provider"
+      },
+      {
+        "command": "ui5-tools.server.configureUI5Provider",
+        "title": "UI5 Tools: Server > Configure UI5 provider"
+      }
+    ],
+    "configuration": {
+      "title": "UI5 Tools",
+      "properties": {
+        "ui5-tools.srcFolder": {
+          "type": "string",
+          "default": "webapp",
+          "description": "Source folder in your workspace"
+        },
+        "ui5-tools.server.name": {
+          "type": "string",
+          "default": "UI5 Server",
+          "description": "Prefix to server messages"
+        },
+        "ui5-tools.server.port": {
+          "type": "number",
+          "default": 3000,
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Set custom port number of UI5 Server"
+        },
+        "ui5-tools.server.startOnLaunch": {
+          "type": "boolean",
+          "default": false,
+          "description": "Start server at launch vscode"
+        },
+        "ui5-tools.server.openBrowser": {
+          "type": "boolean",
+          "default": true,
+          "description": "Open Browser"
+        },
+        "ui5-tools.server.watch": {
+          "type": "boolean",
+          "default": true,
+          "description": "Activate live reload"
+        },
+        "ui5-tools.server.watchExtensions": {
+          "type": "string",
+          "default": "css,js,json,xml,html,properties",
+          "description": "Extensions to listen for live reload"
+        },
+        "ui5-tools.server.gatewayProxy": {
+          "type": "string",
+          "enum": [
+            "Gateway",
+            "None"
+          ],
+          "default": "Gateway",
+          "description": "Proxy all odata calls to a gateway (proxy all url begining with /sap)"
+        },
+        "ui5-tools.server.gatewayUri": {
+          "type": "string",
+          "default": "https://services.odata.org/V2/Northwind/",
+          "description": "Your gateway url (example: http://srvaspgwd.com:8080/)"
+        },
+        "ui5-tools.server.resourcesProxy": {
+          "type": "string",
+          "enum": [
+            "Gateway",
+            "CDN SAPUI5",
+            "CDN OpenUI5",
+            "None"
+          ],
+          "default": "CDN OpenUI5",
+          "description": "Proxy all odata calls to a gateway, cdn or local folder (proxy all url begining with /resources)"
+        },
+        "ui5-tools.server.ui5Version": {
+          "type": "string",
+          "default": "1.71.16",
+          "description": "SAPUI5 Library version for CDN proxy"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "node ./test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.1",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.11.0",
+    "@types/vscode": "^1.44.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-prettier": "^3.1.3",
+    "glob": "^7.1.6",
+    "mocha": "^7.1.1",
+    "typescript": "^3.8.3",
+    "vscode-test": "^1.3.0"
+  },
+  "dependencies": {
+    "connect-livereload": "^0.6.1",
+    "express": "^4.17.1",
+    "express-http-proxy": "^1.6.0",
+    "http-proxy-middleware": "^1.0.3",
+    "livereload": "^0.9.1",
+    "opn": "^6.0.0"
+  }
+}
