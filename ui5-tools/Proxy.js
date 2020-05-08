@@ -115,67 +115,6 @@ async function getErrorsMiddleware(app) {
   });
 }
 
-function addLocalResources(app, pathUri, libraryUri, folders = []) {
-  if (libraryUri) {
-    folders.forEach((folder) => {
-      fs.readdirSync(libraryUri).forEach((fileName) => {
-        let fileOrFolder = path.join(libraryUri, fileName);
-        if (fs.statSync(fileOrFolder).isDirectory()) {
-          addLocalResources(app, `${pathUri}/${fileName}`, fileOrFolder, [folder]);
-        } else {
-          app.use(path.normalize(`${folder}/${pathUri}/${fileName}`), express.static(fileOrFolder));
-        }
-      });
-    });
-  }
-}
-
-function addLocalTheme(app, pathUri, libraryUri, folders = []) {
-  if (libraryUri) {
-    folders.forEach((folder) => {
-      fs.readdirSync(libraryUri).forEach((fileName) => {
-        let fileOrFolder = path.join(libraryUri, fileName);
-        if (fs.statSync(fileOrFolder).isDirectory()) {
-          addLocalTheme(app, `${pathUri}/${fileName}`, fileOrFolder, [folder]);
-        } else {
-          //let cssFile = fileOrFolder.replace(fileName, 'library.css');
-          app.use(path.normalize(`${folder}/${pathUri}/${fileName}`), express.static(fileOrFolder));
-          //if (!fs.existsSync(cssFile)) {
-          // let lessFile = fs.readFileSync(fileOrFolder).toString();
-
-          // let filename = path.resolve(fileOrFolder);
-          // less.render(
-          //   lessFile,
-          //   {
-          //     filename,
-          //   },
-          //   function (e, output) {
-          //     if (output.css) {
-          //       fs.writeFileSync(cssFile, output);
-          //     } else {
-          //       debugger;
-          //     }
-          //   }
-          // );
-          //}
-        }
-      });
-    });
-  }
-}
-
-function checkLibraryType(libraryName) {
-  let type;
-  if (libraryName == 'sap.ui.core') {
-    type = 'core';
-  } else if (libraryName.indexOf('sap') == 0) {
-    type = 'library';
-  } else if (libraryName.indexOf('theme') == 0) {
-    type = 'theme';
-  }
-  return type;
-}
-
 module.exports = {
   setProxys,
 };

@@ -1,5 +1,6 @@
 const { commands } = require('vscode');
 const Server = require('./Server');
+const Builder = require('./Builder');
 const StatusBar = require('./StatusBar');
 const Utils = require('./Utils');
 
@@ -22,6 +23,8 @@ function activate(context) {
   context.subscriptions.push(
     commands.registerCommand('ui5-tools.server.configureUI5Provider', () => Server.configureUI5Provider())
   );
+
+  context.subscriptions.push(commands.registerCommand('ui5-tools.builder.build', () => Builder.build()));
 }
 exports.activate = activate;
 

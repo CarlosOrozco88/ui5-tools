@@ -23,6 +23,9 @@ function getConfigurationGeneral(property) {
 function getConfigurationServer(property) {
   return getConfigurationProperty(property, 'server');
 }
+function getConfigurationBuilder(property) {
+  return getConfigurationProperty(property, 'builder');
+}
 
 function getRoot() {
   let baseDir = workspace.rootPath;
@@ -36,6 +39,7 @@ function getRoot() {
 
 function loadConfig(restarting = false) {
   let srcFolder = getConfigurationGeneral('srcFolder');
+  let distFolder = getConfigurationGeneral('distFolder');
   let ui5Version = getConfigurationServer('ui5Version');
   let serverName = getConfigurationServer('name');
   let port = getConfigurationServer('port');
@@ -46,6 +50,8 @@ function loadConfig(restarting = false) {
   let gatewayUri = getConfigurationServer('gatewayUri');
   let resourcesProxy = getConfigurationServer('resourcesProxy');
   let localDependencies = getConfigurationServer('localDependencies');
+  let debugSources = getConfigurationBuilder('debugSources');
+  let uglifySources = getConfigurationBuilder('uglifySources');
   let portLiveReload = 35729;
 
   let open = restarting ? false : openBrowser;
@@ -59,31 +65,38 @@ function loadConfig(restarting = false) {
   let foldersRoot = [];
   let foldersRootMap = {};
 
-  let folder, folderUri;
-  workspace.workspaceFolders.forEach((route) => {
-    folder = '' + route.uri.path.split(path.sep).pop();
-    if (fs.existsSync(path.join(baseDir, folder, srcFolder))) {
-      folders.push(folder);
+  let foldersWithName = [];
 
-      files.push(path.join(folder, srcFolder, `*.{${watchExtensions}}`));
-      files.push(path.join(folder, srcFolder, '**', `*.{${watchExtensions}}`));
+  if (workspace.workspaceFolders) {
+    // Is a workspace
+    let folder, folderUri;
+    workspace.workspaceFolders.forEach((route) => {
+      folder = '' + route.uri.path.split(path.sep).pop();
+      if (fs.existsSync(path.join(baseDir, folder, srcFolder))) {
+        foldersWithName.push(route);
+        folders.push(folder);
 
-      folderUri = '/' + folder;
-      routes[folderUri] = path.join(folder, srcFolder);
+        files.push(path.join(folder, srcFolder, `*.{${watchExtensions}}`));
+        files.push(path.join(folder, srcFolder, '**', `*.{${watchExtensions}}`));
 
-      foldersRoot.push(path.join(baseDir, folder, srcFolder));
-      foldersRootMap[folderUri] = path.join(baseDir, folder, srcFolder);
+        folderUri = '/' + folder;
+        routes[folderUri] = path.join(folder, srcFolder);
 
-      serveStatic.push({
-        route: folder,
-        dir: path.join(route.uri.path, srcFolder),
-      });
-    }
-  });
+        foldersRoot.push(path.join(baseDir, folder, srcFolder));
+        foldersRootMap[folderUri] = path.join(baseDir, folder, srcFolder);
+
+        serveStatic.push({
+          route: folder,
+          dir: path.join(route.uri.path, srcFolder),
+        });
+      }
+    });
+  }
 
   return {
     // General Config
     srcFolder,
+    distFolder,
     // Server config
     ui5Version,
     serverName,
@@ -100,6 +113,7 @@ function loadConfig(restarting = false) {
     foldersRoot,
     foldersRootMap,
     folders,
+    foldersWithName,
     files,
     serveStatic,
     routes,
@@ -119,6 +133,7 @@ function get404() {
 module.exports = {
   getConfigurationGeneral,
   getConfigurationServer,
+  getConfigurationBuilder,
   getRoot,
   loadConfig,
   get404,

@@ -46,6 +46,10 @@
       {
         "command": "ui5-tools.server.configureUI5Provider",
         "title": "UI5 Tools: Server > Configure UI5 provider"
+      },
+      {
+        "command": "ui5-tools.builder.build",
+        "title": "UI5 Tools: Builder > Build UI5 Project"
       }
     ],
     "configuration": {
@@ -54,7 +58,12 @@
         "ui5-tools.srcFolder": {
           "type": "string",
           "default": "webapp",
-          "description": "Source folder in your workspace"
+          "description": "Source folder in your app"
+        },
+        "ui5-tools.distFolder": {
+          "type": "string",
+          "default": "dist",
+          "description": "Dist folder in your app"
         },
         "ui5-tools.server.name": {
           "type": "string",
@@ -117,6 +126,16 @@
           "type": "string",
           "default": "1.71.16",
           "description": "SAPUI5 Library version for CDN proxy"
+        },
+        "ui5-tools.builder.debugSources": {
+          "type": "boolean",
+          "default": true,
+          "description": "Create debug js files when building"
+        },
+        "ui5-tools.builder.uglifySources": {
+          "type": "boolean",
+          "default": true,
+          "description": "Uglify Component-preload.js and all js files when building"
         }
       }
     }
@@ -144,6 +163,8 @@
     "express-http-proxy": "^1.6.0",
     "http-proxy-middleware": "^1.0.3",
     "livereload": "^0.9.1",
-    "opn": "^6.0.0"
+    "openui5-preload": "^2.3.2",
+    "opn": "^6.0.0",
+    "uglify-js": "^3.9.2"
   }
 }
