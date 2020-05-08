@@ -35,18 +35,21 @@ async function build(projectPath = undefined) {
     let namespace = component['sap.app'].id;
     let library = component['sap.app'].type == 'library';
 
+    let ns = namespace.split('.').join('/');
+    let cwd = path.join(projectPath, srcFolder);
+    let dest = path.join(projectPath, distFolder);
     // preload
     preload({
       resources: {
-        cwd: path.join(projectPath, srcFolder),
-        prefix: namespace,
+        cwd,
+        prefix: ns,
       },
-      dest: path.join(projectPath, distFolder),
+      dest,
       compatVersion: compatVersion,
       compress: true,
       verbose: false,
-      components: !library ? namespace.split('.').join('/') : false,
-      libraries: library ? namespace.split('.').join('/') : false,
+      components: !library ? ns : false,
+      libraries: library ? ns : false,
     });
   }
 }

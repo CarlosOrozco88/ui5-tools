@@ -1,5 +1,6 @@
 const { commands } = require('vscode');
 const Server = require('./Server');
+const Configurator = require('./Configurator');
 const Builder = require('./Builder');
 const StatusBar = require('./StatusBar');
 const Utils = require('./Utils');
@@ -16,15 +17,15 @@ function activate(context) {
 
   context.subscriptions.push(commands.registerCommand('ui5-tools.server.toggle', () => Server.toggle()));
 
-  context.subscriptions.push(
-    commands.registerCommand('ui5-tools.server.configureOdataProvider', () => Server.configureOdataProvider())
-  );
-
-  context.subscriptions.push(
-    commands.registerCommand('ui5-tools.server.configureUI5Provider', () => Server.configureUI5Provider())
-  );
-
   context.subscriptions.push(commands.registerCommand('ui5-tools.builder.build', () => Builder.build()));
+
+  context.subscriptions.push(
+    commands.registerCommand('ui5-tools.server.configureOdataProvider', () => Configurator.configureOdataProvider())
+  );
+
+  context.subscriptions.push(
+    commands.registerCommand('ui5-tools.server.configureUI5Provider', () => Configurator.configureUI5Provider())
+  );
 }
 exports.activate = activate;
 

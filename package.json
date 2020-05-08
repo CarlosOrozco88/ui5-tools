@@ -65,6 +65,11 @@
           "default": "dist",
           "description": "Dist folder in your app"
         },
+        "ui5-tools.ui5Version": {
+          "type": "string",
+          "default": "1.71.16",
+          "description": "SAPUI5 Library version for CDN proxy in server and build correct preload files"
+        },
         "ui5-tools.server.name": {
           "type": "string",
           "default": "UI5 Server",
@@ -121,11 +126,6 @@
           ],
           "default": "CDN OpenUI5",
           "description": "Proxy all odata calls to a gateway, cdn or local folder (proxy all url begining with /resources)"
-        },
-        "ui5-tools.server.ui5Version": {
-          "type": "string",
-          "default": "1.71.16",
-          "description": "SAPUI5 Library version for CDN proxy"
         },
         "ui5-tools.builder.debugSources": {
           "type": "boolean",

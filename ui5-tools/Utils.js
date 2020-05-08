@@ -40,7 +40,8 @@ function getRoot() {
 function loadConfig(restarting = false) {
   let srcFolder = getConfigurationGeneral('srcFolder');
   let distFolder = getConfigurationGeneral('distFolder');
-  let ui5Version = getConfigurationServer('ui5Version');
+  let ui5Version = getConfigurationGeneral('ui5Version');
+
   let serverName = getConfigurationServer('name');
   let port = getConfigurationServer('port');
   let openBrowser = getConfigurationServer('openBrowser');
@@ -50,6 +51,7 @@ function loadConfig(restarting = false) {
   let gatewayUri = getConfigurationServer('gatewayUri');
   let resourcesProxy = getConfigurationServer('resourcesProxy');
   let localDependencies = getConfigurationServer('localDependencies');
+
   let debugSources = getConfigurationBuilder('debugSources');
   let uglifySources = getConfigurationBuilder('uglifySources');
   let portLiveReload = 35729;
@@ -97,8 +99,8 @@ function loadConfig(restarting = false) {
     // General Config
     srcFolder,
     distFolder,
-    // Server config
     ui5Version,
+    // Server config
     serverName,
     port,
     openBrowser,
@@ -108,6 +110,9 @@ function loadConfig(restarting = false) {
     gatewayUri,
     resourcesProxy,
     localDependencies,
+    // Builder config
+    debugSources,
+    uglifySources,
     // Modified config
     baseDir,
     foldersRoot,
