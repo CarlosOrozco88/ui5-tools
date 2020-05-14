@@ -31,7 +31,7 @@ async function build(projectPath = undefined) {
       uglifySources
     );
 
-    let component = require(path.join(projectPath, srcFolder, 'manifest.json'));
+    let component = JSON.parse(fs.readFileSync(path.join(projectPath, srcFolder, 'manifest.json'), 'utf-8'));
     let namespace = component['sap.app'].id;
     let library = component['sap.app'].type == 'library';
 
