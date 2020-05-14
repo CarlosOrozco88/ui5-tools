@@ -1,8 +1,7 @@
 .vscode
 test/**
-.gitignore.
-node_modules
-src/**
+.gitignore
+.editorconfig
+.eslintrc.json
+.git
 package-json.lock
-tsconfig.json
-webpack.config.js
