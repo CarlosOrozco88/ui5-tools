@@ -1,9 +1,3 @@
-# Change Log
+## 0.1.0 (14-05-2020)
 
-All notable changes to the "ui5-tools" extension will be documented in this file.
-
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-
-- Initial release
+- Initial version of the ui5-tools extension

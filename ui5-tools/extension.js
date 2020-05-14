@@ -20,8 +20,8 @@ function activate(context) {
 
   subscriptions.push(registerCommand('ui5-tools.builder.build', () => Builder.build()));
 
-  subscriptions.push(registerCommand('ui5-tools.server.odataProvider', () => Configurator.odataProvider()));
-  subscriptions.push(registerCommand('ui5-tools.server.ui5Provider', () => Configurator.ui5Provider()));
+  subscriptions.push(registerCommand('ui5-tools.configurator.odataProvider', () => Configurator.odataProvider()));
+  subscriptions.push(registerCommand('ui5-tools.configurator.ui5Provider', () => Configurator.ui5Provider()));
 }
 exports.activate = activate;
 

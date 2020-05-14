@@ -41,8 +41,8 @@ async function start(restarting = false) {
       server = httpsModule
         .createServer(
           {
-            key: fs.readFileSync(path.join(__dirname, 'server.key')),
-            cert: fs.readFileSync(path.join(__dirname, 'server.cert')),
+            key: fs.readFileSync(path.join(__dirname, 'cert', 'server.key')),
+            cert: fs.readFileSync(path.join(__dirname, 'cert', 'server.cert')),
           },
           app
         )

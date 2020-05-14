@@ -40,12 +40,12 @@
         "title": "UI5 Tools: Server > Restart"
       },
       {
-        "command": "ui5-tools.server.odataProvider",
-        "title": "UI5 Tools: Server > Configure odata provider"
+        "command": "ui5-tools.configurator.odataProvider",
+        "title": "UI5 Tools: Configurator > Configure odata provider"
       },
       {
-        "command": "ui5-tools.server.ui5Provider",
-        "title": "UI5 Tools: Server > Configure UI5 provider"
+        "command": "ui5-tools.configurator.ui5Provider",
+        "title": "UI5 Tools: Configurator > Configure UI5 provider"
       },
       {
         "command": "ui5-tools.builder.build",
@@ -73,7 +73,7 @@
         "ui5-tools.server.name": {
           "type": "string",
           "default": "UI5 Server",
-          "description": "Prefix to server messages"
+          "description": "Server name"
         },
         "ui5-tools.server.serveFolder": {
           "type": "string",
@@ -99,7 +99,7 @@
         "ui5-tools.server.openBrowser": {
           "type": "boolean",
           "default": true,
-          "description": "Open Browser"
+          "description": "Open Browser at launch server"
         },
         "ui5-tools.server.watch": {
           "type": "boolean",
@@ -130,12 +130,12 @@
             "Proxy OData requests to Gateway",
             "Do not proxy OData requests"
           ],
-          "default": "Gateway",
+          "default": "None",
           "description": "Proxy all odata calls to a gateway (proxy all url begining with /sap)"
         },
         "ui5-tools.server.gatewayUri": {
           "type": "string",
-          "default": "https://services.odata.org/V2/Northwind/",
+          "default": "",
           "description": "Your gateway url (example: http://srvaspgwd.com:8080/)"
         },
         "ui5-tools.server.resourcesProxy": {
