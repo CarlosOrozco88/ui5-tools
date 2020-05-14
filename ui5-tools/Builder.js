@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const Utils = require('./Utils');
 const rimraf = require('rimraf');
-const preload = require('openui5-preload');
+const preload = require('ui5-preload');
 const UglifyJS = require('uglify-js');
 
 async function build(projectPath = undefined) {
