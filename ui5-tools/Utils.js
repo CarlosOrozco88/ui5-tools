@@ -51,6 +51,9 @@ function loadConfig(restarting = false) {
   let gatewayUri = getConfigurationServer('gatewayUri');
   let resourcesProxy = getConfigurationServer('resourcesProxy');
   let localDependencies = getConfigurationServer('localDependencies');
+  let serveFolder = getConfigurationServer('serveFolder');
+  let protocol = getConfigurationServer('protocol');
+  let index = 'index.html';
 
   let debugSources = getConfigurationBuilder('debugSources');
   let uglifySources = getConfigurationBuilder('uglifySources');
@@ -69,30 +72,34 @@ function loadConfig(restarting = false) {
 
   let foldersWithName = [];
 
+  let servingFolder = serveFolder === 'Source Folder' ? srcFolder : distFolder;
+
   if (workspace.workspaceFolders) {
     // Is a workspace
     let folder, folderUri;
     workspace.workspaceFolders.forEach((route) => {
       folder = '' + route.uri.path.split(path.sep).pop();
-      if (fs.existsSync(path.join(baseDir, folder, srcFolder))) {
+      if (fs.existsSync(path.join(baseDir, folder, servingFolder))) {
         foldersWithName.push(route);
         folders.push(folder);
 
-        files.push(path.join(folder, srcFolder, `*.{${watchExtensions}}`));
-        files.push(path.join(folder, srcFolder, '**', `*.{${watchExtensions}}`));
+        files.push(path.join(folder, servingFolder, `*.{${watchExtensions}}`));
+        files.push(path.join(folder, servingFolder, '**', `*.{${watchExtensions}}`));
 
         folderUri = '/' + folder;
-        routes[folderUri] = path.join(folder, srcFolder);
+        routes[folderUri] = path.join(folder, servingFolder);
 
-        foldersRoot.push(path.join(baseDir, folder, srcFolder));
-        foldersRootMap[folderUri] = path.join(baseDir, folder, srcFolder);
+        foldersRoot.push(path.join(baseDir, folder, servingFolder));
+        foldersRootMap[folderUri] = path.join(baseDir, folder, servingFolder);
 
         serveStatic.push({
           route: folder,
-          dir: path.join(route.uri.path, srcFolder),
+          dir: path.join(route.uri.path, servingFolder),
         });
       }
     });
+  } else {
+    throw new Error('Create at least one project in your workspace');
   }
 
   return {
@@ -110,6 +117,9 @@ function loadConfig(restarting = false) {
     gatewayUri,
     resourcesProxy,
     localDependencies,
+    serveFolder,
+    index,
+    protocol,
     // Builder config
     debugSources,
     uglifySources,

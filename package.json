@@ -16,7 +16,7 @@
     "url": "https://github.com/CarlosOrozco88/ui5-tools/issues"
   },
   "engines": {
-    "vscode": "^1.44.0"
+    "vscode": "^1.45.0"
   },
   "categories": [
     "Other"
@@ -40,11 +40,11 @@
         "title": "UI5 Tools: Server > Restart"
       },
       {
-        "command": "ui5-tools.server.configureOdataProvider",
+        "command": "ui5-tools.server.odataProvider",
         "title": "UI5 Tools: Server > Configure odata provider"
       },
       {
-        "command": "ui5-tools.server.configureUI5Provider",
+        "command": "ui5-tools.server.ui5Provider",
         "title": "UI5 Tools: Server > Configure UI5 provider"
       },
       {
@@ -53,7 +53,7 @@
       }
     ],
     "configuration": {
-      "title": "UI5 Tools",
+      "title": "ui5-tools",
       "properties": {
         "ui5-tools.srcFolder": {
           "type": "string",
@@ -74,6 +74,15 @@
           "type": "string",
           "default": "UI5 Server",
           "description": "Prefix to server messages"
+        },
+        "ui5-tools.server.serveFolder": {
+          "type": "string",
+          "enum": [
+            "Source Folder",
+            "Dist Folder"
+          ],
+          "default": "Source Folder",
+          "description": "Folder to serve (if needed to check preloads)"
         },
         "ui5-tools.server.port": {
           "type": "number",
@@ -97,6 +106,15 @@
           "default": true,
           "description": "Activate live reload"
         },
+        "ui5-tools.server.protocol": {
+          "type": "string",
+          "enum": [
+            "http",
+            "https"
+          ],
+          "default": "http",
+          "description": "Should use http or https"
+        },
         "ui5-tools.server.watchExtensions": {
           "type": "string",
           "default": "css,js,json,xml,html,properties",
@@ -107,6 +125,10 @@
           "enum": [
             "Gateway",
             "None"
+          ],
+          "enumDescriptions": [
+            "Proxy OData requests to Gateway",
+            "Do not proxy OData requests"
           ],
           "default": "Gateway",
           "description": "Proxy all odata calls to a gateway (proxy all url begining with /sap)"
@@ -123,6 +145,12 @@
             "CDN SAPUI5",
             "CDN OpenUI5",
             "None"
+          ],
+          "enumDescriptions": [
+            "Proxy SAPUI5 resources provided by Gateway",
+            "Proxy SAPUI5 resources provided by CDN",
+            "Proxy OpenUI5 resources provided by CDN",
+            "Do not proxy resources"
           ],
           "default": "CDN OpenUI5",
           "description": "Proxy all odata calls to a gateway, cdn or local folder (proxy all url begining with /resources)"
@@ -148,23 +176,25 @@
   "devDependencies": {
     "@types/glob": "^7.1.1",
     "@types/mocha": "^7.0.2",
-    "@types/node": "^13.11.0",
-    "@types/vscode": "^1.44.0",
-    "eslint": "^6.8.0",
+    "@types/node": "^14.0.1",
+    "@types/vscode": "^1.45.0",
+    "@types/rimraf": "^3.0.0",
+    "@types/uglify-js": "^3.9.0",
+    "eslint": "^7.0.0",
     "eslint-plugin-prettier": "^3.1.3",
     "glob": "^7.1.6",
-    "mocha": "^7.1.1",
-    "typescript": "^3.8.3",
+    "mocha": "^7.1.2",
+    "typescript": "^3.9.2",
     "vscode-test": "^1.3.0"
   },
   "dependencies": {
     "connect-livereload": "^0.6.1",
     "express": "^4.17.1",
-    "express-http-proxy": "^1.6.0",
     "http-proxy-middleware": "^1.0.3",
     "livereload": "^0.9.1",
     "openui5-preload": "^2.3.2",
     "opn": "^6.0.0",
-    "uglify-js": "^3.9.2"
+    "uglify-js": "^3.9.3",
+    "url-join": "4.0.1"
   }
 }

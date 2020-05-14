@@ -1,7 +1,7 @@
 const { window, ConfigurationTarget } = require('vscode');
 const Utils = require('./Utils');
 
-async function configureOdataProvider() {
+async function odataProvider() {
   let odataProviderValue = Utils.getConfigurationServer('gatewayProxy');
   let quickPickOdataProvider = await window.showQuickPick(
     [
@@ -37,7 +37,7 @@ async function configureOdataProvider() {
   }
 }
 
-async function configureUI5Provider() {
+async function ui5Provider() {
   let ui5ProviderValue = Utils.getConfigurationServer('resourcesProxy');
   let quickPickUI5Provider = await window.showQuickPick(
     [
@@ -93,6 +93,6 @@ async function configureUI5Provider() {
 }
 
 module.exports = {
-  configureOdataProvider,
-  configureUI5Provider,
+  odataProvider,
+  ui5Provider,
 };
