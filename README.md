@@ -1,4 +1,7 @@
-# ui5-tools Extension
+<p align="center">
+<img src="images/logo_blue.png" width="100" />
+<h1 align="center">ui5-tools Extension</h1>
+</p>
 
 VSCode extension for ui5 developers. This extension is not intended to replace ui5 cli, its main objective is to provide a fast and global workspace configuration to work with multi root workspaces and projects deployed to on premise systems (Gateway).
 
