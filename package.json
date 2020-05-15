@@ -8,11 +8,12 @@
   "contributors": [
     "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>"
   ],
+  "homepage": "https://github.com/CarlosOrozco88/ui5-tools/blob/master/README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/CarlosOrozco88/ui5-tools"
   },
-  "bus": {
+  "bugs": {
     "url": "https://github.com/CarlosOrozco88/ui5-tools/issues"
   },
   "license": "Apache-2.0",
