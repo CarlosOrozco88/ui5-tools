@@ -1,0 +1,13 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" controllerName="example.Z_BASE.controller.main" displayBlock="true">
+    <Page showHeader="false">
+      <Title text="Z_BASE main.view.xml" class="sapUiSmallMargin" />
+      <VBox renderType="Bare" class="sapUiSmallMarginBegin">
+        <Text text="The link between apps is the namespace itself." />
+        <Text text="Defined in resourceRoots=`examples.`: `../` in index.html." />
+        <Text text="Also using name BSP name with namespace, its easy to map all components correctly" />
+        <Text text="Z_BASE namespace: example.Z_BASE" class="sapUiTinyMarginTop" />
+        <Text text="Z_APP1 namespace: example.Z_APP1" />
+        <Text text="Z_APP2 namespace: example.Z_APP2" />
+      </VBox>
+    </Page>
+</mvc:View>

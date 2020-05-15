@@ -1,0 +1,26 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="example.Z_BASE.controller.App" displayBlock="true" height="100%" width="100%">
+
+	<App>
+		<pages>
+			<Page>
+				<customHeader>
+					<Toolbar width="100%">
+						<HBox renderType="Bare" justifyContent="SpaceBetween" width="100%" alignItems="Center">
+							<Title text="{i18n>TITLE}" />
+							<Select id="selectApp" selectedKey="main" change="changeApp">
+								<core:Item key="main" text="Z_BASE main" />
+								<core:Item key="Z_APP1" text="Z_APP1" />
+								<core:Item key="Z_APP2" text="Z_APP2" />
+							</Select>
+						</HBox>
+					</Toolbar>
+				</customHeader>
+				<NavContainer
+					id="navcontainer"
+					height="100%"
+					width="100%"
+				/>
+			</Page>
+		</pages>
+	</App>
+</mvc:View>
