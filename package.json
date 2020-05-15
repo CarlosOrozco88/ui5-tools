@@ -15,6 +15,7 @@
   "bus": {
     "url": "https://github.com/CarlosOrozco88/ui5-tools/issues"
   },
+  "license": "Apache-2.0",
   "icon": "images/logo_blue.png",
   "engines": {
     "vscode": "^1.45.0"
@@ -185,6 +186,7 @@
     "eslint-plugin-prettier": "^3.1.3",
     "glob": "^7.1.6",
     "mocha": "^7.1.2",
+    "prettier": "^2.0.5",
     "tslint": "^6.1.2",
     "typescript": "^3.9.2",
     "vscode-test": "^1.3.0"
@@ -194,7 +196,7 @@
     "express": "^4.17.1",
     "http-proxy-middleware": "^1.0.3",
     "livereload": "^0.9.1",
-    "ui5-preload": "^1.0.0",
+    "openui5-preload": "^2.3.2",
     "opn": "^6.0.0",
     "uglify-js": "^3.9.3",
     "url-join": "4.0.1"
