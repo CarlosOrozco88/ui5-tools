@@ -1,5 +1,5 @@
-const { window, StatusBarAlignment } = require('vscode');
-const Utils = require('./Utils');
+import { window, StatusBarAlignment } from 'vscode';
+import Utils from './Utils';
 
 let serverNavBar;
 let errors = [];
@@ -56,7 +56,7 @@ function getErrors() {
   return errorText;
 }
 
-module.exports = {
+export default {
   init,
   startText,
   stopText,

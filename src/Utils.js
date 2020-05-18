@@ -1,6 +1,6 @@
-const { workspace } = require('vscode');
-const path = require('path');
-const fs = require('fs');
+import { workspace } from 'vscode';
+import path from 'path';
+import fs from 'fs';
 
 function getConfiguration(tool = '') {
   if (tool) {
@@ -145,7 +145,7 @@ function get404() {
   return errorPage;
 }
 
-module.exports = {
+export default {
   getConfigurationGeneral,
   getConfigurationServer,
   getConfigurationBuilder,

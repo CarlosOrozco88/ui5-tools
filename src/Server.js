@@ -1,16 +1,16 @@
-const express = require('express');
-const { workspace, window } = require('vscode');
-const liveReload = require('livereload');
-const connectLiveReload = require('connect-livereload');
-const opn = require('opn');
-const { createProxyMiddleware } = require('http-proxy-middleware');
-const httpsModule = require('https');
-const path = require('path');
-const fs = require('fs');
-const urljoin = require('url-join');
+import express from 'express';
+import { workspace, window } from 'vscode';
+import liveReload from 'livereload';
+import connectLiveReload from 'connect-livereload';
+import opn from 'opn';
+import { createProxyMiddleware } from 'http-proxy-middleware';
+import httpsModule from 'https';
+import path from 'path';
+import fs from 'fs';
+import urljoin from 'url-join';
 
-const StatusBar = require('./StatusBar');
-const Utils = require('./Utils');
+import StatusBar from './StatusBar';
+import Utils from './Utils';
 
 let app, server, liveServer;
 
@@ -149,21 +149,24 @@ async function getResourcesProxy(app, folders = []) {
   switch (resourcesProxy) {
     case 'Gateway':
       targetUri = Utils.getConfigurationServer('gatewayUri');
-      pathRoute = '/sap/bc/ui5_ui5/sap';
 
-      pathRewrite = {
-        '^/': `${pathRoute}/`,
-      };
+      if (targetUri) {
+        pathRoute = '/sap/bc/ui5_ui5/sap';
 
-      proxy = createProxyMiddleware({
-        pathRewrite,
-        target: targetUri,
-        secure: targetUri.indexOf('https') == 0,
-        changeOrigin: true,
-        logLevel: 'debug',
-      });
+        pathRewrite = {
+          '^/': `${pathRoute}/`,
+        };
 
-      app.use('/**/resources/**', proxy);
+        proxy = createProxyMiddleware({
+          pathRewrite,
+          target: targetUri,
+          secure: targetUri.indexOf('https') == 0,
+          changeOrigin: true,
+          logLevel: 'debug',
+        });
+
+        app.use('/**/resources/**', proxy);
+      }
       break;
 
     case 'CDN SAPUI5':
@@ -172,22 +175,25 @@ async function getResourcesProxy(app, folders = []) {
       let ui5Version = Utils.getConfigurationGeneral('ui5Version');
 
       targetUri = `https://${framework}.hana.ondemand.com/${ui5Version}/`;
-      pathRoute = '/';
 
-      pathRewrite = {};
-      folders.forEach((folder) => {
-        pathRewrite[`^/${folder}/`] = pathRoute;
-      });
+      if (ui5Version) {
+        pathRoute = '/';
 
-      proxy = createProxyMiddleware({
-        pathRewrite,
-        target: targetUri,
-        secure: targetUri.indexOf('https') == 0,
-        changeOrigin: true,
-        logLevel: 'debug',
-      });
+        pathRewrite = {};
+        folders.forEach((folder) => {
+          pathRewrite[`^/${folder}/`] = pathRoute;
+        });
 
-      app.use('/**/resources/**', proxy);
+        proxy = createProxyMiddleware({
+          pathRewrite,
+          target: targetUri,
+          secure: targetUri.indexOf('https') == 0,
+          changeOrigin: true,
+          logLevel: 'debug',
+        });
+
+        app.use('/**/resources/**', proxy);
+      }
 
       httpsModule
         .get(`${targetUri}resources/sap-ui-core.js`, ({ statusCode }) => {
@@ -216,7 +222,7 @@ async function getErrorsMiddleware(app) {
   return;
 }
 
-module.exports = {
+export default {
   start,
   stop,
   restart,

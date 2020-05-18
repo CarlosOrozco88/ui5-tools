@@ -1,5 +1,5 @@
-const { window, ConfigurationTarget } = require('vscode');
-const Utils = require('./Utils');
+import { window, ConfigurationTarget } from 'vscode';
+import Utils from './Utils';
 
 async function odataProvider() {
   let odataProviderValue = Utils.getConfigurationServer('gatewayProxy');
@@ -92,7 +92,7 @@ async function ui5Provider() {
   //}
 }
 
-module.exports = {
+export default {
   odataProvider,
   ui5Provider,
 };

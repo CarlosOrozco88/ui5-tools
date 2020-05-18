@@ -1,10 +1,10 @@
-const { workspace, window, ConfigurationTarget } = require('vscode');
-const path = require('path');
-const fs = require('fs');
-const Utils = require('./Utils');
-const rimraf = require('rimraf');
-const preload = require('ui5-preload');
-const UglifyJS = require('uglify-js');
+import { workspace, window, ConfigurationTarget } from 'vscode';
+import path from 'path';
+import fs from 'fs';
+import Utils from './Utils';
+import rimraf from 'rimraf';
+import preload from './openui5-preload/lib/preload';
+import Terser from 'terser';
 
 async function build(projectPath = undefined) {
   if (!projectPath) {
@@ -97,7 +97,7 @@ function copyRecursiveSync(src, dest, debugSources = true, uglifySources = true)
         let copyOriginal = true;
         if (uglifySources) {
           let code = fs.readFileSync(src, 'utf8');
-          let minifiedFile = UglifyJS.minify(code);
+          let minifiedFile = Terser.minify(code);
           if (!minifiedFile.error) {
             copyOriginal = false;
             fs.writeFileSync(dest, minifiedFile.code);
@@ -123,6 +123,6 @@ function copyRecursiveSync(src, dest, debugSources = true, uglifySources = true)
   }
 }
 
-module.exports = {
+export default {
   build,
 };

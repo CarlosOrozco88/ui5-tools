@@ -1,12 +1,12 @@
-const { commands } = require('vscode');
-const { registerCommand } = commands;
-const Server = require('./Server');
-const Configurator = require('./Configurator');
-const Builder = require('./Builder');
-const StatusBar = require('./StatusBar');
-const Utils = require('./Utils');
+import { commands } from 'vscode';
+import Server from './Server';
+import Configurator from './Configurator';
+import Builder from './Builder';
+import StatusBar from './StatusBar';
+import Utils from './Utils';
 
-function activate(context) {
+export function activate(context) {
+  const { registerCommand } = commands;
   const { subscriptions } = context;
   StatusBar.init(context);
   if (Utils.getConfigurationServer('startOnLaunch')) {
@@ -23,11 +23,5 @@ function activate(context) {
   subscriptions.push(registerCommand('ui5-tools.configurator.odataProvider', () => Configurator.odataProvider()));
   subscriptions.push(registerCommand('ui5-tools.configurator.ui5Provider', () => Configurator.ui5Provider()));
 }
-exports.activate = activate;
 
-function deactivate() {}
-
-module.exports = {
-  activate,
-  deactivate,
-};
+export function deactivate() {}
