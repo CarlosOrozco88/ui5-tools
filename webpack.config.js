@@ -17,7 +17,7 @@ const config = {
   externals: {
     vscode: 'commonjs vscode',
     //express: 'express',
-    //livereload: 'livereload',
+    livereload: 'commonjs livereload',
   },
   resolve: {
     extensions: ['.js'],

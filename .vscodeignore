@@ -16,4 +16,4 @@ webpack.config.js
 
 #Externals
 #!node_modules/express
-#!node_modules/livereload
+!node_modules/livereload

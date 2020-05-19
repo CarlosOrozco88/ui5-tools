@@ -29,14 +29,14 @@ function stopText() {
 function startingText() {
   lastText = 'startingText';
   let { serverName } = Utils.loadConfig();
-  serverNavBar.text = `$(loading) Starting ${serverName}...`;
+  serverNavBar.text = `$(loading~spin) Starting ${serverName}...`;
 }
 
 function stoppingText() {
   lastText = 'stoppingText';
   errors = [];
   let { serverName } = Utils.loadConfig();
-  serverNavBar.text = `$(loading) Stopping ${serverName}...`;
+  serverNavBar.text = `$(loading~spin) Stopping ${serverName}...`;
 }
 
 function pushError(error) {
