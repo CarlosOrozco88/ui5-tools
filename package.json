@@ -216,7 +216,7 @@
   "dependencies": {
     "connect-livereload": "^0.6.1",
     "express": "^4.17.1",
-    "http-proxy-middleware": "^1.0.3",
+    "http-proxy-middleware": "^1.0.4",
     "livereload": "^0.9.1",
     "opn": "^6.0.0",
     "terser": "^4.7.0",
