@@ -16,8 +16,8 @@ const config = {
   devtool: 'source-map',
   externals: {
     vscode: 'commonjs vscode',
-    //express: 'express',
-    livereload: 'commonjs livereload',
+    bufferutil: 'commonjs bufferutil',
+    'utf-8-validate': 'commonjs utf-8-validate',
   },
   resolve: {
     extensions: ['.js'],
@@ -38,4 +38,5 @@ const config = {
     ],
   },
 };
+
 module.exports = config;

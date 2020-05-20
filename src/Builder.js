@@ -3,8 +3,8 @@ import path from 'path';
 import fs from 'fs';
 import Utils from './Utils';
 import rimraf from 'rimraf';
-import preload from './openui5-preload/lib/preload';
-import Terser from 'terser';
+import preload from 'openui5-preload';
+import terser from 'terser';
 
 async function build(projectPath = undefined) {
   if (!projectPath) {
@@ -97,7 +97,7 @@ function copyRecursiveSync(src, dest, debugSources = true, uglifySources = true)
         let copyOriginal = true;
         if (uglifySources) {
           let code = fs.readFileSync(src, 'utf8');
-          let minifiedFile = Terser.minify(code);
+          let minifiedFile = terser.minify(code);
           if (!minifiedFile.error) {
             copyOriginal = false;
             fs.writeFileSync(dest, minifiedFile.code);

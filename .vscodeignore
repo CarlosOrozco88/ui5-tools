@@ -3,12 +3,11 @@
 .git
 .gitignore
 .prettierrc.json
-.vscode
-examples
+examples/**
 jsconfig.json
 node_modules
 package-json.lock
-test
+test/**
 webpack.config.js
 
 .DS_Store
@@ -16,4 +15,4 @@ webpack.config.js
 
 #Externals
 #!node_modules/express
-!node_modules/livereload
+#!node_modules/livereload

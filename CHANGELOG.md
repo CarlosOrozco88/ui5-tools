@@ -1,4 +1,8 @@
-## 0.0.2 (19-05-2020)
+## 0.0.4 (20-05-2020)
+
+- Server: auto-serve index with workspace apps
+
+## 0.0.2 to 0.0.3 (19-05-2020)
 
 - Webpack bundle: livereload correction bug
 

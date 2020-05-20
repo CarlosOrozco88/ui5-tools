@@ -58,6 +58,13 @@ function loadConfig(restarting = false) {
   let debugSources = getConfigurationBuilder('debugSources');
   let uglifySources = getConfigurationBuilder('uglifySources');
   let portLiveReload = 35729;
+  let lrPath = __non_webpack_require__.resolve('../scripts/livereload');
+
+  let ui5ToolsPath = lrPath.slice(0, lrPath.indexOf('scripts'));
+  let cert = {
+    key: fs.readFileSync(path.join(ui5ToolsPath, 'cert', 'server.key')),
+    cert: fs.readFileSync(path.join(ui5ToolsPath, 'cert', 'server.cert')),
+  };
 
   let open = restarting ? false : openBrowser;
 
@@ -108,6 +115,8 @@ function loadConfig(restarting = false) {
     distFolder,
     ui5Version,
     // Server config
+    cert,
+    lrPath,
     serverName,
     port,
     openBrowser,
@@ -137,12 +146,72 @@ function loadConfig(restarting = false) {
   };
 }
 
-function get404() {
-  let errorPage = '<html><head><title>UI5 Server</title></head><body>';
-  errorPage += '<p>ERROR 404</p>';
-  errorPage += '</body></html>';
+function getIndex({ serverName, foldersRootMap }) {
+  let apps = '',
+    appName;
 
-  return errorPage;
+  Object.entries(foldersRootMap).forEach(([key, folderRoot]) => {
+    appName = key.replace('/', '');
+    apps += `
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="card bg-light mb-3">
+          <div class="card-body"><a href="${key}">${appName}</a></div>
+        </div>
+      </div>
+    `;
+  });
+
+  let indexPage = `
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+        <link
+          rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+          crossorigin="anonymous"
+        />
+        <title>${serverName}</title>
+        <style>
+          li {
+            padding: 0.5rem;
+            background-color: antiquewhite;
+            margin: 0.25rem;
+          }
+          li a {
+          }
+        </style>
+      </head>
+      <body class="d-flex flex-column h-100">
+        <header>
+          <nav class="navbar navbar-light bg-light">
+            <a class="navbar-brand mb-0 h1" href="#">${serverName} | Workspace</a>
+          </nav>
+        </header>
+        <main role="main" class="flex-shrink-0">
+          <div class="container">
+            <h1 class="mt-3">Apps List</h1>
+
+            <div class="row">
+              ${apps}
+            </div>
+          </div>
+        </main>
+        <footer class="footer mt-auto py-3">
+          <div class="container">
+            <span class="text-muted">
+              ui5-tools | <a href="https://github.com/CarlosOrozco88/ui5-tools">GitHub</a> |
+              <a href="https://github.com/CarlosOrozco88/ui5-tools/issues">Issues</a>
+            </span>
+          </div>
+        </footer>
+      </body>
+    </html>
+  `;
+
+  return indexPage;
 }
 
 export default {
@@ -151,5 +220,5 @@ export default {
   getConfigurationBuilder,
   getRoot,
   loadConfig,
-  get404,
+  getIndex,
 };

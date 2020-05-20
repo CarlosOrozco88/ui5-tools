@@ -4,54 +4,46 @@ import liveReload from 'livereload';
 import connectLiveReload from 'connect-livereload';
 import opn from 'opn';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-import httpsModule from 'https';
 import path from 'path';
 import fs from 'fs';
 import urljoin from 'url-join';
+import url from 'url';
+import http from 'http';
+import https from 'https';
 
 import StatusBar from './StatusBar';
 import Utils from './Utils';
 
-let app, server, liveServer;
+let app, server, appLiveServer, liveServer;
 
 async function start(restarting = false) {
   try {
     StatusBar.startingText();
 
     let config = Utils.loadConfig(restarting);
-    let { foldersRootMap, folders, port, watch, baseDir, open, index, protocol } = config;
+    let { foldersRootMap, port, watch, protocol, folders, baseDir, cert } = config;
 
     app = express();
 
-    app.use('/index.html', express.static(path.join(baseDir, 'index.html')));
-
     if (watch) {
-      attachLiveReload(app, config);
+      await attachLiveReload(app, config);
     }
 
     Object.entries(foldersRootMap).forEach(([key, folderRoot]) => {
       app.use(key, express.static(folderRoot));
     });
 
-    await getGatewayProxy(app, folders);
+    await getGatewayProxy(app);
     await getResourcesProxy(app, folders);
-    await getErrorsMiddleware(app);
+    await getIndexMiddleware(app, config);
 
     if (protocol == 'https') {
-      server = httpsModule
-        .createServer(
-          {
-            key: fs.readFileSync(path.join(__dirname, 'cert', 'server.key')),
-            cert: fs.readFileSync(path.join(__dirname, 'cert', 'server.cert')),
-          },
-          app
-        )
-        .listen(port, () => {
-          listen(open, restarting, folders, index, port, protocol);
-        });
+      server = https.createServer(cert, app).listen(port, () => {
+        serverReady(config, restarting);
+      });
     } else {
-      server = app.listen(port, () => {
-        listen(open, restarting, folders, index, port, protocol);
+      server = http.createServer(app).listen(port, () => {
+        serverReady(config, restarting);
       });
     }
   } catch (e) {
@@ -59,7 +51,7 @@ async function start(restarting = false) {
   }
 }
 
-function listen(open, restarting, folders, index, port, protocol) {
+function serverReady({ open, folders, index, port, protocol }, restarting = false) {
   StatusBar.stopText();
   if (open && !restarting) {
     let route = '';
@@ -72,14 +64,30 @@ function listen(open, restarting, folders, index, port, protocol) {
 }
 
 function stop() {
-  StatusBar.stoppingText();
+  function end(resolv) {
+    StatusBar.startText();
+    resolv();
+  }
+
   return new Promise((resolv) => {
-    server.close(() => {
-      app = undefined;
-      server = undefined;
-      StatusBar.startText();
-      resolv();
-    });
+    StatusBar.stoppingText();
+    if (server) {
+      server.close(() => {
+        app = undefined;
+        server = undefined;
+        if (appLiveServer) {
+          appLiveServer.close(() => {
+            appLiveServer = undefined;
+            liveServer = undefined;
+            end(resolv);
+          });
+        } else {
+          end(resolv);
+        }
+      });
+    } else {
+      end(resolv);
+    }
   });
 }
 
@@ -101,24 +109,49 @@ async function toggle() {
   return;
 }
 
-function attachLiveReload(app, { foldersRoot, portLiveReload }) {
-  liveServer = liveReload.createServer({
-    extraExts: 'xml,json,properties',
-    watchDirs: foldersRoot,
-    app: app,
-    port: portLiveReload,
-  });
-  liveServer.watch(foldersRoot);
+function attachLiveReload(app, { foldersRoot, portLiveReload, watchExtensions, protocol, cert, lrPath }) {
+  return new Promise(function (resolv, reject) {
+    try {
+      let configLiveServer = {
+        extraExts: 'xml,json,properties',
+        exts: watchExtensions,
+        port: portLiveReload,
+      };
 
-  app.use(
-    connectLiveReload({
-      ignore: [],
-      port: portLiveReload,
-    })
-  );
+      let requestHandler = function (req, res) {
+        if (url.parse(req.url).pathname === '/livereload.js') {
+          res.writeHead(200, {
+            'Content-Type': 'text/javascript',
+          });
+          return res.end(fs.readFileSync(lrPath, 'utf-8'));
+        }
+      };
+
+      if (protocol === 'http') {
+        appLiveServer = http.createServer(requestHandler);
+      } else {
+        appLiveServer = https.createServer(cert, requestHandler);
+      }
+      configLiveServer.server = appLiveServer;
+
+      liveServer = liveReload.createServer(configLiveServer, () => {
+        resolv();
+      });
+      liveServer.watch(foldersRoot);
+
+      app.use(
+        connectLiveReload({
+          ignore: [],
+          port: portLiveReload,
+        })
+      );
+    } catch (e) {
+      reject(e);
+    }
+  });
 }
 
-async function getGatewayProxy(app, folders = []) {
+async function getGatewayProxy(app) {
   let proxy, targetUri;
   let gatewayProxy = Utils.getConfigurationServer('gatewayProxy');
   // Options: Gateway, None
@@ -195,7 +228,7 @@ async function getResourcesProxy(app, folders = []) {
         app.use('/**/resources/**', proxy);
       }
 
-      httpsModule
+      https
         .get(`${targetUri}resources/sap-ui-core.js`, ({ statusCode }) => {
           if (statusCode !== 200) {
             let error = `Error: Unable to get sap-ui-core.js, framework ${framework} does not have ${ui5Version} available at CDN.`;
@@ -215,11 +248,13 @@ async function getResourcesProxy(app, folders = []) {
   return;
 }
 
-async function getErrorsMiddleware(app) {
-  app.use(function (req, res) {
-    res.status(404).send(Utils.get404());
+async function getIndexMiddleware(app, config) {
+  app.get('/', function (req, res) {
+    res.send(Utils.getIndex(config));
   });
-  return;
+  app.get('/index.html', function (req, res) {
+    res.send(Utils.getIndex(config));
+  });
 }
 
 export default {
