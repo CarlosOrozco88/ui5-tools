@@ -11,7 +11,7 @@ async function build(projectPath = undefined) {
     projectPath = await askProjectToBuild();
   }
   if (projectPath) {
-    let { srcFolder, distFolder, ui5Version, debugSources, uglifySources } = Utils.loadConfig();
+    let { srcFolder, distFolder, ui5Version, debugSources, uglifySources } = Utils.getConfig();
     if (!srcFolder || !distFolder || srcFolder == distFolder) {
       throw 'Invalid srcFolder or distFolder';
     }
@@ -57,7 +57,7 @@ async function build(projectPath = undefined) {
 async function askProjectToBuild() {
   let project = undefined;
   try {
-    let { foldersWithName } = Utils.loadConfig();
+    let { foldersWithName } = Utils.getConfig();
     let qpOptions = [];
     foldersWithName.forEach((folder) => {
       qpOptions.push({

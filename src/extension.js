@@ -8,6 +8,7 @@ import Utils from './Utils';
 export function activate(context) {
   const { registerCommand } = commands;
   const { subscriptions } = context;
+  Utils.loadConfig();
   StatusBar.init(context);
   if (Utils.getConfigurationServer('startOnLaunch')) {
     Server.start();

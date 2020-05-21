@@ -2,6 +2,8 @@ import { workspace } from 'vscode';
 import path from 'path';
 import fs from 'fs';
 
+let config = {};
+
 function getConfiguration(tool = '') {
   if (tool) {
     tool = '.' + tool;
@@ -30,9 +32,18 @@ function getConfigurationBuilder(property) {
 function getRoot() {
   let baseDir = workspace.rootPath;
   if (baseDir) {
-    let arr = baseDir.split('/');
-    arr.pop();
-    baseDir = arr.join('/');
+    let doSplit = true;
+    if (workspace.workspaceFolders.length == 1) {
+      var p = workspace.workspaceFolders[0].uri.path;
+      if (p === baseDir) {
+        doSplit = false;
+      }
+    }
+    if (doSplit) {
+      let arr = baseDir.split('/');
+      arr.pop();
+      baseDir = arr.join('/');
+    }
   }
   return baseDir;
 }
@@ -83,33 +94,46 @@ function loadConfig(restarting = false) {
 
   if (workspace.workspaceFolders) {
     // Is a workspace
-    let folder, folderUri;
+
     workspace.workspaceFolders.forEach((route) => {
-      folder = '' + route.uri.path.split(path.sep).pop();
-      if (fs.existsSync(path.join(baseDir, folder, servingFolder))) {
-        foldersWithName.push(route);
-        folders.push(folder);
-
-        files.push(path.join(folder, servingFolder, `*.{${watchExtensions}}`));
-        files.push(path.join(folder, servingFolder, '**', `*.{${watchExtensions}}`));
-
-        folderUri = '/' + folder;
-        routes[folderUri] = path.join(folder, servingFolder);
-
-        foldersRoot.push(path.join(baseDir, folder, servingFolder));
-        foldersRootMap[folderUri] = path.join(baseDir, folder, servingFolder);
-
-        serveStatic.push({
-          route: folder,
-          dir: path.join(route.uri.path, servingFolder),
-        });
-      }
+      checkFolder(route.uri.path, {
+        servingFolder,
+        foldersWithName,
+        route,
+        folders,
+        files,
+        watchExtensions,
+        foldersRoot,
+        foldersRootMap,
+        serveStatic,
+        routes,
+      });
     });
+
+    if (folders.length == 0) {
+      fs.readdirSync(baseDir).forEach((fileOrFolder) => {
+        checkFolder(path.join(baseDir, fileOrFolder), {
+          servingFolder,
+          foldersWithName,
+          route: {
+            name: fileOrFolder,
+            uri: { path: fileOrFolder },
+          },
+          folders,
+          files,
+          watchExtensions,
+          foldersRoot,
+          foldersRootMap,
+          serveStatic,
+          routes,
+        });
+      });
+    }
   } else {
     throw new Error('Create at least one project in your workspace');
   }
 
-  return {
+  config = {
     // General Config
     srcFolder,
     distFolder,
@@ -144,8 +168,48 @@ function loadConfig(restarting = false) {
     open,
     portLiveReload,
   };
+  return config;
+}
+function getConfig() {
+  return config;
 }
 
+function checkFolder(
+  folderPath,
+  {
+    servingFolder,
+    foldersWithName,
+    route,
+    folders,
+    files,
+    watchExtensions,
+    foldersRoot,
+    foldersRootMap,
+    serveStatic,
+    routes,
+  }
+) {
+  let folder, folderUri;
+  if (fs.existsSync(path.join(folderPath, servingFolder))) {
+    folder = '' + folderPath.split(path.sep).pop();
+    foldersWithName.push(route);
+    folders.push(folder);
+
+    files.push(path.join(folder, servingFolder, `*.{${watchExtensions}}`));
+    files.push(path.join(folder, servingFolder, '**', `*.{${watchExtensions}}`));
+
+    folderUri = '/' + folder;
+    routes[folderUri] = path.join(folder, servingFolder);
+
+    foldersRoot.push(path.join(folderPath, servingFolder));
+    foldersRootMap[folderUri] = path.join(folderPath, servingFolder);
+
+    serveStatic.push({
+      route: folder,
+      dir: path.join(folderPath, servingFolder),
+    });
+  }
+}
 function getIndex({ serverName, foldersRootMap }) {
   let apps = '',
     appName;
@@ -220,5 +284,6 @@ export default {
   getConfigurationBuilder,
   getRoot,
   loadConfig,
+  getConfig,
   getIndex,
 };
