@@ -2,7 +2,7 @@
   "name": "ui5-tools",
   "displayName": "UI5 Tools",
   "description": "Local development tools for UI5",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
@@ -222,9 +222,5 @@
     "terser": "^4.7.0",
     "openui5-preload": "3.0.0",
     "url-join": "4.0.1"
-  },
-  "announcement": {
-    "onVersion": "0.0.4",
-    "message": "[NEW] Server: Auto-serve index with workspace apps."
   }
 }

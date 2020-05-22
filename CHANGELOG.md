@@ -1,3 +1,7 @@
+## 0.0.5 (23-05-2020)
+
+- Server: correction for windows users
+
 ## 0.0.4 (20-05-2020)
 
 - Server: auto-serve index with workspace apps

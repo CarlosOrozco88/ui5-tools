@@ -61,7 +61,7 @@ async function askProjectToBuild() {
     let qpOptions = [];
     foldersWithName.forEach((folder) => {
       qpOptions.push({
-        description: folder.uri.path != folder.name ? path.sep + folder.uri.path.split(path.sep).pop() : '',
+        description: folder.uri.fsPath != folder.name ? path.sep + folder.uri.fsPath.split(path.sep).pop() : '',
         label: folder.name,
       });
     });
@@ -72,9 +72,9 @@ async function askProjectToBuild() {
       });
       project = foldersWithName.filter((folder) => {
         return folder.name == ui5ProjectToBuild.label;
-      })[0].uri.path;
+      })[0].uri.fsPath;
     } else if (qpOptions.length == 1) {
-      project = qpOptions[0].uri.path;
+      project = qpOptions[0].uri.fsPath;
     }
   } catch (e) {
     project = undefined;

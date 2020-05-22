@@ -34,7 +34,7 @@ function getRoot() {
   if (baseDir) {
     let doSplit = true;
     if (workspace.workspaceFolders.length == 1) {
-      var p = workspace.workspaceFolders[0].uri.path;
+      var p = workspace.workspaceFolders[0].uri.fsPath;
       if (p === baseDir) {
         doSplit = false;
       }
@@ -96,7 +96,7 @@ function loadConfig(restarting = false) {
     // Is a workspace
 
     workspace.workspaceFolders.forEach((route) => {
-      checkFolder(route.uri.path, {
+      checkFolder(route.uri.fsPath, {
         servingFolder,
         foldersWithName,
         route,
