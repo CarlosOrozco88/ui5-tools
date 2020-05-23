@@ -1,3 +1,8 @@
+## 0.0.6 (25-05-2020)
+
+- Server: bug correction
+- Server: docs, links and readme in index
+
 ## 0.0.5 (23-05-2020)
 
 - Server: correction for windows users

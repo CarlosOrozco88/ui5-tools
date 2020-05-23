@@ -13,11 +13,23 @@ import https from 'https';
 
 import StatusBar from './StatusBar';
 import Utils from './Utils';
+import Index from './Index';
 
-let app, server, appLiveServer, liveServer;
+let app, server, appLiveServer;
+let status = 0;
+let STATUSES = {
+  STOPPED: 0,
+  STARTING: 1,
+  STARTED: 2,
+  STOPPING: 3,
+};
 
 async function start(restarting = false) {
   try {
+    if (status != STATUSES.STOPPED) {
+      return;
+    }
+    status = STATUSES.STARTING;
     StatusBar.startingText();
 
     let config = Utils.loadConfig(restarting);
@@ -52,7 +64,9 @@ async function start(restarting = false) {
 }
 
 function serverReady({ open, folders, index, port, protocol }, restarting = false) {
+  status = STATUSES.STARTED;
   StatusBar.stopText();
+
   if (open && !restarting) {
     let route = '';
     if (folders.length == 1) {
@@ -64,30 +78,39 @@ function serverReady({ open, folders, index, port, protocol }, restarting = fals
 }
 
 function stop() {
-  function end(resolv) {
-    StatusBar.startText();
-    resolv();
+  if (status != STATUSES.STARTED) {
+    return Promise.resolve();
   }
+  status = STATUSES.STOPPING;
+  StatusBar.stoppingText();
 
-  return new Promise((resolv) => {
-    StatusBar.stoppingText();
+  let stopServer = new Promise((resolv, reject) => {
     if (server) {
       server.close(() => {
-        app = undefined;
+        //server.unref();
         server = undefined;
-        if (appLiveServer) {
-          appLiveServer.close(() => {
-            appLiveServer = undefined;
-            liveServer = undefined;
-            end(resolv);
-          });
-        } else {
-          end(resolv);
-        }
+        app = undefined;
+        resolv();
       });
     } else {
-      end(resolv);
+      resolv();
     }
+  });
+  let stopLiveServer = new Promise((resolv, reject) => {
+    if (appLiveServer) {
+      // appLiveServer.server.on('close', () => {
+      //   resolv();
+      // });
+      appLiveServer.close();
+      resolv();
+    } else {
+      resolv();
+    }
+  });
+
+  return Promise.all([stopServer, stopLiveServer]).then(() => {
+    status = STATUSES.STOPPED;
+    StatusBar.startText();
   });
 }
 
@@ -112,32 +135,37 @@ async function toggle() {
 function attachLiveReload(app, { foldersRoot, portLiveReload, watchExtensions, protocol, cert, lrPath }) {
   return new Promise(function (resolv, reject) {
     try {
-      let configLiveServer = {
-        extraExts: 'xml,json,properties',
-        exts: watchExtensions,
-        port: portLiveReload,
-      };
+      if (!appLiveServer) {
+        let requestHandler = function (req, res) {
+          if (url.parse(req.url).pathname === '/livereload.js') {
+            res.writeHead(200, {
+              'Content-Type': 'text/javascript',
+            });
+            return res.end(fs.readFileSync(lrPath, 'utf-8'));
+          }
+        };
 
-      let requestHandler = function (req, res) {
-        if (url.parse(req.url).pathname === '/livereload.js') {
-          res.writeHead(200, {
-            'Content-Type': 'text/javascript',
-          });
-          return res.end(fs.readFileSync(lrPath, 'utf-8'));
+        let appLiveReload;
+        if (protocol === 'http') {
+          appLiveReload = http.createServer(requestHandler);
+        } else {
+          appLiveReload = https.createServer(cert, requestHandler);
         }
-      };
 
-      if (protocol === 'http') {
-        appLiveServer = http.createServer(requestHandler);
-      } else {
-        appLiveServer = https.createServer(cert, requestHandler);
+        let configLiveServer = {
+          extraExts: 'xml,json,properties',
+          exts: watchExtensions,
+          port: portLiveReload,
+          server: appLiveReload,
+          noListen: true,
+        };
+
+        appLiveServer = liveReload.createServer(configLiveServer);
       }
-      configLiveServer.server = appLiveServer;
-
-      liveServer = liveReload.createServer(configLiveServer, () => {
+      appLiveServer.watch(foldersRoot);
+      appLiveServer.listen(() => {
         resolv();
       });
-      liveServer.watch(foldersRoot);
 
       app.use(
         connectLiveReload({
@@ -250,10 +278,10 @@ async function getResourcesProxy(app, folders = []) {
 
 async function getIndexMiddleware(app, config) {
   app.get('/', function (req, res) {
-    res.send(Utils.getIndex(config));
+    res.send(Index.getHTML(config));
   });
   app.get('/index.html', function (req, res) {
-    res.send(Utils.getIndex(config));
+    res.send(Index.getHTML(config));
   });
 }
 
