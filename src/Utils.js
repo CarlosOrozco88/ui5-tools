@@ -34,7 +34,7 @@ function getRoot() {
   if (baseDir) {
     let doSplit = true;
     if (workspace.workspaceFolders.length == 1) {
-      var p = workspace.workspaceFolders[0].uri.fsPath;
+      let p = workspace.workspaceFolders[0].uri.fsPath;
       if (p === baseDir) {
         doSplit = false;
       }
@@ -80,6 +80,9 @@ function loadConfig(restarting = false) {
   let open = restarting ? false : openBrowser;
 
   let baseDir = getRoot();
+  let baseDirIndex = path.join(baseDir, 'index');
+  let baseDirDocs = path.join(baseDir, 'docs');
+  let readmeDir = path.join(baseDir, 'README.md');
 
   let files = [];
   let serveStatic = [];
@@ -158,6 +161,9 @@ function loadConfig(restarting = false) {
     uglifySources,
     // Modified config
     baseDir,
+    baseDirIndex,
+    baseDirDocs,
+    readmeDir,
     foldersRoot,
     foldersRootMap,
     folders,

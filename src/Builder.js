@@ -83,9 +83,9 @@ async function askProjectToBuild() {
 }
 
 function copyRecursiveSync(src, dest, debugSources = true, uglifySources = true) {
-  var existsSrc = fs.existsSync(src);
-  var stats = existsSrc && fs.statSync(src);
-  var isDirectory = existsSrc && stats.isDirectory();
+  let existsSrc = fs.existsSync(src);
+  let stats = existsSrc && fs.statSync(src);
+  let isDirectory = existsSrc && stats.isDirectory();
   if (isDirectory) {
     fs.mkdirSync(dest);
     fs.readdirSync(src).forEach(function (childItemName) {

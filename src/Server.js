@@ -1,21 +1,18 @@
 import express from 'express';
-import { workspace, window } from 'vscode';
-import liveReload from 'livereload';
-import connectLiveReload from 'connect-livereload';
+import { window } from 'vscode';
 import opn from 'opn';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-import path from 'path';
-import fs from 'fs';
 import urljoin from 'url-join';
-import url from 'url';
 import http from 'http';
 import https from 'https';
 
+import LiveServer from './LiveServer';
 import StatusBar from './StatusBar';
 import Utils from './Utils';
 import Index from './Index';
 
-let app, server, appLiveServer;
+const expressApp = express();
+let server;
 let status = 0;
 let STATUSES = {
   STOPPED: 0,
@@ -33,31 +30,31 @@ async function start(restarting = false) {
     StatusBar.startingText();
 
     let config = Utils.loadConfig(restarting);
-    let { foldersRootMap, port, watch, protocol, folders, baseDir, cert } = config;
-
-    app = express();
+    let { foldersRootMap, port, watch, protocol, folders, baseDirIndex, baseDirDocs, readmeDir, cert } = config;
 
     if (watch) {
-      await attachLiveReload(app, config);
+      await LiveServer.start(expressApp, config);
     }
 
     Object.entries(foldersRootMap).forEach(([key, folderRoot]) => {
-      app.use(key, express.static(folderRoot));
+      expressApp.use(key, express.static(folderRoot));
     });
 
-    await getGatewayProxy(app);
-    await getResourcesProxy(app, folders);
-    await getIndexMiddleware(app, config);
+    await getGatewayProxy(expressApp);
+    await getResourcesProxy(expressApp, folders);
+    await getIndexMiddleware(expressApp, config);
 
     if (protocol == 'https') {
-      server = https.createServer(cert, app).listen(port, () => {
+      server = https.createServer(cert, expressApp).listen(port, () => {
         serverReady(config, restarting);
       });
     } else {
-      server = http.createServer(app).listen(port, () => {
+      server = http.createServer(expressApp).listen(port, () => {
         serverReady(config, restarting);
       });
     }
+
+    server.timeout = 30 * 1000;
   } catch (e) {
     throw new Error(e);
   }
@@ -85,30 +82,18 @@ function stop() {
   StatusBar.stoppingText();
 
   let stopServer = new Promise((resolv, reject) => {
-    if (server) {
+    if (server && server.listening) {
+      expressApp._router.stack.splice(2, expressApp._router.stack.length);
       server.close(() => {
         //server.unref();
-        server = undefined;
-        app = undefined;
         resolv();
       });
     } else {
       resolv();
     }
   });
-  let stopLiveServer = new Promise((resolv, reject) => {
-    if (appLiveServer) {
-      // appLiveServer.server.on('close', () => {
-      //   resolv();
-      // });
-      appLiveServer.close();
-      resolv();
-    } else {
-      resolv();
-    }
-  });
 
-  return Promise.all([stopServer, stopLiveServer]).then(() => {
+  return Promise.all([stopServer, LiveServer.stop()]).then(() => {
     status = STATUSES.STOPPED;
     StatusBar.startText();
   });
@@ -132,54 +117,7 @@ async function toggle() {
   return;
 }
 
-function attachLiveReload(app, { foldersRoot, portLiveReload, watchExtensions, protocol, cert, lrPath }) {
-  return new Promise(function (resolv, reject) {
-    try {
-      if (!appLiveServer) {
-        let requestHandler = function (req, res) {
-          if (url.parse(req.url).pathname === '/livereload.js') {
-            res.writeHead(200, {
-              'Content-Type': 'text/javascript',
-            });
-            return res.end(fs.readFileSync(lrPath, 'utf-8'));
-          }
-        };
-
-        let appLiveReload;
-        if (protocol === 'http') {
-          appLiveReload = http.createServer(requestHandler);
-        } else {
-          appLiveReload = https.createServer(cert, requestHandler);
-        }
-
-        let configLiveServer = {
-          extraExts: 'xml,json,properties',
-          exts: watchExtensions,
-          port: portLiveReload,
-          server: appLiveReload,
-          noListen: true,
-        };
-
-        appLiveServer = liveReload.createServer(configLiveServer);
-      }
-      appLiveServer.watch(foldersRoot);
-      appLiveServer.listen(() => {
-        resolv();
-      });
-
-      app.use(
-        connectLiveReload({
-          ignore: [],
-          port: portLiveReload,
-        })
-      );
-    } catch (e) {
-      reject(e);
-    }
-  });
-}
-
-async function getGatewayProxy(app) {
+async function getGatewayProxy(expressApp) {
   let proxy, targetUri;
   let gatewayProxy = Utils.getConfigurationServer('gatewayProxy');
   // Options: Gateway, None
@@ -193,7 +131,7 @@ async function getGatewayProxy(app) {
         changeOrigin: true,
         logLevel: 'debug',
       });
-      app.use('/sap', proxy);
+      expressApp.use('/sap', proxy);
       break;
 
     default:
@@ -202,7 +140,7 @@ async function getGatewayProxy(app) {
   return;
 }
 
-async function getResourcesProxy(app, folders = []) {
+async function getResourcesProxy(expressApp, folders = []) {
   let targetUri, pathRewrite, pathRoute, proxy;
   let resourcesProxy = Utils.getConfigurationServer('resourcesProxy');
 
@@ -226,7 +164,7 @@ async function getResourcesProxy(app, folders = []) {
           logLevel: 'debug',
         });
 
-        app.use('/**/resources/**', proxy);
+        expressApp.use('/**/resources/**', proxy);
       }
       break;
 
@@ -253,17 +191,23 @@ async function getResourcesProxy(app, folders = []) {
           logLevel: 'debug',
         });
 
-        app.use('/**/resources/**', proxy);
+        expressApp.use('/**/resources/**', proxy);
       }
 
       https
-        .get(`${targetUri}resources/sap-ui-core.js`, ({ statusCode }) => {
-          if (statusCode !== 200) {
-            let error = `Error: Unable to get sap-ui-core.js, framework ${framework} does not have ${ui5Version} available at CDN.`;
-            StatusBar.pushError(error);
-            window.showErrorMessage(error);
+        .get(
+          `${targetUri}resources/sap-ui-core.js`,
+          {
+            timeout: 1000 * 5, // 3 seconds to check if ui5 is available
+          },
+          ({ statusCode }) => {
+            if (statusCode !== 200) {
+              let error = `Error: Unable to get sap-ui-core.js, framework ${framework} does not have ${ui5Version} available at CDN.`;
+              StatusBar.pushError(error);
+              window.showErrorMessage(error);
+            }
           }
-        })
+        )
         .on('error', (e) => {
           let error = `Error: Unable to get sap-ui-core.js, framework ${framework} does not have ${ui5Version} available at CDN.`;
           StatusBar.pushError(error);
@@ -276,11 +220,22 @@ async function getResourcesProxy(app, folders = []) {
   return;
 }
 
-async function getIndexMiddleware(app, config) {
-  app.get('/', function (req, res) {
+async function getIndexMiddleware(expressApp, config) {
+  expressApp.use('/webapp', express.static(config.baseDirIndex));
+  expressApp.use('/docs', express.static(config.baseDirDocs));
+  expressApp.use('/README.md', express.static(config.readmeDir));
+  expressApp.get('/appData.json', function (req, res) {
+    let appData = {
+      folders: config.folders,
+      docs: [],
+    };
+    res.send(JSON.stringify(appData));
+  });
+
+  expressApp.get('/', function (req, res) {
     res.send(Index.getHTML(config));
   });
-  app.get('/index.html', function (req, res) {
+  expressApp.get('/index.html', function (req, res) {
     res.send(Index.getHTML(config));
   });
 }
