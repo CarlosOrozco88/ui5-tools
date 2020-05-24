@@ -2,7 +2,6 @@ import express from 'express';
 import { window } from 'vscode';
 import opn from 'opn';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-import urljoin from 'url-join';
 import http from 'http';
 import https from 'https';
 
@@ -26,11 +25,16 @@ async function start(restarting = false) {
     if (status != STATUSES.STOPPED) {
       return;
     }
+    if (expressApp._router && expressApp._router.stack) {
+      expressApp._router.stack.splice(2, expressApp._router.stack.length);
+    }
+
     status = STATUSES.STARTING;
     StatusBar.startingText();
 
+    // Reload config, checks new projects
     let config = Utils.loadConfig(restarting);
-    let { foldersRootMap, port, watch, protocol, folders, baseDirIndex, baseDirDocs, readmeDir, cert } = config;
+    let { foldersRootMap, port, watch, protocol, folders, cert } = config;
 
     if (watch) {
       await LiveServer.start(expressApp, config);
@@ -65,12 +69,7 @@ function serverReady({ open, folders, index, port, protocol }, restarting = fals
   StatusBar.stopText();
 
   if (open && !restarting) {
-    let route = '';
-    if (folders.length == 1) {
-      route = folders[0];
-    }
-    let url = urljoin(`${protocol}://localhost:${port}`, route, index);
-    opn(url);
+    opn(`${protocol}://localhost:${port}`);
   }
 }
 
@@ -83,7 +82,6 @@ function stop() {
 
   let stopServer = new Promise((resolv, reject) => {
     if (server && server.listening) {
-      expressApp._router.stack.splice(2, expressApp._router.stack.length);
       server.close(() => {
         //server.unref();
         resolv();
@@ -165,6 +163,7 @@ async function getResourcesProxy(expressApp, folders = []) {
         });
 
         expressApp.use('/**/resources/**', proxy);
+        expressApp.use('/resources/**', proxy);
       }
       break;
 
@@ -192,6 +191,7 @@ async function getResourcesProxy(expressApp, folders = []) {
         });
 
         expressApp.use('/**/resources/**', proxy);
+        expressApp.use('/resources/**', proxy);
       }
 
       https
@@ -220,24 +220,27 @@ async function getResourcesProxy(expressApp, folders = []) {
   return;
 }
 
-async function getIndexMiddleware(expressApp, config) {
-  expressApp.use('/webapp', express.static(config.baseDirIndex));
-  expressApp.use('/docs', express.static(config.baseDirDocs));
-  expressApp.use('/README.md', express.static(config.readmeDir));
-  expressApp.get('/appData.json', function (req, res) {
+async function getIndexMiddleware(expressApp, { baseDirIndex, baseDirDocs, readmeDir, folders, serverName }) {
+  expressApp.use('/', express.static(baseDirIndex));
+  expressApp.use('/docs', express.static(baseDirDocs));
+  expressApp.use('/README.md', express.static(readmeDir));
+  expressApp.get('/ui5tools.json', function (req, res) {
     let appData = {
-      folders: config.folders,
+      folders: folders,
       docs: [],
+      serverName: serverName,
     };
     res.send(JSON.stringify(appData));
   });
 
+  /*
   expressApp.get('/', function (req, res) {
     res.send(Index.getHTML(config));
   });
   expressApp.get('/index.html', function (req, res) {
     res.send(Index.getHTML(config));
   });
+  */
 }
 
 export default {

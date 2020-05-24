@@ -80,9 +80,9 @@ function loadConfig(restarting = false) {
   let open = restarting ? false : openBrowser;
 
   let baseDir = getRoot();
-  let baseDirIndex = path.join(baseDir, 'index');
-  let baseDirDocs = path.join(baseDir, 'docs');
-  let readmeDir = path.join(baseDir, 'README.md');
+  let baseDirIndex = path.join(ui5ToolsPath, 'index', 'webapp');
+  let baseDirDocs = path.join(ui5ToolsPath, 'docs');
+  let readmeDir = path.join(ui5ToolsPath, 'README.md');
 
   let files = [];
   let serveStatic = [];
@@ -136,7 +136,7 @@ function loadConfig(restarting = false) {
     throw new Error('Create at least one project in your workspace');
   }
 
-  config = {
+  let nConfig = {
     // General Config
     srcFolder,
     distFolder,
@@ -174,7 +174,8 @@ function loadConfig(restarting = false) {
     open,
     portLiveReload,
   };
-  return config;
+  config = nConfig;
+  return nConfig;
 }
 function getConfig() {
   return config;

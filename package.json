@@ -218,9 +218,8 @@
     "express": "^4.17.1",
     "http-proxy-middleware": "^1.0.4",
     "livereload": "^0.9.1",
-    "opn": "^6.0.0",
-    "terser": "^4.7.0",
     "openui5-preload": "3.0.0",
-    "url-join": "4.0.1"
+    "opn": "^6.0.0",
+    "terser": "^4.7.0"
   }
 }
