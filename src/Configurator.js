@@ -130,9 +130,13 @@ async function getVersions(url) {
     versionsValues[0].versions.forEach((versionData) => {
       if (versionData.version.length > 1) {
         let cleanVersion = versionData.version.replace('.*', '');
+        let description = versionData.eom ? versionData.eom : versionData.support;
+        if (versionData.lts !== undefined) {
+          description = versionData.lts ? versionData.eom : versionData.support + ' ' + versionData.eom;
+        }
         let cVersion = {
           label: cleanVersion,
-          description: versionData.lts ? versionData.eom : versionData.support + ' ' + versionData.eom,
+          description: description,
           patches: [],
         };
         mapVersions[cleanVersion] = cVersion;
@@ -161,7 +165,7 @@ async function getVersions(url) {
               },
             ],
           };
-          mapVersions[cleanVersion] = cVersion;
+          mapVersions[cleanVersionMaster] = cVersion;
           versions.push(cVersion);
         }
       }
