@@ -4,10 +4,12 @@ import opn from 'opn';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import http from 'http';
 import https from 'https';
+import path from 'path';
 
 import LiveServer from './LiveServer';
 import StatusBar from './StatusBar';
 import Utils from './Utils';
+
 import Index from './Index';
 
 const expressApp = express();
@@ -220,14 +222,11 @@ async function getResourcesProxy(expressApp, folders = []) {
   return;
 }
 
-async function getIndexMiddleware(expressApp, { baseDirIndex, baseDirDocs, readmeDir, folders, serverName }) {
-  expressApp.use('/', express.static(baseDirIndex));
-  expressApp.use('/docs', express.static(baseDirDocs));
-  expressApp.use('/README.md', express.static(readmeDir));
+async function getIndexMiddleware(expressApp, { ui5ToolsPath, folders, serverName }) {
+  expressApp.use('/', express.static(path.join(ui5ToolsPath, 'index', 'ui5', 'webapp')));
   expressApp.get('/ui5tools.json', function (req, res) {
     let appData = {
       folders: folders,
-      docs: [],
       serverName: serverName,
     };
     res.send(JSON.stringify(appData));

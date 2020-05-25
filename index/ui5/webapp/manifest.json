@@ -18,6 +18,36 @@
       "async": true,
       "id": "app"
     },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "viewPath": "ui5tools.view",
+        "controlId": "ui5toolsApp",
+        "async": true
+      },
+      "routes": [
+        {
+          "pattern": "",
+          "name": "main",
+          "target": ["master", "detailApps"]
+        }
+      ],
+      "targets": {
+        "master": {
+          "viewName": "master",
+          "viewId": "master",
+          "controlAggregation": "masterPages",
+          "viewLevel": 0
+        },
+        "detailApps": {
+          "viewName": "detailApps",
+          "viewId": "detailApps",
+          "controlAggregation": "detailPages",
+          "viewLevel": 1
+        }
+      }
+    },
     "models": {
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",

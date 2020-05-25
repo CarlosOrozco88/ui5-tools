@@ -80,9 +80,6 @@ function loadConfig(restarting = false) {
   let open = restarting ? false : openBrowser;
 
   let baseDir = getRoot();
-  let baseDirIndex = path.join(ui5ToolsPath, 'index', 'webapp');
-  let baseDirDocs = path.join(ui5ToolsPath, 'docs');
-  let readmeDir = path.join(ui5ToolsPath, 'README.md');
 
   let files = [];
   let serveStatic = [];
@@ -141,6 +138,7 @@ function loadConfig(restarting = false) {
     srcFolder,
     distFolder,
     ui5Version,
+    ui5ToolsPath,
     // Server config
     cert,
     lrPath,
@@ -161,9 +159,6 @@ function loadConfig(restarting = false) {
     uglifySources,
     // Modified config
     baseDir,
-    baseDirIndex,
-    baseDirDocs,
-    readmeDir,
     foldersRoot,
     foldersRootMap,
     folders,

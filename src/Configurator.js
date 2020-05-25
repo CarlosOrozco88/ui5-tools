@@ -1,5 +1,7 @@
 import { window, ConfigurationTarget } from 'vscode';
 import Utils from './Utils';
+import https from 'https';
+import { version } from 'os';
 
 async function odataProvider() {
   let odataProviderValue = Utils.getConfigurationServer('gatewayProxy');
@@ -44,26 +46,22 @@ async function ui5Provider() {
       {
         description: 'Use resources from gateway',
         label: 'Gateway',
-        picked: ui5ProviderValue == 'Gateway',
       },
       {
         description: 'Use SAPUI5 CDN',
         label: 'CDN SAPUI5',
-        picked: ui5ProviderValue == 'CDN SAPUI5',
       },
       {
         description: 'Use OpenUI5 CDN',
         label: 'CDN OpenUI5',
-        picked: ui5ProviderValue == 'CDN OpenUI5',
       },
       {
         description: 'Without resources proxy',
         label: 'None',
-        picked: ui5ProviderValue == 'None',
       },
     ],
     {
-      placeHolder: 'Select odata provider (proxy all /sap)',
+      placeHolder: `Select odata provider (proxy all /sap) | Actual value: ${ui5ProviderValue}`,
       canPickMany: false,
     }
   );
@@ -82,14 +80,160 @@ async function ui5Provider() {
     await Utils.getConfigurationServer().update('gatewayUri', inputBoxGatewayUri, ConfigurationTarget.Workspace);
   }
 
-  //if (quickPickUI5Provider.label != 'None') {
-  let framework = quickPickUI5Provider.label.indexOf('SAPUI5') >= 0 ? 'SAPUI5' : 'OpenUI5';
-  let inputBoxUI5VersionUri = await window.showInputBox({
-    placeHolder: `Enter ${framework} version`,
-    value: Utils.getConfigurationGeneral('ui5Version'),
+  let ui5Version = Utils.getConfigurationGeneral('ui5Version');
+  let error = false,
+    versions,
+    framework;
+  try {
+    var url = `https://openui5.hana.ondemand.com/`;
+    framework = 'OpenUI5';
+    if (quickPickUI5Provider.label == 'Gateway' || quickPickUI5Provider.label == 'CDN SAPUI5') {
+      url = `https://sapui5.hana.ondemand.com/`;
+      framework = 'SAPUI5';
+    }
+    versions = await getVersions(url);
+  } catch (err) {
+    error = true;
+  }
+  if (!error) {
+    let quickPickUI5Version = await window.showQuickPick(versions, {
+      placeHolder: `Select ${framework} version | Actual value: ${ui5Version}`,
+      canPickMany: false,
+    });
+    let versionPatch = versions.find((versionData) => {
+      return versionData === quickPickUI5Version;
+    });
+
+    let quickPickUI5VersionPatch = await window.showQuickPick(versionPatch.patches, {
+      placeHolder: `Select ${framework} patch | Actual value: ${ui5Version}`,
+      canPickMany: false,
+    });
+    await Utils.getConfigurationGeneral().update(
+      'ui5Version',
+      quickPickUI5VersionPatch.label,
+      ConfigurationTarget.Workspace
+    );
+  } else {
+    let inputBoxUI5Version = await window.showInputBox({
+      placeHolder: `Enter ${framework} version | Actual value: ${ui5Version}`,
+      value: Utils.getConfigurationGeneral('ui5Version'),
+    });
+    await Utils.getConfigurationGeneral().update('ui5Version', inputBoxUI5Version, ConfigurationTarget.Workspace);
+  }
+}
+
+async function getVersions(url) {
+  try {
+    let versionsValues = await Promise.all([getVersionOverview(url), getNeoApp(url)]);
+    let versions = [];
+    let mapVersions = {};
+    versionsValues[0].versions.forEach((versionData) => {
+      if (versionData.version.length > 1) {
+        let cleanVersion = versionData.version.replace('.*', '');
+        let cVersion = {
+          label: cleanVersion,
+          description: versionData.lts ? versionData.eom : versionData.support + ' ' + versionData.eom,
+          patches: [],
+        };
+        mapVersions[cleanVersion] = cVersion;
+        versions.push(cVersion);
+      }
+    });
+    versionsValues[1].routes.forEach((versionData) => {
+      if (versionData.path.length > 1) {
+        let cleanVersion = versionData.path.replace('/', '');
+        let cleanVersionArray = cleanVersion.split('.');
+        cleanVersionArray.pop();
+        let cleanVersionMaster = cleanVersionArray.join('.');
+        if (mapVersions[cleanVersionMaster]) {
+          mapVersions[cleanVersionMaster].patches.push({
+            label: cleanVersion,
+            description: mapVersions[cleanVersionMaster].description,
+          });
+        } else {
+          let cVersion = {
+            label: cleanVersionMaster,
+            description: 'Out of Maintenance',
+            patches: [
+              {
+                label: cleanVersion,
+                description: 'Out of Maintenance',
+              },
+            ],
+          };
+          mapVersions[cleanVersion] = cVersion;
+          versions.push(cVersion);
+        }
+      }
+    });
+    return versions;
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+function getVersionOverview(url) {
+  return new Promise((resolv, reject) => {
+    https
+      .get(
+        `${url}versionoverview.json`,
+        {
+          timeout: 1000 * 5, // 5 seconds
+        },
+        (res) => {
+          if (res.statusCode !== 200) {
+            reject();
+          } else {
+            let rawData = '';
+            res.on('data', (chunk) => {
+              rawData += chunk;
+            });
+            res.on('end', () => {
+              try {
+                resolv(JSON.parse(rawData));
+              } catch (e) {
+                reject(e.message);
+              }
+            });
+          }
+        }
+      )
+      .on('error', (e) => {
+        reject();
+      });
   });
-  await Utils.getConfigurationGeneral().update('ui5Version', inputBoxUI5VersionUri, ConfigurationTarget.Workspace);
-  //}
+}
+
+function getNeoApp(url) {
+  return new Promise((resolv, reject) => {
+    https
+      .get(
+        `${url}neo-app.json`,
+        {
+          timeout: 1000 * 5, // 5 seconds
+        },
+        (res) => {
+          if (res.statusCode !== 200) {
+            reject();
+          } else {
+            let rawData = '';
+            res.on('data', (chunk) => {
+              rawData += chunk;
+            });
+            res.on('end', () => {
+              try {
+                resolv(JSON.parse(rawData));
+              } catch (e) {
+                reject(e.message);
+              }
+            });
+          }
+        }
+      )
+      .on('error', (e) => {
+        reject();
+      });
+  });
 }
 
 export default {
