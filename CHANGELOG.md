@@ -1,3 +1,7 @@
+## 0.1.1 (27-05-2020)
+
+- Server: launchpad theme for older versions
+
 ## 0.1.0 (27-05-2020)
 
 - Server: new sandbox launchpad for sapui5 framework. Customizable with firiSandboxConfig.json in workspaceroot

@@ -1,5 +1,5 @@
 {
-  "ignorePatterns": ["scripts/*.js"],
+  "ignorePatterns": ["scripts", "dist"],
   "env": {
     "browser": false,
     "commonjs": true,
