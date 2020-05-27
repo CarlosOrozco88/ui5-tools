@@ -10,18 +10,7 @@ async function setIndexMiddleware(expressApp, config) {
   setLaunchpadMiddleware(expressApp, config);
 }
 
-function setServerIndexMiddleware(expressApp, config) {
-  let { ui5ToolsPath, folders, serverName, baseDir, manifests, ui5Version } = config;
-  let ui5toolsData = {
-    readme: '',
-    folders: folders,
-    manifests: manifests,
-    serverName: serverName,
-    launchpad: isLaunchpadMounted(config),
-    docs: [],
-    showTree: false,
-    theme: 'sap_bluecrystal',
-  };
+function getOptionsVersion(ui5toolsData = {}, { ui5Version }) {
   let ui5VersionArray = ui5Version.split('.');
   if (ui5VersionArray.length >= 2) {
     if (ui5VersionArray[1] >= 42) {
@@ -34,6 +23,21 @@ function setServerIndexMiddleware(expressApp, config) {
       ui5toolsData.theme = 'sap_belize';
     }
   }
+  return ui5toolsData;
+}
+function setServerIndexMiddleware(expressApp, config) {
+  let { ui5ToolsPath, folders, serverName, baseDir, manifests, ui5Version } = config;
+  let ui5toolsData = {
+    readme: '',
+    folders: folders,
+    manifests: manifests,
+    serverName: serverName,
+    launchpad: isLaunchpadMounted(config),
+    docs: [],
+    showTree: false,
+    theme: 'sap_bluecrystal',
+  };
+  getOptionsVersion(ui5toolsData, config);
   // SERVER INDEX
   let indexHTML = function (req, res, next) {
     res.render(path.join(ui5ToolsPath, 'index', 'ui5', 'webapp', 'index'), { theme: ui5toolsData.theme });
@@ -117,7 +121,16 @@ function setLaunchpadMiddleware(expressApp, config) {
     // Object.entries(manifests).forEach(([folder, manifest]) => {
     //   fioriSandboxConfig.modulePaths[manifest['sap.app'].id] = `../${folder}`;
     // });
-    expressApp.use('/flp/', express.static(path.join(ui5ToolsPath, 'index', 'flp', 'webapp')));
+    let ui5toolsData = getOptionsVersion({}, config);
+    let flpPath = path.join(ui5ToolsPath, 'index', 'flp', 'webapp');
+    let indexFLP = function (req, res, next) {
+      res.render(path.join(flpPath, 'index'), { theme: ui5toolsData.theme });
+    };
+    expressApp.get('/flp/', indexFLP);
+    expressApp.get('/flp/index.html', indexFLP);
+    expressApp.use('/flp/test-resources/sap/ushell/bootstrap/sandbox.js', function (req, res) {
+      res.sendFile(path.join(flpPath, 'sandbox.js'));
+    });
     expressApp.get('/flp/test-resources/sap/ushell/shells/sandbox/fioriSandboxConfig.json', function (req, res) {
       res.json(fioriSandboxConfig);
     });

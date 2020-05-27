@@ -30,13 +30,13 @@
       id="sap-ui-bootstrap"
       src="/resources/sap-ui-core.js"
       data-sap-ui-libs="sap.m, sap.ushell, sap.collaboration"
-      data-sap-ui-theme="sap_fiori_3"
+      data-sap-ui-theme="<%= theme %>"
       data-sap-ui-compatVersion="edge"
+      data-sap-ui-xx-waitForTheme="true"
       data-sap-ui-frameOptions="allow"
     >
       // NON-SECURE setting for testing environment
     </script>
-    <!-- data-sap-ui-resourceRoots="<%= resourceroots %>" -->
 
     <script type="text/javascript">
       sap.ui.getCore().attachInit(function () {
