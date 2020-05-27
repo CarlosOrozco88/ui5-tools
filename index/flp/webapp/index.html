@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Launchpad Sandbox</title>
+
+    <script type="text/javascript">
+      window['sap-ushell-config'] = {
+        defaultRenderer: 'fiori2',
+        renderers: {
+          fiori2: {
+            componentData: {
+              config: {
+                //search: 'hidden',
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <script src="test-resources/sap/ushell/bootstrap/sandbox.js" id="sap-ushell-bootstrap"></script>
+
+    <!-- Bootstrap the UI5 core library -->
+    <script
+      id="sap-ui-bootstrap"
+      src="/resources/sap-ui-core.js"
+      data-sap-ui-libs="sap.m, sap.ushell, sap.collaboration"
+      data-sap-ui-theme="sap_fiori_3"
+      data-sap-ui-compatVersion="edge"
+      data-sap-ui-frameOptions="allow"
+    >
+      // NON-SECURE setting for testing environment
+    </script>
+    <!-- data-sap-ui-resourceRoots="<%= resourceroots %>" -->
+
+    <script type="text/javascript">
+      sap.ui.getCore().attachInit(function () {
+        // initialize the ushell sandbox component
+        sap.ushell.Container.createRenderer().placeAt('content');
+      });
+    </script>
+  </head>
+
+  <!-- UI Content -->
+  <body class="sapUiBody" id="content"></body>
+</html>

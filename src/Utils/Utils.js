@@ -69,6 +69,7 @@ function loadConfig(restarting = false) {
   let debugSources = getConfigurationBuilder('debugSources');
   let uglifySources = getConfigurationBuilder('uglifySources');
   let portLiveReload = 35729;
+  // @ts-ignore
   let lrPath = __non_webpack_require__.resolve('../scripts/livereload');
 
   let ui5ToolsPath = lrPath.slice(0, lrPath.indexOf('scripts'));
@@ -87,6 +88,7 @@ function loadConfig(restarting = false) {
   let folders = [];
   let foldersRoot = [];
   let foldersRootMap = {};
+  let manifests = {};
 
   let foldersWithName = [];
 
@@ -107,6 +109,7 @@ function loadConfig(restarting = false) {
         foldersRootMap,
         serveStatic,
         routes,
+        manifests,
       });
     });
 
@@ -126,6 +129,7 @@ function loadConfig(restarting = false) {
           foldersRootMap,
           serveStatic,
           routes,
+          manifests,
         });
       });
     }
@@ -168,6 +172,7 @@ function loadConfig(restarting = false) {
     routes,
     open,
     portLiveReload,
+    manifests,
   };
   config = nConfig;
   return nConfig;
@@ -189,27 +194,38 @@ function checkFolder(
     foldersRootMap,
     serveStatic,
     routes,
+    manifests,
   }
 ) {
   let folder, folderUri;
   if (fs.existsSync(path.join(folderPath, servingFolder))) {
-    folder = '' + folderPath.split(path.sep).pop();
-    foldersWithName.push(route);
-    folders.push(folder);
+    if (fs.existsSync(path.join(folderPath, servingFolder, 'manifest.json'))) {
+      let rawManifest = fs.readFileSync(path.join(folderPath, servingFolder, 'manifest.json'), 'utf8');
+      try {
+        let manifestJson = JSON.parse(rawManifest);
+        if (manifestJson['sap.app'] && manifestJson['sap.app'].id) {
+          folder = '' + folderPath.split(path.sep).pop();
+          foldersWithName.push(route);
+          folders.push(folder);
 
-    files.push(path.join(folder, servingFolder, `*.{${watchExtensions}}`));
-    files.push(path.join(folder, servingFolder, '**', `*.{${watchExtensions}}`));
+          manifests[folder] = manifestJson;
 
-    folderUri = '/' + folder;
-    routes[folderUri] = path.join(folder, servingFolder);
+          files.push(path.join(folder, servingFolder, `*.{${watchExtensions}}`));
+          files.push(path.join(folder, servingFolder, '**', `*.{${watchExtensions}}`));
 
-    foldersRoot.push(path.join(folderPath, servingFolder));
-    foldersRootMap[folderUri] = path.join(folderPath, servingFolder);
+          folderUri = '/' + folder;
+          routes[folderUri] = path.join(folder, servingFolder);
 
-    serveStatic.push({
-      route: folder,
-      dir: path.join(folderPath, servingFolder),
-    });
+          foldersRoot.push(path.join(folderPath, servingFolder));
+          foldersRootMap[folderUri] = path.join(folderPath, servingFolder);
+
+          serveStatic.push({
+            route: folder,
+            dir: path.join(folderPath, servingFolder),
+          });
+        }
+      } catch (err) {}
+    }
   }
 }
 

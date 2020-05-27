@@ -1,9 +1,9 @@
 import { commands } from 'vscode';
-import Server from './Server';
-import Configurator from './Configurator';
-import Builder from './Builder';
-import StatusBar from './StatusBar';
-import Utils from './Utils';
+import Server from './Server/Server';
+import Configurator from './Configurator/Configurator';
+import Builder from './Builder/Builder';
+import StatusBar from './StatusBar/StatusBar';
+import Utils from './Utils/Utils';
 
 export function activate(context) {
   const { registerCommand } = commands;

@@ -1,5 +1,5 @@
 import { window, StatusBarAlignment } from 'vscode';
-import Utils from './Utils';
+import Utils from '../Utils/Utils';
 
 let serverNavBar;
 let errors = [];

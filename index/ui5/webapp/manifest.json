@@ -24,27 +24,21 @@
         "viewType": "XML",
         "viewPath": "ui5tools.view",
         "controlId": "ui5toolsApp",
+				"controlAggregation": "pages",
         "async": true
       },
       "routes": [
         {
           "pattern": "",
           "name": "main",
-          "target": ["master", "detailApps"]
+          "target": "main"
         }
       ],
       "targets": {
-        "master": {
-          "viewName": "master",
-          "viewId": "master",
-          "controlAggregation": "masterPages",
+        "main": {
+          "viewName": "main",
+          "viewId": "main",
           "viewLevel": 0
-        },
-        "detailApps": {
-          "viewName": "detailApps",
-          "viewId": "detailApps",
-          "controlAggregation": "detailPages",
-          "viewLevel": 1
         }
       }
     },

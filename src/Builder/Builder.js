@@ -1,7 +1,7 @@
 import { workspace, window, ConfigurationTarget } from 'vscode';
 import path from 'path';
 import fs from 'fs';
-import Utils from './Utils';
+import Utils from '../Utils/Utils';
 import rimraf from 'rimraf';
 import preload from 'openui5-preload';
 import terser from 'terser';

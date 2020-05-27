@@ -1,5 +1,5 @@
 import { window, ConfigurationTarget } from 'vscode';
-import Utils from './Utils';
+import Utils from '../Utils/Utils';
 import https from 'https';
 import { version } from 'os';
 
@@ -85,7 +85,7 @@ async function ui5Provider() {
     versions,
     framework;
   try {
-    var url = `https://openui5.hana.ondemand.com/`;
+    let url = `https://openui5.hana.ondemand.com/`;
     framework = 'OpenUI5';
     if (quickPickUI5Provider.label == 'Gateway' || quickPickUI5Provider.label == 'CDN SAPUI5') {
       url = `https://sapui5.hana.ondemand.com/`;
@@ -110,6 +110,7 @@ async function ui5Provider() {
     });
     await Utils.getConfigurationGeneral().update(
       'ui5Version',
+      // @ts-ignore
       quickPickUI5VersionPatch.label,
       ConfigurationTarget.Workspace
     );
