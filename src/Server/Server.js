@@ -2,7 +2,6 @@ import express from 'express';
 import opn from 'opn';
 import http from 'http';
 import https from 'https';
-import mcache from 'memory-cache';
 
 import LiveServer from './LiveServer';
 import StatusBar from '../StatusBar/StatusBar';

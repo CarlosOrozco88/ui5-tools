@@ -1,7 +1,9 @@
-## 0.0.6 (25-05-2020)
+## 0.1.0 (27-05-2020)
 
-- Server: bug correction
-- Server: docs, links and readme in index
+- Server: new sandbox launchpad for sapui5 framework. Customizable with firiSandboxConfig.json in workspaceroot
+- Server: new server index with ui5, includes readme.md and docs folders (\*.md). When SAPUI5 framework, shows link to the sandbox launchpad
+- Server: new server-side caching for resources, cache dies with server shutdown
+- Configurator: now you can select ui5 versions fetched from CDN, manual option is fallback
 
 ## 0.0.5 (23-05-2020)
 

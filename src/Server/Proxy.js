@@ -1,7 +1,9 @@
 import { window } from 'vscode';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import https from 'https';
-import mcache from 'memory-cache';
+import apicache from 'apicache';
+
+const cacheResources = apicache.middleware('1 day');
 
 import StatusBar from '../StatusBar/StatusBar';
 import Utils from '../Utils/Utils';
@@ -53,8 +55,8 @@ async function setResourcesProxy(expressApp, folders = []) {
           logLevel: 'debug',
         });
 
-        expressApp.use('/**/resources/**', cacheProxyResources, proxy);
-        expressApp.use('/resources/**', cacheProxyResources, proxy);
+        expressApp.use('/**/resources/**', cacheResources, proxy);
+        expressApp.use('/resources/**', cacheResources, proxy);
       }
       break;
 
@@ -81,8 +83,8 @@ async function setResourcesProxy(expressApp, folders = []) {
           logLevel: 'debug',
         });
 
-        expressApp.use('/**/resources/**', cacheProxyResources, proxy);
-        expressApp.use('/resources/**', cacheProxyResources, proxy);
+        expressApp.use('/**/resources/**', cacheResources, proxy);
+        expressApp.use('/resources/**', cacheResources, proxy);
       }
 
       https
@@ -109,26 +111,6 @@ async function setResourcesProxy(expressApp, folders = []) {
       break;
   }
   return;
-}
-
-function cacheProxyResources(req, res, next) {
-  if (req.method !== 'GET') return next();
-
-  return next();
-
-  let key = '__proxy_cache__' + req.originalUrl || req.url;
-
-  let cachedBody = mcache.get(key);
-  if (cachedBody) {
-    res.send(cachedBody);
-  } else {
-    res.sendResponse = res.send;
-    res.send = (body) => {
-      mcache.put(key, body);
-      res.sendResponse(body);
-    };
-    next();
-  }
 }
 
 export default {

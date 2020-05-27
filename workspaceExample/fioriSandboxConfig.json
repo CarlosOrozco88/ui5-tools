@@ -1,0 +1,1022 @@
+{
+  "services": {
+    "LaunchPage": {
+      "adapter": {
+        "config": {
+          "catalogs": [
+            {
+              "id": "sample_catalog",
+              "title": "Sample Application Catalog",
+              "tiles": [
+                {
+                  "id": "todefaultapp",
+                  "title": "Default Application",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_00",
+                    "title": "Default Application",
+                    "info": "shows statically registered apps",
+                    "icon": "sap-icon://Fiori2/F0001",
+                    "targetURL": "#Action-todefaultapp"
+                  }
+                },
+                {
+                  "id": "tortademo",
+                  "title": "RTA Demo App",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_17",
+                    "title": "RTA Demo App",
+                    "info": "shows RTA Demo App",
+                    "icon": "sap-icon://Fiori2/F0001",
+                    "targetURL": "#Action-tortademo"
+                  }
+                },
+                {
+                  "id": "toappnavsample",
+                  "title": "AppNavSample",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_01",
+                    "title": "AppNavSample",
+                    "subtitle": "Navigation Sample 1",
+                    "info": "demo for startup parameter passing",
+                    "icon": "sap-icon://Fiori2/F0003",
+                    "targetURL": "#Action-toappnavsample"
+                  }
+                },
+                {
+                  "id": "toappnavsampleParam",
+                  "title": "AppNavSampleParam",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_02",
+                    "title": "AppNavSampleParam",
+                    "subtitle": "Navigation Sample 1",
+                    "info": "demo for startup parameter passing",
+                    "icon": "sap-icon://flight",
+                    "targetURL": "#Action-toappnavsampleParam"
+                  }
+                },
+                {
+                  "id": "toappnavsample2",
+                  "title": "AppNavSample2",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_03",
+                    "title": "AppNavSample2",
+                    "subtitle": "Navigation Sample 2",
+                    "info": "demo for declarative routing",
+                    "icon": "sap-icon://Fiori2/F0002",
+                    "targetURL": "#Action-toappnavsample2"
+                  }
+                },
+                {
+                  "id": "touserdefaults",
+                  "title": "UserDefaults",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_03",
+                    "title": "UserDefaults",
+                    "subtitle": "UserDefaults Internal Demonstration App",
+                    "info": "demo for UserDefaults",
+                    "icon": "sap-icon://Fiori2/F0002",
+                    "targetURL": "#Action-touserdefaults"
+                  }
+                },
+                {
+                  "id": "toappperssample",
+                  "title": "AppPersSample",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_04",
+                    "title": "AppPersSample",
+                    "subtitle": "Personalization Sample 1",
+                    "info": "demo for generic personalization service",
+                    "icon": "sap-icon://employee",
+                    "targetURL": "#Action-toappperssample"
+                  }
+                },
+                {
+                  "id": "toappperssample2",
+                  "title": "AppPersSample2",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_05",
+                    "title": "AppPersSample2",
+                    "subtitle": "Personalization Sample 2",
+                    "info": "demo for personalization of tables",
+                    "icon": "sap-icon://flight",
+                    "targetURL": "#Action-toappperssample2"
+                  }
+                },
+                {
+                  "id": "toappperssample3",
+                  "title": "AppPersSample3",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_06",
+                    "title": "AppPersSample3",
+                    "subtitle": "Personalization Sample 3",
+                    "info": "demo for personalization with variants",
+                    "icon": "sap-icon://camera",
+                    "targetURL": "#Action-toappperssample3"
+                  }
+                },
+                {
+                  "id": "toappcontextsample",
+                  "title": "AppContextSample",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_07",
+                    "title": "AppContextSample",
+                    "subtitle": "Personalization Sample 4",
+                    "info": "demo for AppContext (application state and cross app parameter passing)",
+                    "icon": "sap-icon://car-rental",
+                    "targetURL": "#Action-toappcontextsample"
+                  }
+                },
+                {
+                  "id": "toperssrvtest",
+                  "title": "PersSrvTest",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_08",
+                    "title": "PersSrvTest",
+                    "subtitle": "Personalization Service Test",
+                    "info": "create, load and save personalization containers",
+                    "icon": "sap-icon://world",
+                    "targetURL": "#Action-toperssrvtest"
+                  }
+                },
+                {
+                  "id": "toappstatesample",
+                  "title": "AppStateSample",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_09",
+                    "title": "AppStateSample",
+                    "subtitle": "Application state sample app",
+                    "info": "Application state sample app",
+                    "icon": "sap-icon://action",
+                    "targetURL": "#Action-toappstatesample"
+                  }
+                },
+                {
+                  "id": "toperssrv2test",
+                  "title": "PersSrv2Test",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_10",
+                    "title": "PersSrv2Test",
+                    "subtitle": "Personalization Service Test",
+                    "info": "OData model create, load and save personalization containers",
+                    "icon": "sap-icon://action",
+                    "targetURL": "#Action-toperssrv2test"
+                  }
+                },
+                {
+                  "id": "appscfltest",
+                  "title": "AppScflTest",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_11",
+                    "title": "AppScflTest",
+                    "subtitle": "Scaffolding",
+                    "info": "demo app based on sap.ca scaffolding layer",
+                    "icon": "sap-icon://action-settings",
+                    "targetURL": "#UI2Fiori2SampleApps-appscfltest"
+                  }
+                },
+                {
+                  "id": "appstateformsample",
+                  "title": "Fiori Icons",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_12",
+                    "title": "AppScflTest",
+                    "subtitle": "Scaffolding",
+                    "info": "demo app based on sap.ca scaffolding layer",
+                    "icon": "sap-icon://action-settings",
+                    "targetURL": "#Action-toappstateformsample"
+                  }
+                },
+                {
+                  "id": "ValidateUrlMessagePopoverSample",
+                  "title": "ValidateUrlMessagePopoverSample",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_13",
+                    "title": "ValidateUrlMessagePopoverSample",
+                    "subtitle": "ValidateUrlMessagePopoverSample",
+                    "info": "demo for startup parameter passing",
+                    "icon": "sap-icon://Fiori2/F0003",
+                    "targetURL": "#Action-ValidateUrlMessagePopoverSample"
+                  }
+                },
+                {
+                  "id": "toWDANavSource",
+                  "title": "WDA Navigation source",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_01",
+                    "title": "WDA Navigation source",
+                    "subtitle": "WDR_TEST_FLP_NAVIGATION (nwbc)",
+                    "info": "WDA Navigation source application",
+                    "icon": "sap-icon://Fiori2/F0003",
+                    "targetURL": "#WDANavSource-display"
+                  }
+                },
+                {
+                  "id": "toWDANavTarget",
+                  "title": "WDA Navigation target",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_01",
+                    "title": "WDA Navigation target",
+                    "subtitle": "WDR_TEST_PORTAL_NAV_TARGET (nwbc)",
+                    "info": "WDA Navigation source application",
+                    "icon": "sap-icon://Fiori2/F0003",
+                    "targetURL": "#WDANavTarget-display"
+                  }
+                },
+                {
+                  "id": "toWDANavSource",
+                  "title": "WDA Navigation source",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_01",
+                    "title": "WDA Navigation source",
+                    "subtitle": "WDR_TEST_FLP_NAVIGATION (direct)",
+                    "info": "WDA Navigation source application",
+                    "icon": "sap-icon://Fiori2/F0003",
+                    "targetURL": "#WDANavSourceDirect-display"
+                  }
+                },
+                {
+                  "id": "toWDANavTarget",
+                  "title": "WDA Navigation target (direct)",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_01",
+                    "title": "WDA Navigation target",
+                    "subtitle": "WDR_TEST_PORTAL_NAV_TARGET (direct)",
+                    "info": "WDA Navigation source application",
+                    "icon": "sap-icon://Fiori2/F0003",
+                    "targetURL": "#WDANavTargetDirect-display"
+                  }
+                }
+              ]
+            }
+          ],
+          "groups": [
+            {
+              "id": "sample_group",
+              "title": "Sample Applications",
+              "isPreset": true,
+              "isVisible": true,
+              "isGroupLocked": false,
+              "tiles": [
+                {
+                  "id": "todefaultapp",
+                  "title": "Default Application",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_00",
+                    "title": "Default Application",
+                    "info": "shows statically registered apps",
+                    "icon": "sap-icon://Fiori2/F0001",
+                    "targetURL": "#Action-todefaultapp"
+                  }
+                },
+                {
+                  "id": "tortademo",
+                  "title": "RTA Demo App",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_17",
+                    "title": "RTA Demo App",
+                    "info": "shows RTA Demo App",
+                    "icon": "sap-icon://Fiori2/F0001",
+                    "targetURL": "#Action-tortademo"
+                  }
+                },
+                {
+                  "id": "toappnavsample",
+                  "title": "AppNavSample",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_01",
+                    "title": "AppNavSample",
+                    "subtitle": "Navigation Sample 1",
+                    "info": "demo for startup parameter passing",
+                    "icon": "sap-icon://Fiori2/F0003",
+                    "targetURL": "#Action-toappnavsample"
+                  }
+                },
+                {
+                  "id": "toappnavsampleParam",
+                  "title": "AppNavSampleParam",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_02",
+                    "title": "AppNavSampleParam",
+                    "subtitle": "Navigation Sample 1",
+                    "info": "demo for startup parameter passing",
+                    "icon": "sap-icon://flight",
+                    "targetURL": "#Action-toappnavsampleParam"
+                  }
+                },
+                {
+                  "id": "toappnavsample2",
+                  "title": "AppNavSample2",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_03",
+                    "title": "AppNavSample2",
+                    "subtitle": "Navigation Sample 2",
+                    "info": "demo for declarative routing",
+                    "icon": "sap-icon://Fiori2/F0002",
+                    "targetURL": "#Action-toappnavsample2"
+                  }
+                },
+                {
+                  "id": "touserdefaults",
+                  "title": "UserDefaults",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_03",
+                    "title": "UserDefaults",
+                    "subtitle": "UserDefaults Internal Demonstration App",
+                    "info": "UserDefaults Internal Demonstration App",
+                    "icon": "sap-icon://Fiori2/F0002",
+                    "targetURL": "#Action-touserdefaults"
+                  }
+                },
+                {
+                  "id": "toappperssample",
+                  "title": "AppPersSample",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_04",
+                    "title": "AppPersSample",
+                    "subtitle": "Personalization Sample 1",
+                    "info": "demo for generic personalization service",
+                    "icon": "sap-icon://employee",
+                    "targetURL": "#Action-toappperssample"
+                  }
+                },
+                {
+                  "id": "toappperssample2",
+                  "title": "AppPersSample2",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_05",
+                    "title": "AppPersSample2",
+                    "subtitle": "Personalization Sample 2",
+                    "info": "demo for personalization of tables",
+                    "icon": "sap-icon://flight",
+                    "targetURL": "#Action-toappperssample2"
+                  }
+                },
+                {
+                  "id": "toappperssample3",
+                  "title": "AppPersSample3",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_06",
+                    "title": "AppPersSample3",
+                    "subtitle": "Personalization Sample 3",
+                    "info": "demo for personalization with variants",
+                    "icon": "sap-icon://camera",
+                    "targetURL": "#Action-toappperssample3"
+                  }
+                },
+                {
+                  "id": "toappcontextsample",
+                  "title": "AppContextSample",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_07",
+                    "title": "AppContextSample",
+                    "subtitle": "Personalization Sample 4",
+                    "info": "demo for AppContext (application state and cross app parameter passing)",
+                    "icon": "sap-icon://car-rental",
+                    "targetURL": "#Action-toappcontextsample"
+                  }
+                },
+                {
+                  "id": "toperssrvtest",
+                  "title": "PersSrvTest",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_08",
+                    "title": "PersSrvTest",
+                    "subtitle": "Personalization Service Test",
+                    "info": "create, load and save personalization containers",
+                    "icon": "sap-icon://world",
+                    "targetURL": "#Action-toperssrvtest"
+                  }
+                },
+                {
+                  "id": "toappstatesample",
+                  "title": "AppStateSample",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_09",
+                    "title": "AppStateSample",
+                    "subtitle": "Application state sample app",
+                    "info": "Application state sample app",
+                    "icon": "sap-icon://action",
+                    "targetURL": "#Action-toappstatesample"
+                  }
+                },
+                {
+                  "id": "toperssrv2test",
+                  "title": "PersSrv2Test",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_10",
+                    "title": "PersSrv2Test",
+                    "subtitle": "Personalization Service Test",
+                    "info": "OData model create, load and save personalization containers",
+                    "icon": "sap-icon://action",
+                    "targetURL": "#Action-toperssrv2test"
+                  }
+                },
+                {
+                  "id": "appscfltest",
+                  "title": "AppScflTest",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_11",
+                    "title": "AppScflTest",
+                    "subtitle": "Scaffolding",
+                    "info": "demo app based on sap.ca scaffolding layer",
+                    "icon": "sap-icon://action-settings",
+                    "targetURL": "#UI2Fiori2SampleApps-appscfltest"
+                  }
+                },
+                {
+                  "id": "toappstateformsample",
+                  "title": "FormSample",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_12",
+                    "title": "AppStateFormSample",
+                    "subtitle": "Form editing with application state",
+                    "info": "Form editing with application state",
+                    "icon": "sap-icon://action",
+                    "targetURL": "#Action-toappstateformsample"
+                  }
+                },
+                {
+                  "id": "ValidateUrlMessagePopoverSample",
+                  "title": "ValidateUrlMessagePopoverSample",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_13",
+                    "title": "ValidateUrlMessagePopoverSample",
+                    "subtitle": "ValidateUrlMessagePopoverSample",
+                    "info": "demo for startup parameter passing",
+                    "icon": "sap-icon://Fiori2/F0003",
+                    "targetURL": "#Action-ValidateUrlMessagePopoverSample"
+                  }
+                },
+                {
+                  "id": "PostMessageTest",
+                  "title": "Post Message Test",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_14",
+                    "title": "Post Message Test",
+                    "info": "Test app for the post message service interface used by WDA intent-based navigation",
+                    "icon": "sap-icon://Fiori2/F0004",
+                    "targetURL": "#Action-topostmessagesample"
+                  }
+                },
+                {
+                  "id": "toWDANavSource",
+                  "title": "WDA Navigation source",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_01",
+                    "title": "WDA Navigation source",
+                    "subtitle": "WDR_TEST_FLP_NAVIGATION (nwbc)",
+                    "info": "WDA Navigation source application",
+                    "icon": "sap-icon://Fiori2/F0003",
+                    "targetURL": "#WDANavSource-display"
+                  }
+                },
+                {
+                  "id": "toWDANavTarget",
+                  "title": "WDA Navigation target",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_01",
+                    "title": "WDA Navigation target",
+                    "subtitle": "WDR_TEST_PORTAL_NAV_TARGET (nwbc)",
+                    "info": "WDA Navigation source application",
+                    "icon": "sap-icon://Fiori2/F0003",
+                    "targetURL": "#WDANavTarget-display"
+                  }
+                },
+                {
+                  "id": "toWDANavSource",
+                  "title": "WDA Navigation source",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_01",
+                    "title": "WDA Navigation source",
+                    "subtitle": "WDR_TEST_FLP_NAVIGATION (direct)",
+                    "info": "WDA Navigation source application",
+                    "icon": "sap-icon://Fiori2/F0003",
+                    "targetURL": "#WDANavSourceDirect-display"
+                  }
+                },
+                {
+                  "id": "toWDANavTarget",
+                  "title": "WDA Navigation target (direct)",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_01",
+                    "title": "WDA Navigation target",
+                    "subtitle": "WDR_TEST_PORTAL_NAV_TARGET (direct)",
+                    "info": "WDA Navigation source application",
+                    "icon": "sap-icon://Fiori2/F0003",
+                    "targetURL": "#WDANavTargetDirect-display"
+                  }
+                },
+                {
+                  "id": "BookmarkSample",
+                  "title": "Bookmark Sample",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_15",
+                    "title": "Bookmark Sample",
+                    "info": "Create FLP Bookmarks",
+                    "icon": "sap-icon://favorite",
+                    "targetURL": "#Action-bookmark"
+                  }
+                },
+                {
+                  "id": "smartMainApp",
+                  "title": "Smart Controls",
+                  "size": "1x1",
+                  "tileType": "sap.ushell.ui.tile.StaticTile",
+                  "properties": {
+                    "chipId": "catalogTile_15",
+                    "title": "Smart Controls",
+                    "info": "Display Smart Controls",
+                    "icon": "sap-icon://favorite",
+                    "targetURL": "#SmartMainApp-start"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "NavTargetResolution": {
+      "config": {
+        "enableClientSideTargetResolution": true
+      }
+    },
+    "ClientSideTargetResolution": {
+      "adapter": {
+        "config": {
+          "inbounds": {
+            "actionTodefaultapp": {
+              "semanticObject": "Action",
+              "action": "todefaultapp",
+              "title": "Default App: shows statically registered apps (fioriSandboxConfig.js) ",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.FioriSandboxDefaultApp",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/FioriSandboxDefaultApp"
+              }
+            },
+            "actionToappnavsample": {
+              "semanticObject": "Action",
+              "action": "toappnavsample",
+              "title": "Navigation Sample 1: demo for startup parameter passing and routing with event handlers",
+              "signature": {
+                "parameters": {
+                  "fixed-param1": {
+                    "defaultValue": {
+                      "format": "value",
+                      "value": "value1"
+                    }
+                  }
+                },
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.AppNavSample",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/AppNavSample?array-param1=value1&array-param1=value2"
+              }
+            },
+            "actionToappnavsampleParam": {
+              "semanticObject": "Action",
+              "action": "toappnavsampleParam",
+              "title": "Navigation Sample 1: demo for startup parameter passing and routing with event handlers",
+              "signature": {
+                "parameters": {
+                  "fixed-param1": {
+                    "defaultValue": {
+                      "format": "value",
+                      "value": "value1"
+                    }
+                  }
+                },
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.AppNavSample",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/AppNavSample?array-param1=value1&array-param1=value2"
+              }
+            },
+            "actionToappnavsample2": {
+              "semanticObject": "Action",
+              "action": "toappnavsample2",
+              "title": "Navigation Sample 2: demo for declarative routing",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.AppNavSample2",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/AppNavSample2"
+              }
+            },
+            "actionTouserdefaults": {
+              "semanticObject": "Action",
+              "action": "touserdefaults",
+              "title": "UserDefaults Internal Demonstration App",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.UserDefaults",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/UserDefaults"
+              }
+            },
+            "actionToappperssample": {
+              "semanticObject": "Action",
+              "action": "toappperssample",
+              "title": "Personalization Sample 1: demo for generic personalization service",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.AppPersSample",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/AppPersSample"
+              }
+            },
+            "actionToappcontextsample": {
+              "semanticObject": "Action",
+              "action": "toappcontextsample",
+              "title": "Personalization Sample 4: demo for AppContext (application state and cross app parameter passing)",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.AppContextSample",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/AppContextSample"
+              }
+            },
+            "actionToShowParameters": {
+              "semanticObject": "Action",
+              "action": "toshowparameters",
+              "title": "Show received parameters",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.ReceiveParametersTestApp",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/ReceiveParametersTestApp"
+              }
+            },
+            "actionToappperssample2": {
+              "semanticObject": "Action",
+              "action": "toappperssample2",
+              "title": "Personalization Sample 2: demo for personalization of tables",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.AppPersSample2",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/AppPersSample2"
+              }
+            },
+            "actionToappperssample3": {
+              "semanticObject": "Action",
+              "action": "toappperssample3",
+              "title": "Personalization Sample 3: demo for personalization with variants",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.AppPersSample3",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/AppPersSample3"
+              }
+            },
+            "actionToperssrvtest": {
+              "semanticObject": "Action",
+              "action": "toperssrvtest",
+              "title": "Personalization Service Test: create, load and save personalization containers",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.PersSrvTest",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/PersSrvTest"
+              }
+            },
+            "actionToperssrv2test": {
+              "semanticObject": "Action",
+              "action": "toperssrv2test",
+              "title": "Personalization Service Test: OData model create, load and save personalization containers",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.PersSrv2Test",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/PersSrv2Test"
+              }
+            },
+            "actionToappstatesample": {
+              "semanticObject": "Action",
+              "action": "toappstatesample",
+              "title": "ApplicationState Sample: demo for AppState",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.AppStateSample",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/AppStateSample"
+              }
+            },
+            "actionToappstateformsample": {
+              "semanticObject": "Action",
+              "action": "toappstateformsample",
+              "title": "ApplicationState Sample: Application State (Form, Undo)",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.AppStateFormSample",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/AppStateFormSample"
+              }
+            },
+            "actionValidateUrlMessagePopoverSample": {
+              "semanticObject": "Action",
+              "action": "ValidateUrlMessagePopoverSample",
+              "title": "ValidateUrlMessagePopoverSample",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.ValidateUrlMessagePopoverSample",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/ValidateUrlMessagePopoverSample"
+              }
+            },
+            "uI2Fiori2SampleAppsAppscfltest": {
+              "semanticObject": "UI2Fiori2SampleApps",
+              "action": "appscfltest",
+              "title": "Scaffolding: demo app based on sap.ca scaffolding layer",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=AppScflTest",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/AppScflTest"
+              }
+            },
+            "actionTopostmessagesample": {
+              "semanticObject": "Action",
+              "action": "topostmessagesample",
+              "title": "Post Message Test App",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "URL",
+                "additionalInformation": "managed=FioriWave1",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/PostMessageTestApp/index.html"
+              }
+            },
+            "wDANavSourceDisplay": {
+              "semanticObject": "WDANavSource",
+              "action": "display",
+              "title": "WDA Navsource nwbc url",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "WDA",
+                "additionalInformation": "",
+                "url": "/ui2/nwbc/~canvas;window=app/wda/WDR_TEST_FLP_NAVIGATION/?System=&amp;sap-ie=edge"
+              }
+            },
+            "wDANavTargetDisplay": {
+              "semanticObject": "WDANavTarget",
+              "action": "display",
+              "title": "WDA Navtarget nwbc url",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "WDA",
+                "additionalInformation": "",
+                "url": "/ui2/nwbc/~canvas;window=app/wda/WDR_TEST_PORTAL_NAV_TARGET/?System=&amp;sap-ie=edge"
+              }
+            },
+            "wDANavSourceDirectDisplay": {
+              "semanticObject": "WDANavSourceDirect",
+              "action": "display",
+              "title": "WDA Navsource direct url",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "WDA",
+                "additionalInformation": "",
+                "url": "/sap/bc/webdynpro/sap/wdr_test_flp_navigation"
+              }
+            },
+            "wDANavTargetDirectDisplay": {
+              "semanticObject": "WDANavTargetDirect",
+              "action": "display",
+              "title": "WDA Navtarget direct url",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "WDA",
+                "additionalInformation": "",
+                "url": "/sap/bc/webdynpro/sap/wdr_test_portal_nav_target"
+              }
+            },
+            "actionBookmark": {
+              "semanticObject": "Action",
+              "action": "bookmark",
+              "title": "Bookmark Sample",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ushell.demo.bookmark",
+                "url": "../../../../../test-resources/sap/ushell/demoapps/BookmarkSample"
+              }
+            },
+            "smartMainApp": {
+              "semanticObject": "SmartMainApp",
+              "action": "start",
+              "title": "Smart Controls",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ui.comp.sample.smartlink.example_99",
+                "url": "../../../../../test-resources/sap/ui/comp/demokit/sample/smartlink/example_99"
+              }
+            },
+            "smartFactsheetPage": {
+              "semanticObject": "ProductCollection",
+              "action": "displayFactSheet",
+              "title": "Show Fact Sheet",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ui.comp.sample.smartlink.factSheetPage",
+                "url": "../../../../../test-resources/sap/ui/comp/demokit/sample/smartlink/factSheetPage"
+              }
+            },
+            "smartProductPage": {
+              "semanticObject": "ProductCollection",
+              "action": "displayProduct",
+              "title": "Show Product",
+              "signature": {
+                "parameters": {
+                  "sap-tag": {
+                    "defaultValue": {
+                      "format": "value",
+                      "value": "superiorAction"
+                    }
+                  }
+                },
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "applicationType": "SAPUI5",
+                "additionalInformation": "SAPUI5.Component=sap.ui.comp.sample.smartlink.productPage",
+                "url": "../../../../../test-resources/sap/ui/comp/demokit/sample/smartlink/productPage"
+              }
+            },
+            "tortademo": {
+              "semanticObject": "Action",
+              "action": "tortademo",
+              "title": "RTA Demo App",
+              "signature": {
+                "parameters": {},
+                "additionalParameters": "allowed"
+              },
+              "resolutionResult": {
+                "additionalInformation": "SAPUI5.Component=sap.ui.demoapps.rta.freestyle",
+                "applicationType": "SAPUI5",
+                "url": "../../../../../test-resources/sap/ui/demoapps/demokit/rta/freestyle"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

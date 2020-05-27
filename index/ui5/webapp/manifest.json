@@ -24,7 +24,7 @@
         "viewType": "XML",
         "viewPath": "ui5tools.view",
         "controlId": "ui5toolsApp",
-				"controlAggregation": "pages",
+        "controlAggregation": "pages",
         "async": true
       },
       "routes": [
@@ -60,7 +60,7 @@
     "resources": {
       "css": [
         {
-          "uri": "css/styles.css"
+          "uri": "styles/styles.css"
         }
       ]
     }
