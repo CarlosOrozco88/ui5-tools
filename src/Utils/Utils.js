@@ -173,6 +173,12 @@ function loadConfig(restarting = false) {
     open,
     portLiveReload,
     manifests,
+    // auth
+    auth: {
+      gatewayUser: config.auth ? config.auth.gatewayUser : '',
+      gatewayPassword: config.auth ? config.auth.gatewayPassword : '',
+      authGateway: config.auth ? config.auth.authGateway : undefined,
+    },
   };
   config = nConfig;
   return nConfig;

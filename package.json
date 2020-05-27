@@ -215,6 +215,7 @@
   },
   "dependencies": {
     "@types/apicache": "^1.2.2",
+    "agentkeepalive": "^4.1.2",
     "apicache": "^1.5.3",
     "connect-livereload": "^0.6.1",
     "ejs": "^3.1.3",

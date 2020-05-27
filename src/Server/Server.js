@@ -36,7 +36,7 @@ async function start(restarting = false) {
 
     // Reload config, checks new projects
     let config = Utils.loadConfig(restarting);
-    let { foldersRootMap, port, watch, protocol, folders, cert } = config;
+    let { foldersRootMap, port, watch, protocol, cert } = config;
 
     if (watch) {
       await LiveServer.start(expressApp, config);
@@ -46,8 +46,12 @@ async function start(restarting = false) {
       expressApp.use(key, express.static(folderRoot));
     });
 
-    await Proxy.setGatewayProxy(expressApp);
-    await Proxy.setResourcesProxy(expressApp, folders);
+    Proxy.resetCache();
+    // if (!restarting) {
+    //   await Proxy.checkGatewayProxy(config);
+    // }
+    await Proxy.setGatewayProxy(expressApp, config);
+    await Proxy.setResourcesProxy(expressApp, config);
     await Index.setIndexMiddleware(expressApp, config);
 
     if (protocol == 'https') {

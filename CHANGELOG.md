@@ -3,6 +3,7 @@
 - Server: new sandbox launchpad for sapui5 framework. Customizable with firiSandboxConfig.json in workspaceroot
 - Server: new server index with ui5, includes readme.md and docs folders (\*.md). When SAPUI5 framework, shows link to the sandbox launchpad
 - Server: new server-side caching for resources, cache dies with server shutdown
+- Server: proxy for gateway asks user for username and password before server initialization
 - Configurator: now you can select ui5 versions fetched from CDN, manual option is fallback
 
 ## 0.0.5 (23-05-2020)
