@@ -5,17 +5,7 @@
     displayBlock="true"
     width="100%"
     height="100%">
-    <Page>
-        <customHeader>
-            <Toolbar width="100%">
-                <content>
-                    <ToolbarSpacer />
-                    <Title text="{ui5tools>/serverName}" />
-                    <ToolbarSpacer />
-                </content>
-            </Toolbar>
-        </customHeader>
-        <content>
+    <Page showHeader="false">
             <IconTabBar id="iconTabBar" expandable="false" selectedKey="apps" select="selectIconTabbar" applyContentPadding="false" >
                 <items>
                     <% if(launchpad) { %>
@@ -87,24 +77,5 @@
                     </IconTabFilter>
                 </items>
             </IconTabBar>
-        </content>
-        <footer>
-            <Toolbar width="100%">
-                <ToolbarSpacer />
-                <Link text="ui5-tools"
-                    href="https://marketplace.visualstudio.com/items?itemName=carlosorozcojimenez.ui5-tools"
-                    target="_blank"
-                    />
-                <Link text="Github"
-                    href="https://github.com/CarlosOrozco88/ui5-tools"
-                    target="_blank"
-                    />
-                <Link text="Issues"
-                    href="https://github.com/CarlosOrozco88/ui5-tools/issues"
-                    target="_blank"
-                    />
-                <ToolbarSpacer />
-            </Toolbar>
-        </footer>
     </Page>
 </mvc:View>

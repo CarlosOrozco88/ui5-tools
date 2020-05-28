@@ -1,8 +1,108 @@
-<mvc:View xmlns:mvc="sap.ui.core.mvc" 
-    xmlns="sap.m" 
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+    xmlns:customData="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+    xmlns="sap.m"
+    xmlns:tnt="sap.tnt"
     controllerName="ui5tools.controller.App"
     displayBlock="true"
     width="100%"
     height="100%">
-    <App id="ui5toolsApp" />
+
+    <tnt:ToolPage id="toolPage" class="sapUiSizeCompact">
+        <tnt:header>
+            <tnt:ToolHeader>
+                <Button
+                    id="sideNavigationToggleButton"
+                    icon="sap-icon://menu2"
+                    type="Transparent"
+                    press=".onSideNavButtonPress">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="NeverOverflow" />
+                    </layoutData>
+                </Button>
+
+                <Title text="{ui5tools>/serverName}">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="NeverOverflow" />
+                    </layoutData>
+                </Title>
+                <tnt:ToolHeaderUtilitySeparator />
+            </tnt:ToolHeader>
+        </tnt:header>
+        <tnt:sideContent>
+            <tnt:SideNavigation
+                expanded="true"
+                itemSelect=".onItemSelect">
+                <tnt:NavigationList>
+                    <!--
+                    <% if(launchpad) { %>
+                    <tnt:NavigationListItem icon="sap-icon://sap-ui5"
+                        iconColor="Default"
+                        iconDensityAware="true"
+                        key="launchpad"
+                        text="Launchpad" />
+                    <% } %>
+                    -->
+
+                    <tnt:NavigationListItem icon="sap-icon://grid"
+                        iconColor="Default"
+                        iconDensityAware="true"
+                        key="apps"
+                        text="Apps" />
+
+                    <tnt:NavigationListItem enabled="{= ${ui5tools>/readme}.length > 0 }"
+                        icon="sap-icon://document-text"
+                        iconColor="Critical"
+                        iconDensityAware="true"
+                        key="readme"
+                        text="Readme"/>
+
+                    <!-- <Tree id="docsTree"
+                                    items="{path:'ui5tools>/docs',sorter:{path:'folder',descending:true}}"
+                                    itemPress="itemPressTreeDocs"
+                                    showSeparators="Inner"
+                                    mode="SingleSelectMaster">
+                                    <StandardTreeItem title="{ui5tools>name}"
+                                        icon="{= ${ui5tools>folder} === 0 ? 'sap-icon://document-text' : 'sap-icon://folder-full' }"
+                                        type="{= ${ui5tools>markdown}.length ? 'Navigation' : 'Inactive' }" />
+                                </Tree> -->
+                </tnt:NavigationList>
+                <tnt:NavigationList items="{path:'ui5tools>/folders',sorter:{path:'folder',descending:true}}">
+                    <tnt:NavigationListItem
+                        icon="sap-icon://folder-full"
+                        expanded="true"
+                        key="docs"
+                        text="Docs">
+                        <tnt:items>
+                            <tnt:NavigationListItem icon="sap-icon://folder-full"
+                                iconColor="Critical"
+                                expanded="true"
+                                iconDensityAware="true"
+                                key="{ui5tools>name}"
+                                text="{ui5tools>name}">
+                            </tnt:NavigationListItem>
+                        </tnt:items>
+                    </tnt:NavigationListItem>
+                </tnt:NavigationList>
+                <tnt:fixedItem>
+                    <tnt:NavigationList>
+                        <tnt:NavigationListItem text="ui5-tools"
+                            customData:url="https://marketplace.visualstudio.com/items?itemName=carlosorozcojimenez.ui5-tools"
+                            icon="sap-icon://sap-ui5"
+                            select="selectLink" />
+                        <tnt:NavigationListItem text="Github"
+                            customData:url="https://github.com/CarlosOrozco88/ui5-tools"
+                            icon="sap-icon://source-code"
+                            select="selectLink" />
+                        <tnt:NavigationListItem text="Issues"
+                            customData:url="https://github.com/CarlosOrozco88/ui5-tools/issues"
+                            icon="sap-icon://message-popup"
+                            select="selectLink" />
+                    </tnt:NavigationList>
+                </tnt:fixedItem>
+            </tnt:SideNavigation>
+        </tnt:sideContent>
+        <tnt:mainContents>
+            <NavContainer id="ui5toolsApp" />
+        </tnt:mainContents>
+    </tnt:ToolPage>
 </mvc:View>
