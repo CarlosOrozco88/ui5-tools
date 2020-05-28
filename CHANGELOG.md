@@ -1,3 +1,7 @@
+## 0.1.3 (28-05-2020)
+
+- Bug correction for windows users
+
 ## 0.1.2 (28-05-2020)
 
 - Server: launchpad file sandbox.js fetched from sapui5 cdn
