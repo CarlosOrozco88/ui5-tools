@@ -11,15 +11,12 @@ async function build(projectPath = undefined) {
     projectPath = await askProjectToBuild();
   }
   if (projectPath) {
-    let { srcFolder, distFolder, ui5Version, debugSources, uglifySources } = Utils.getConfig();
+    let config = Utils.getConfig();
+    let { srcFolder, distFolder, debugSources, uglifySources } = config;
     if (!srcFolder || !distFolder || srcFolder == distFolder) {
       throw 'Invalid srcFolder or distFolder';
     }
-    let compatVersionArr = ui5Version.split('.');
-    while (compatVersionArr.length > 2) {
-      compatVersionArr.pop();
-    }
-    let compatVersion = compatVersionArr.join('.');
+    let { compatVersion } = Utils.getOptionsVersion();
 
     // clean folder
     rimraf.sync(path.join(projectPath, distFolder));

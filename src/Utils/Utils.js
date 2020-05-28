@@ -66,6 +66,8 @@ function loadConfig(restarting = false) {
   let protocol = getConfigurationServer('protocol');
   let index = 'index.html';
 
+  let framework = resourcesProxy.indexOf('OpenUI5') >= 0 ? 'openui5' : 'sapui5';
+
   let debugSources = getConfigurationBuilder('debugSources');
   let uglifySources = getConfigurationBuilder('uglifySources');
   let portLiveReload = 35729;
@@ -173,6 +175,7 @@ function loadConfig(restarting = false) {
     open,
     portLiveReload,
     manifests,
+    framework,
     // auth
     auth: {
       gatewayUser: config.auth ? config.auth.gatewayUser : '',
@@ -235,7 +238,42 @@ function checkFolder(
   }
 }
 
+function getOptionsVersion(ui5toolsData = {}, config = getConfig()) {
+  let { ui5Version } = config;
+
+  ui5toolsData.compatVersion = 'edge'; // for building
+  ui5toolsData.showTree = false; // shows list or tree in docs folder
+  ui5toolsData.theme = 'sap_bluecrystal'; // theme to use in index server and flp
+
+  let majorV = 0;
+  let minorV = 0;
+  let patchV = 0;
+  const aVersionMatch = String(ui5Version).match(/^(\d+)\.(\d+)\.(\d+)$/);
+  if (aVersionMatch) {
+    majorV = parseInt(aVersionMatch[1], 10);
+    minorV = parseInt(aVersionMatch[2], 10);
+    patchV = parseInt(aVersionMatch[3], 10);
+    ui5toolsData.compatVersion = `${majorV}.${minorV}`;
+  }
+
+  if (majorV == 1) {
+    // sap.m.tree
+    if (minorV >= 42) {
+      ui5toolsData.showTree = true;
+    }
+
+    // theme
+    if (minorV >= 65) {
+      ui5toolsData.theme = 'sap_fiori_3';
+    } else if (minorV >= 44) {
+      ui5toolsData.theme = 'sap_belize';
+    }
+  }
+  return ui5toolsData;
+}
+
 export default {
+  getOptionsVersion,
   getConfigurationGeneral,
   getConfigurationServer,
   getConfigurationBuilder,

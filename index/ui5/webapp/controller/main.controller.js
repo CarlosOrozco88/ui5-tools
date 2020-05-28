@@ -58,7 +58,7 @@ sap.ui.define(['sap/ui/core/mvc/Controller', 'sap/m/IconTabFilter', 'sap/m/VBox'
       tabbar.setSelectedKey(idTabFilter);
     },
     navToFLP: function () {
-      sap.m.URLHelper.redirect(window.location.origin + '/flp', false);
+      sap.m.URLHelper.redirect(window.location.origin + '/flp/', false);
     },
   });
 });

@@ -1,3 +1,9 @@
+## 0.1.2 (28-05-2020)
+
+- Server: launchpad file sandbox.js fetched from sapui5 cdn
+- Server: bug correction for cache cleaning at startup
+- Server: url launchpad added last slash /flp/
+
 ## 0.1.1 (27-05-2020)
 
 - Server: launchpad theme for older versions
@@ -6,7 +12,7 @@
 
 - Server: new sandbox launchpad for sapui5 framework. Customizable with firiSandboxConfig.json in workspaceroot
 - Server: new server index with ui5, includes readme.md and docs folders (\*.md). When SAPUI5 framework, shows link to the sandbox launchpad
-- Server: new server-side caching for resources, cache dies with server shutdown
+- Server: new server-side caching for resources, cache cleaning at server startup
 - Server: proxy for gateway asks user for username and password before server initialization
 - Configurator: now you can select ui5 versions fetched from CDN, manual option is fallback
 

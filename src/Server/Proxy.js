@@ -74,8 +74,8 @@ import Utils from '../Utils/Utils';
 // }
 
 function resetCache() {
-  if (cacheResources.clear) {
-    cacheResources.clear();
+  if (apicache.clear) {
+    apicache.clear(null);
   }
 }
 
@@ -92,7 +92,7 @@ async function setGatewayProxy(expressApp, { auth }) {
         target: targetUri,
         secure: targetUri.indexOf('https') == 0,
         changeOrigin: true,
-        logLevel: 'debug',
+        //logLevel: 'debug',
       });
       expressApp.use('/sap', proxy);
       break;
@@ -104,7 +104,7 @@ async function setGatewayProxy(expressApp, { auth }) {
 }
 
 async function setResourcesProxy(expressApp, config) {
-  let { folders = [], auth } = config;
+  let { folders = [], auth, ui5Version, framework } = config;
   let targetUri, pathRewrite, pathRoute, proxy;
   let resourcesProxy = Utils.getConfigurationServer('resourcesProxy');
 
@@ -127,7 +127,7 @@ async function setResourcesProxy(expressApp, config) {
           target: targetUri,
           secure: targetUri.indexOf('https') == 0,
           changeOrigin: true,
-          logLevel: 'debug',
+          //logLevel: 'debug',
         });
 
         expressApp.use('/**/resources/**', cacheResources, proxy);
@@ -137,9 +137,6 @@ async function setResourcesProxy(expressApp, config) {
 
     case 'CDN SAPUI5':
     case 'CDN OpenUI5':
-      let framework = resourcesProxy.indexOf('SAPUI5') >= 0 ? 'sapui5' : 'openui5';
-      let ui5Version = Utils.getConfigurationGeneral('ui5Version');
-
       targetUri = `https://${framework}.hana.ondemand.com/${ui5Version}/`;
 
       if (ui5Version) {
@@ -155,7 +152,7 @@ async function setResourcesProxy(expressApp, config) {
           target: targetUri,
           secure: targetUri.indexOf('https') == 0,
           changeOrigin: true,
-          logLevel: 'debug',
+          //logLevel: 'debug',
         });
 
         expressApp.use('/**/resources/**', cacheResources, proxy);
@@ -188,9 +185,28 @@ async function setResourcesProxy(expressApp, config) {
   return;
 }
 
+function setTestResourcesProxy(expressApp, { ui5Version }) {
+  let targetUri = `https://sapui5.hana.ondemand.com/${ui5Version}/`;
+
+  if (ui5Version) {
+    let proxy = createProxyMiddleware({
+      pathRewrite: {
+        '^/flp/': '/',
+      },
+      target: targetUri,
+      secure: targetUri.indexOf('https') == 0,
+      changeOrigin: true,
+      //logLevel: 'debug',
+    });
+
+    expressApp.use('/flp/test-resources/**', cacheResources, proxy);
+  }
+}
+
 export default {
   setGatewayProxy,
   setResourcesProxy,
+  setTestResourcesProxy,
   // checkGatewayProxy,
   resetCache,
 };
