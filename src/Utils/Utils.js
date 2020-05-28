@@ -40,9 +40,9 @@ function getRoot() {
       }
     }
     if (doSplit) {
-      let arr = baseDir.split('/');
+      let arr = baseDir.split(path.sep);
       arr.pop();
-      baseDir = arr.join('/');
+      baseDir = arr.join(path.sep);
     }
   }
   return baseDir;
