@@ -1,3 +1,7 @@
+## 0.1.6 (29-05-2020)
+
+- Breaking changes! options gatewayProxy/gatewayUri -> odataProxy/odataUri
+
 ## 0.1.5 (29-05-2020)
 
 - New server index + readme + docs + links + info
