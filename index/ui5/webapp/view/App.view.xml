@@ -10,79 +10,62 @@
     <tnt:ToolPage id="toolPage" class="sapUiSizeCompact">
         <tnt:header>
             <tnt:ToolHeader>
-                <Button
-                    id="sideNavigationToggleButton"
-                    icon="sap-icon://menu2"
-                    type="Transparent"
-                    press=".onSideNavButtonPress">
+                <Button icon="sap-icon://sap-ui5"
+                    type="Transparent">
                     <layoutData>
                         <OverflowToolbarLayoutData priority="NeverOverflow" />
                     </layoutData>
                 </Button>
 
-                <Title text="{ui5tools>/serverName}">
+                <Title text="{ui5tools>/config/serverName}">
                     <layoutData>
                         <OverflowToolbarLayoutData priority="NeverOverflow" />
                     </layoutData>
                 </Title>
-                <tnt:ToolHeaderUtilitySeparator />
+
+                <ToolbarSpacer>
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="NeverOverflow" minWidth="20px" />
+                    </layoutData>
+                </ToolbarSpacer>
             </tnt:ToolHeader>
         </tnt:header>
         <tnt:sideContent>
             <tnt:SideNavigation
-                expanded="true"
-                itemSelect=".onItemSelect">
+                expanded="true">
                 <tnt:NavigationList>
-                    <!--
-                    <% if(launchpad) { %>
                     <tnt:NavigationListItem icon="sap-icon://sap-ui5"
-                        iconColor="Default"
-                        iconDensityAware="true"
+                        visible="{ui5tools>/launchpad}"
                         key="launchpad"
-                        text="Launchpad" />
-                    <% } %>
-                    -->
+                        text="Launchpad"
+                        select="navToFLP" />
 
                     <tnt:NavigationListItem icon="sap-icon://grid"
-                        iconColor="Default"
-                        iconDensityAware="true"
                         key="apps"
-                        text="Apps" />
+                        text="Apps"
+                        select="selectNav" />
 
-                    <tnt:NavigationListItem enabled="{= ${ui5tools>/readme}.length > 0 }"
-                        icon="sap-icon://document-text"
-                        iconColor="Critical"
-                        iconDensityAware="true"
+                    <tnt:NavigationListItem icon="sap-icon://sys-help-2"
                         key="readme"
-                        text="Readme"/>
+                        text="Readme"
+                        select="selectNav" />
 
-                    <!-- <Tree id="docsTree"
-                                    items="{path:'ui5tools>/docs',sorter:{path:'folder',descending:true}}"
-                                    itemPress="itemPressTreeDocs"
-                                    showSeparators="Inner"
-                                    mode="SingleSelectMaster">
-                                    <StandardTreeItem title="{ui5tools>name}"
-                                        icon="{= ${ui5tools>folder} === 0 ? 'sap-icon://document-text' : 'sap-icon://folder-full' }"
-                                        type="{= ${ui5tools>markdown}.length ? 'Navigation' : 'Inactive' }" />
-                                </Tree> -->
-                </tnt:NavigationList>
-                <tnt:NavigationList items="{path:'ui5tools>/folders',sorter:{path:'folder',descending:true}}">
-                    <tnt:NavigationListItem
-                        icon="sap-icon://folder-full"
-                        expanded="true"
+                    <tnt:NavigationListItem icon="sap-icon://document-text"
                         key="docs"
-                        text="Docs">
-                        <tnt:items>
-                            <tnt:NavigationListItem icon="sap-icon://folder-full"
-                                iconColor="Critical"
-                                expanded="true"
-                                iconDensityAware="true"
-                                key="{ui5tools>name}"
-                                text="{ui5tools>name}">
-                            </tnt:NavigationListItem>
-                        </tnt:items>
-                    </tnt:NavigationListItem>
+                        text="Docs"
+                        select="selectNav" />
+
+                    <tnt:NavigationListItem icon="sap-icon://chain-link"
+                        key="links"
+                        text="Links"
+                        select="selectNav" />
+
+                    <tnt:NavigationListItem icon="sap-icon://developer-settings"
+                        key="info"
+                        text="Info"
+                        select="selectNav" />
                 </tnt:NavigationList>
+
                 <tnt:fixedItem>
                     <tnt:NavigationList>
                         <tnt:NavigationListItem text="ui5-tools"

@@ -1,0 +1,42 @@
+<mvc:View
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  controllerName="ui5tools.controller.docs"
+  displayBlock="true"
+  width="100%"
+  height="100%"
+>
+  <Page title="Docs">
+    <% if(showTree) { %>
+    <Tree
+      id="docsTree"
+      items="{path:'ui5tools>/docs',sorter:{path:'folder',descending:true},parameters:{numberOfExpandedLevels: 2}}"
+      itemPress="itemPressDocs"
+      noDataText="Workspace without docs folder"
+      showSeparators="Inner"
+      mode="SingleSelectMaster"
+    >
+      <StandardTreeItem
+        title="{ui5tools>name}"
+        icon="{= ${ui5tools>folder} ? 'sap-icon://folder-full' : 'sap-icon://document-text' }"
+        type="{= ${ui5tools>folder} ? 'Inactive' : 'Navigation' }"
+      />
+    </Tree>
+    <% } else { %>
+    <List
+      id="docsList"
+      items="{path:'ui5tools>/docs'}"
+      itemPress="itemPressDocs"
+      noDataText="Workspace without docs folder"
+      showSeparators="Inner"
+      mode="SingleSelectMaster"
+    >
+      <StandardListItem
+        title="{ui5tools>name}"
+        icon="{= ${ui5tools>folder} ? 'sap-icon://folder-full' : 'sap-icon://document-text' }"
+        type="{= ${ui5tools>folder} ? 'Inactive' : 'Navigation' }"
+      />
+    </List>
+    <% } %>
+  </Page>
+</mvc:View>
