@@ -15,14 +15,14 @@ async function setIndexMiddleware(expressApp, config) {
 
 // SERVER INDEX
 function setServerIndexMiddleware(expressApp, config) {
-  let { ui5ToolsPath, folders, serverName, baseDir, manifests } = config;
+  let { ui5ToolsPath, baseDir } = config;
+
   let ui5toolsData = {
     readme: '',
-    folders: folders,
-    manifests: manifests,
-    serverName: serverName,
     launchpad: isLaunchpadMounted(config),
+    links: [],
     docs: [],
+    config,
   };
   Utils.getOptionsVersion(ui5toolsData, config);
 
@@ -35,9 +35,9 @@ function setServerIndexMiddleware(expressApp, config) {
   expressApp.get('/index.html', indexHTML);
 
   // render view with correct list or tree
-  expressApp.get('/view/main.view.xml', function (req, res, next) {
+  expressApp.get('/view/docs.view.xml', function (req, res, next) {
     res.setHeader('content-type', 'text/xml');
-    res.render(path.join(indexPath, 'view', 'main'), {
+    res.render(path.join(indexPath, 'view', 'docs'), {
       showTree: ui5toolsData.showTree,
       launchpad: ui5toolsData.launchpad,
     });
@@ -51,6 +51,10 @@ function setServerIndexMiddleware(expressApp, config) {
     if (fs.existsSync(path.join(baseDir, 'README.md'))) {
       let readmeMD = fs.readFileSync(path.join(baseDir, 'README.md'), 'utf8');
       ui5toolsData.readme = converter.makeHtml(readmeMD);
+    }
+    if (fs.existsSync(path.join(baseDir, 'links.json'))) {
+      let linksJSON = fs.readFileSync(path.join(baseDir, 'links.json'), 'utf8');
+      ui5toolsData.links = JSON.parse(linksJSON);
     }
     ui5toolsData.docs = [];
     if (fs.existsSync(path.join(baseDir, 'docs'))) {
@@ -66,7 +70,7 @@ function createDocsTree(folderOrFilePath, nodes, config, tree) {
     let newNode = {};
     if (tree) {
       newNode = {
-        folder: 1,
+        folder: true,
         name: path.basename(folderOrFilePath),
         nodes: [],
       };
@@ -80,9 +84,10 @@ function createDocsTree(folderOrFilePath, nodes, config, tree) {
       case '.md':
       case '.MD':
         nodes.push({
-          folder: 0,
+          folder: false,
           markdown: converter.makeHtml(fs.readFileSync(folderOrFilePath, 'utf8')),
           name: tree ? path.basename(folderOrFilePath) : folderOrFilePath.replace(config.baseDir, ''),
+          path: folderOrFilePath.replace(config.baseDir, ''),
           nodes: [],
         });
         break;

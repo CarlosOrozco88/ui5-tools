@@ -9,6 +9,7 @@ node_modules
 package-json.lock
 test/**
 webpack.config.js
+workspaceExample
 
 .DS_Store
 *.vsix

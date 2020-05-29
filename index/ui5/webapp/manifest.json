@@ -9,7 +9,9 @@
       "minUI5Version": "1.71.0",
       "libs": {
         "sap.ui.core": {},
-        "sap.m": {}
+        "sap.m": {},
+        "sap.tnt": {},
+        "sap.f": {}
       }
     },
     "rootView": {
@@ -30,27 +32,70 @@
       "routes": [
         {
           "pattern": "",
-          "name": "main",
-          "target": "main"
+          "name": "apps",
+          "target": "apps"
+        },
+        {
+          "pattern": "readme",
+          "name": "readme",
+          "target": "readme"
+        },
+        {
+          "pattern": "docs",
+          "name": "docs",
+          "target": "docs"
+        },
+        {
+          "pattern": "{hash}",
+          "name": "docsDetail",
+          "target": "docsDetail",
+          "parent": "docs"
+        },
+        {
+          "pattern": "links",
+          "name": "links",
+          "target": "links"
+        },
+        {
+          "pattern": "info",
+          "name": "info",
+          "target": "info"
         }
       ],
       "targets": {
-        "main": {
-          "viewName": "main",
-          "viewId": "main",
+        "apps": {
+          "viewName": "apps",
+          "viewId": "apps",
+          "viewLevel": 0
+        },
+        "docs": {
+          "viewName": "docs",
+          "viewId": "docs",
+          "viewLevel": 0
+        },
+        "readme": {
+          "viewName": "readme",
+          "viewId": "readme",
+          "viewLevel": 0
+        },
+        "docsDetail": {
+          "viewName": "docsDetail",
+          "viewId": "docsDetail",
+          "viewLevel": 1
+        },
+        "links": {
+          "viewName": "links",
+          "viewId": "links",
+          "viewLevel": 0
+        },
+        "info": {
+          "viewName": "info",
+          "viewId": "info",
           "viewLevel": 0
         }
       }
     },
     "models": {
-      "i18n": {
-        "type": "sap.ui.model.resource.ResourceModel",
-        "settings": {
-          "bundleName": "ui5tools.i18n.i18n",
-          "supportedLocales": ["en"],
-          "fallbackLocale": "en"
-        }
-      },
       "ui5tools": {
         "preload": true,
         "uri": "ui5tools.json",

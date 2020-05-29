@@ -1,0 +1,17 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    controllerName="ui5tools.controller.apps"
+    displayBlock="true"
+    width="100%"
+    height="100%">
+    <Page title="Workspace Apps">
+        <HBox items="{ui5tools>/config/folders}" wrap="Wrap">
+            <GenericTile class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout"
+                header="{ui5tools>}"
+                subheader=""
+                sizeBehavior="Small"
+                press="pressTile">
+            </GenericTile>
+        </HBox>
+    </Page>
+</mvc:View>

@@ -61,7 +61,6 @@ function loadConfig(restarting = false) {
   let gatewayProxy = getConfigurationServer('gatewayProxy');
   let gatewayUri = getConfigurationServer('gatewayUri');
   let resourcesProxy = getConfigurationServer('resourcesProxy');
-  let localDependencies = getConfigurationServer('localDependencies');
   let serveFolder = getConfigurationServer('serveFolder');
   let protocol = getConfigurationServer('protocol');
   let index = 'index.html';
@@ -156,7 +155,6 @@ function loadConfig(restarting = false) {
     gatewayProxy,
     gatewayUri,
     resourcesProxy,
-    localDependencies,
     serveFolder,
     index,
     protocol,

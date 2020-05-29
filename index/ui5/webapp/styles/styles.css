@@ -1,6 +1,12 @@
-.sapMITBContent {
-  border-bottom: none !important;
+.paper {
+  margin: 1rem;
+  width: calc(100% - 2rem) !important;
+  box-shadow: 1px 3px 4px #e2e2e2;
+  padding: 1rem;
+  background-color: #ffffff;
+  box-sizing: border-box;
 }
+
 .markdown-body {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
@@ -11,11 +17,6 @@
   font-size: 16px;
   line-height: 1.5;
   word-wrap: break-word;
-  margin: 1rem;
-  width: calc(100% - 2rem) !important;
-  box-shadow: 1px 3px 4px #e2e2e2;
-  padding: 1rem;
-  background-color: #ffffff;
 }
 
 .markdown-body .octicon {

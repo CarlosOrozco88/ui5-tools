@@ -1,0 +1,25 @@
+<mvc:View
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  controllerName="ui5tools.controller.links"
+  displayBlock="true"
+  width="100%"
+  height="100%"
+  >
+  <Page title="Links">
+    <List
+      id="linksList"
+      items="{path:'ui5tools>/links'}"
+      itemPress="itemPressLinks"
+      noDataText="Workspace without links.json"
+      showSeparators="Inner"
+      mode="SingleSelectMaster"
+      >
+      <StandardListItem
+        title="{ui5tools>name}"
+        icon="{= ${ui5tools>icon} !== undefined ? ${ui5tools>icon} : 'sap-icon://chain-link'}"
+        type="Navigation"
+        />
+    </List>
+  </Page>
+</mvc:View>
