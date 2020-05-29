@@ -85,7 +85,7 @@ function createDocsTree(folderOrFilePath, nodes, config, tree) {
       case '.MD':
         nodes.push({
           folder: false,
-          markdown: converter.makeHtml(fs.readFileSync(folderOrFilePath, 'utf8')),
+          markdown: '<div>' + converter.makeHtml(fs.readFileSync(folderOrFilePath, 'utf8')) + '</div>',
           name: tree ? path.basename(folderOrFilePath) : folderOrFilePath.replace(config.baseDir, ''),
           path: folderOrFilePath.replace(config.baseDir, ''),
           nodes: [],
