@@ -1,3 +1,7 @@
+## 0.1.5 (29-05-2020)
+
+- New server index + readme + docs + links + info
+
 ## 0.1.4 (28-05-2020)
 
 - Fix? vscode endless loop instalation
