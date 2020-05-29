@@ -43,8 +43,8 @@ TBD
 - `ui5-tools.server.watch`: activate live reload | default: `true`
 - `ui5-tools.server.watchExtensions`: extensions to listen for live reload | default: `css,js,json,xml,html,properties`
 - `ui5-tools.server.protocol`: dhould use http or https | default: `http`
-- `ui5-tools.server.gatewayProxy`: proxy all odata calls to a gateway (proxy all url begining with /sap) | default: `None`
-- `ui5-tools.server.gatewayUri`: your gateway or web dispatcher url (example: http://srvaspgwd.com:8080/)
+- `ui5-tools.server.odataProxy`: Proxy all odata calls to a server | default: `None`
+- `ui5-tools.server.odataUri`: Your odata server uri url (example: http://srvaspgwd.com:8080/)
 - `ui5-tools.server.resourcesProxy`: proxy all odata calls to a gateway, cdn or local folder (proxy all url begining with /resources) | default: `CDN OpenUI5`
 
 #### Builder Settings

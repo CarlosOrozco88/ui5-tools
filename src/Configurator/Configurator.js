@@ -4,7 +4,7 @@ import https from 'https';
 import { version } from 'os';
 
 async function odataProvider() {
-  let odataProviderValue = Utils.getConfigurationServer('gatewayProxy');
+  let odataProviderValue = Utils.getConfigurationServer('odataProxy');
   let quickPickOdataProvider = await window.showQuickPick(
     [
       {
@@ -25,7 +25,7 @@ async function odataProvider() {
   );
 
   await Utils.getConfigurationServer().update(
-    'gatewayProxy',
+    'odataProxy',
     quickPickOdataProvider.label,
     ConfigurationTarget.Workspace
   );
@@ -33,9 +33,9 @@ async function odataProvider() {
   if (quickPickOdataProvider.label == 'Gateway') {
     let inputBoxOdataUri = await window.showInputBox({
       placeHolder: 'Enter gateway url',
-      value: Utils.getConfigurationServer('gatewayUri'),
+      value: Utils.getConfigurationServer('odataUri'),
     });
-    await Utils.getConfigurationServer().update('gatewayUri', inputBoxOdataUri, ConfigurationTarget.Workspace);
+    await Utils.getConfigurationServer().update('odataUri', inputBoxOdataUri, ConfigurationTarget.Workspace);
   }
 }
 
@@ -73,11 +73,11 @@ async function ui5Provider() {
   );
 
   if (quickPickUI5Provider.label == 'Gateway') {
-    let inputBoxGatewayUri = await window.showInputBox({
+    let inputBoxOdataUri = await window.showInputBox({
       placeHolder: 'Enter gateway url',
-      value: Utils.getConfigurationServer('gatewayUri'),
+      value: Utils.getConfigurationServer('odataUri'),
     });
-    await Utils.getConfigurationServer().update('gatewayUri', inputBoxGatewayUri, ConfigurationTarget.Workspace);
+    await Utils.getConfigurationServer().update('odataUri', inputBoxOdataUri, ConfigurationTarget.Workspace);
   }
 
   let ui5Version = Utils.getConfigurationGeneral('ui5Version');

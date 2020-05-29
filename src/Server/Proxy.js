@@ -10,82 +10,19 @@ const cacheResources = apicache.middleware('1 day', onlyStatus200);
 import StatusBar from '../StatusBar/StatusBar';
 import Utils from '../Utils/Utils';
 
-// async function askUserPassword(gatewayUri, config, { resolv, reject }) {
-//   try {
-//     let inputUser = await window.showInputBox({
-//       placeHolder: `Enter username for ${gatewayUri}`,
-//       value: config.auth.gatewayUser,
-//     });
-//     let inputPassword = await window.showInputBox({
-//       placeHolder: `Enter password for username ${inputUser} @ ${gatewayUri}`,
-//       password: true,
-//       value: config.auth.gatewayPassword,
-//     });
-//     if (inputUser && inputPassword) {
-//       config.auth = {
-//         gatewayUser: inputUser,
-//         gatewayPassword: inputPassword,
-//         authGateway: `${inputUser}:${inputPassword}`,
-//       };
-//       resolv(config.auth.authGateway);
-//     } else {
-//       resolv();
-//     }
-//   } catch (error) {
-//     reject(error);
-//   }
-// }
-
-// function checkGatewayProxy(config) {
-//   return new Promise((resolv, reject) => {
-//     let gatewayProxy = Utils.getConfigurationServer('gatewayProxy');
-//     let resourcesProxy = Utils.getConfigurationServer('resourcesProxy');
-//     let gatewayUri = Utils.getConfigurationServer('gatewayUri');
-//     if ((gatewayProxy === 'Gateway' || resourcesProxy === 'Gateway') && gatewayUri) {
-//       let httpModule;
-//       if (gatewayUri.indexOf('https') >= 0) {
-//         httpModule = https;
-//       } else {
-//         httpModule = http;
-//       }
-//       httpModule
-//         .get(
-//           `${gatewayUri}resources/sap-ui-core.js`,
-//           {
-//             timeout: 1000 * 5,
-//           },
-//           ({ statusCode }) => {
-//             if (statusCode === 503) {
-//               askUserPassword(gatewayUri, config, { resolv, reject });
-//             } else if (statusCode === 404) {
-//               reject(`sap-ui-core.js not found in ${gatewayUri}`);
-//             } else {
-//               resolv();
-//             }
-//           }
-//         )
-//         .on('error', (error) => {
-//           reject(error);
-//         });
-//     } else {
-//       resolv();
-//     }
-//   });
-// }
-
 function resetCache() {
   if (apicache.clear) {
     apicache.clear(null);
   }
 }
 
-async function setGatewayProxy(expressApp, { auth }) {
+async function setODataProxy(expressApp, { auth }) {
   let proxy, targetUri;
-  let gatewayProxy = Utils.getConfigurationServer('gatewayProxy');
+  let odataProxy = Utils.getConfigurationServer('odataProxy');
   // Options: Gateway, None
-  switch (gatewayProxy) {
+  switch (odataProxy) {
     case 'Gateway':
-      targetUri = Utils.getConfigurationServer('gatewayUri');
+      targetUri = Utils.getConfigurationServer('odataUri');
 
       proxy = createProxyMiddleware({
         pathRewrite: {},
@@ -104,34 +41,33 @@ async function setGatewayProxy(expressApp, { auth }) {
 }
 
 async function setResourcesProxy(expressApp, config) {
-  let { folders = [], auth, ui5Version, framework } = config;
-  let targetUri, pathRewrite, pathRoute, proxy;
+  let { ui5Version, framework } = config;
+  let targetUri, proxy;
   let resourcesProxy = Utils.getConfigurationServer('resourcesProxy');
 
   // Options: Gateway, CDN SAPUI5, CDN OpenUI5, None
   switch (resourcesProxy) {
     case 'Gateway':
-      targetUri = Utils.getConfigurationServer('gatewayUri');
+      targetUri = Utils.getConfigurationServer('odataUri');
 
       if (targetUri) {
-        pathRoute = '/sap/bc/ui5_ui5/sap';
-
-        pathRewrite = {};
-        folders.forEach((folder) => {
-          pathRewrite[`^/${folder}/`] = `${pathRoute}/${folder}/`;
-        });
-        pathRewrite[`^/`] = `/sap/public/bc/ui5_ui5/1/`;
-
         proxy = createProxyMiddleware({
-          pathRewrite,
+          pathRewrite: function (path, req) {
+            var nPath = path;
+            if (path.indexOf('/resources/') === 0) {
+              nPath = `/sap/public/bc/ui5_ui5/1${path}`;
+            } else {
+              nPath = `/sap/bc/ui5_ui5/sap${path}`;
+            }
+            return nPath;
+          },
           target: targetUri,
           secure: targetUri.indexOf('https') == 0,
           changeOrigin: true,
           //logLevel: 'debug',
         });
 
-        expressApp.use('/**/resources/**', cacheResources, proxy);
-        expressApp.use('/resources/**', cacheResources, proxy);
+        expressApp.use(['/resources', '/**/resources'], cacheResources, proxy);
       }
       break;
 
@@ -140,23 +76,21 @@ async function setResourcesProxy(expressApp, config) {
       targetUri = `https://${framework}.hana.ondemand.com/${ui5Version}/`;
 
       if (ui5Version) {
-        pathRoute = '/';
-
-        pathRewrite = {};
-        folders.forEach((folder) => {
-          pathRewrite[`^/${folder}/`] = pathRoute;
-        });
-
         proxy = createProxyMiddleware({
-          pathRewrite,
+          pathRewrite: function (path, req) {
+            var nPath = path;
+            if (path.indexOf('/resources/') > 0) {
+              nPath = path.slice(path.indexOf('/resources/'), path.length);
+            }
+            return nPath;
+          },
           target: targetUri,
           secure: targetUri.indexOf('https') == 0,
           changeOrigin: true,
-          //logLevel: 'debug',
+          logLevel: 'debug',
         });
 
-        expressApp.use('/**/resources/**', cacheResources, proxy);
-        expressApp.use('/resources/**', cacheResources, proxy);
+        expressApp.use(['/resources', '/**/resources'], cacheResources, proxy);
       }
 
       https
@@ -204,9 +138,8 @@ function setTestResourcesProxy(expressApp, { ui5Version }) {
 }
 
 export default {
-  setGatewayProxy,
+  setODataProxy,
   setResourcesProxy,
   setTestResourcesProxy,
-  // checkGatewayProxy,
   resetCache,
 };

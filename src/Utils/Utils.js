@@ -58,8 +58,8 @@ function loadConfig(restarting = false) {
   let openBrowser = getConfigurationServer('openBrowser');
   let watch = getConfigurationServer('watch');
   let watchExtensions = getConfigurationServer('watchExtensions');
-  let gatewayProxy = getConfigurationServer('gatewayProxy');
-  let gatewayUri = getConfigurationServer('gatewayUri');
+  let odataProxy = getConfigurationServer('odataProxy');
+  let odataUri = getConfigurationServer('odataUri');
   let resourcesProxy = getConfigurationServer('resourcesProxy');
   let serveFolder = getConfigurationServer('serveFolder');
   let protocol = getConfigurationServer('protocol');
@@ -152,8 +152,8 @@ function loadConfig(restarting = false) {
     openBrowser,
     watch,
     watchExtensions,
-    gatewayProxy,
-    gatewayUri,
+    odataProxy,
+    odataUri,
     resourcesProxy,
     serveFolder,
     index,

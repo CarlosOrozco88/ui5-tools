@@ -132,23 +132,23 @@
           "default": "css,js,json,xml,html,properties",
           "description": "Extensions to listen for live reload"
         },
-        "ui5-tools.server.gatewayProxy": {
+        "ui5-tools.server.odataProxy": {
           "type": "string",
           "enum": [
             "Gateway",
             "None"
           ],
           "enumDescriptions": [
-            "Proxy OData requests to Gateway",
+            "Proxy OData requests to Gateway, proxy all with requests starting with /sap",
             "Do not proxy OData requests"
           ],
           "default": "None",
-          "description": "Proxy all odata calls to a gateway (proxy all url begining with /sap)"
+          "description": "Proxy all odata calls to a server"
         },
-        "ui5-tools.server.gatewayUri": {
+        "ui5-tools.server.odataUri": {
           "type": "string",
           "default": "",
-          "description": "Your gateway url (example: http://srvaspgwd.com:8080/)"
+          "description": "Your odata server uri url (example: http://srvaspgwd.com:8080/)"
         },
         "ui5-tools.server.resourcesProxy": {
           "type": "string",

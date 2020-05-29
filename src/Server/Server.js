@@ -23,7 +23,7 @@ const STATUSES = {
 
 async function start(restarting = false) {
   try {
-    if (status != STATUSES.STOPPED) {
+    if (status !== STATUSES.STOPPED) {
       return;
     }
     if (expressApp._router && expressApp._router.stack) {
@@ -47,14 +47,12 @@ async function start(restarting = false) {
     });
 
     Proxy.resetCache();
-    // if (!restarting) {
-    //   await Proxy.checkGatewayProxy(config);
-    // }
-    await Proxy.setGatewayProxy(expressApp, config);
+
+    await Proxy.setODataProxy(expressApp, config);
     await Proxy.setResourcesProxy(expressApp, config);
     await Index.setIndexMiddleware(expressApp, config);
 
-    if (protocol == 'https') {
+    if (protocol === 'https') {
       server = https.createServer(cert, expressApp).listen(port, () => {
         serverReady(config, restarting);
       });
@@ -66,6 +64,8 @@ async function start(restarting = false) {
 
     server.timeout = 30 * 1000;
   } catch (e) {
+    status = STATUSES.STOPPING;
+    StatusBar.stoppingText();
     throw new Error(e);
   }
 }
@@ -93,7 +93,7 @@ function stopServer() {
 }
 
 function stop() {
-  if (status != STATUSES.STARTED) {
+  if (status !== STATUSES.STARTED) {
     return Promise.resolve();
   }
   status = STATUSES.STOPPING;
@@ -106,8 +106,10 @@ function stop() {
 }
 
 async function restart() {
-  await stop();
-  await start(true);
+  if (status === STATUSES.STARTED) {
+    await stop();
+    await start(true);
+  }
 }
 
 async function toggle() {
