@@ -1,126 +1,156 @@
 import { window, ConfigurationTarget } from 'vscode';
 import Utils from '../Utils/Utils';
 import https from 'https';
-import { version } from 'os';
 
 async function odataProvider() {
-  let odataProviderValue = Utils.getConfigurationServer('odataProxy');
-  let quickPickOdataProvider = await window.showQuickPick(
-    [
+  try {
+    let odataProviderValue = Utils.getConfigurationServer('odataProxy');
+    let quickPickOdataProvider = await window.showQuickPick(
+      [
+        {
+          description: 'Gateway url',
+          label: 'Gateway',
+          picked: odataProviderValue === 'Gateway',
+        },
+        {
+          description: 'Without odata provider',
+          label: 'None',
+          picked: odataProviderValue === 'None',
+        },
+      ],
       {
-        description: 'Gateway url',
-        label: 'Gateway',
-        picked: odataProviderValue == 'Gateway',
-      },
-      {
-        description: 'Without odata provider',
-        label: 'None',
-        picked: odataProviderValue == 'None',
-      },
-    ],
-    {
-      placeHolder: 'Select odata provider (proxy all /sap)',
-      canPickMany: false,
+        placeHolder: `Select odata provider (proxy all /sap) | Actual value: ${odataProviderValue}`,
+        canPickMany: false,
+      }
+    );
+    if (!quickPickOdataProvider.label) {
+      throw new Error('No odata proxy configured');
     }
-  );
 
-  await Utils.getConfigurationServer().update(
-    'odataProxy',
-    quickPickOdataProvider.label,
-    ConfigurationTarget.Workspace
-  );
+    await Utils.getConfigurationServer().update(
+      'odataProxy',
+      quickPickOdataProvider.label,
+      ConfigurationTarget.Workspace
+    );
 
-  if (quickPickOdataProvider.label == 'Gateway') {
-    let inputBoxOdataUri = await window.showInputBox({
-      placeHolder: 'Enter gateway url',
-      value: Utils.getConfigurationServer('odataUri'),
-    });
-    await Utils.getConfigurationServer().update('odataUri', inputBoxOdataUri, ConfigurationTarget.Workspace);
-  }
+    if (quickPickOdataProvider.label === 'Gateway') {
+      let odataUri = Utils.getConfigurationServer('odataUri');
+      let inputBoxOdataUri = await window.showInputBox({
+        placeHolder: `Enter gateway url | Actual value: ${odataUri}`,
+        value: odataUri,
+      });
+      if (!inputBoxOdataUri) {
+        throw new Error('No gateway url configured');
+      }
+      await Utils.getConfigurationServer().update('odataUri', inputBoxOdataUri, ConfigurationTarget.Workspace);
+    }
+  } catch (err) {}
 }
 
 async function ui5Provider() {
-  let ui5ProviderValue = Utils.getConfigurationServer('resourcesProxy');
-  let quickPickUI5Provider = await window.showQuickPick(
-    [
-      {
-        description: 'Use resources from gateway',
-        label: 'Gateway',
-      },
-      {
-        description: 'Use SAPUI5 CDN',
-        label: 'CDN SAPUI5',
-      },
-      {
-        description: 'Use OpenUI5 CDN',
-        label: 'CDN OpenUI5',
-      },
-      {
-        description: 'Without resources proxy',
-        label: 'None',
-      },
-    ],
-    {
-      placeHolder: `Select odata provider (proxy all /sap) | Actual value: ${ui5ProviderValue}`,
-      canPickMany: false,
-    }
-  );
-
-  await Utils.getConfigurationServer().update(
-    'resourcesProxy',
-    quickPickUI5Provider.label,
-    ConfigurationTarget.Workspace
-  );
-
-  if (quickPickUI5Provider.label == 'Gateway') {
-    let inputBoxOdataUri = await window.showInputBox({
-      placeHolder: 'Enter gateway url',
-      value: Utils.getConfigurationServer('odataUri'),
-    });
-    await Utils.getConfigurationServer().update('odataUri', inputBoxOdataUri, ConfigurationTarget.Workspace);
-  }
-
-  let ui5Version = Utils.getConfigurationGeneral('ui5Version');
-  let error = false,
-    versions,
-    framework;
   try {
-    let url = `https://openui5.hana.ondemand.com/`;
-    framework = 'OpenUI5';
-    if (quickPickUI5Provider.label == 'Gateway' || quickPickUI5Provider.label == 'CDN SAPUI5') {
-      url = `https://sapui5.hana.ondemand.com/`;
-      framework = 'SAPUI5';
+    let ui5ProviderValue = Utils.getConfigurationServer('resourcesProxy');
+    let quickPickUI5Provider = await window.showQuickPick(
+      [
+        {
+          description: 'Use resources from gateway',
+          label: 'Gateway',
+        },
+        {
+          description: 'Use SAPUI5 CDN',
+          label: 'CDN SAPUI5',
+        },
+        {
+          description: 'Use OpenUI5 CDN',
+          label: 'CDN OpenUI5',
+        },
+        {
+          description: 'Without resources proxy',
+          label: 'None',
+        },
+      ],
+      {
+        placeHolder: `Select odata provider (proxy all /sap) | Actual value: ${ui5ProviderValue}`,
+        canPickMany: false,
+      }
+    );
+    if (!quickPickUI5Provider) {
+      return;
     }
-    versions = await getVersions(url);
-  } catch (err) {
-    error = true;
-  }
-  if (!error) {
-    let quickPickUI5Version = await window.showQuickPick(versions, {
-      placeHolder: `Select ${framework} version | Actual value: ${ui5Version}`,
-      canPickMany: false,
-    });
-    let versionPatch = versions.find((versionData) => {
-      return versionData === quickPickUI5Version;
-    });
 
-    let quickPickUI5VersionPatch = await window.showQuickPick(versionPatch.patches, {
-      placeHolder: `Select ${framework} patch | Actual value: ${ui5Version}`,
-      canPickMany: false,
-    });
-    await Utils.getConfigurationGeneral().update(
-      'ui5Version',
-      // @ts-ignore
-      quickPickUI5VersionPatch.label,
+    await Utils.getConfigurationServer().update(
+      'resourcesProxy',
+      quickPickUI5Provider.label,
       ConfigurationTarget.Workspace
     );
-  } else {
-    let inputBoxUI5Version = await window.showInputBox({
-      placeHolder: `Enter ${framework} version | Actual value: ${ui5Version}`,
-      value: Utils.getConfigurationGeneral('ui5Version'),
-    });
-    await Utils.getConfigurationGeneral().update('ui5Version', inputBoxUI5Version, ConfigurationTarget.Workspace);
-  }
+
+    if (quickPickUI5Provider.label === 'Gateway') {
+      let inputBoxOdataUri = await window.showInputBox({
+        placeHolder: 'Enter gateway url',
+        value: Utils.getConfigurationServer('odataUri'),
+      });
+      if (!inputBoxOdataUri) {
+        throw new Error('No gateway url configured');
+      }
+      await Utils.getConfigurationServer().update('odataUri', inputBoxOdataUri, ConfigurationTarget.Workspace);
+    }
+
+    let ui5Version = Utils.getConfigurationGeneral('ui5Version');
+    let error = false,
+      versions,
+      framework;
+    try {
+      let url = `https://openui5.hana.ondemand.com/`;
+      framework = 'None';
+      if (quickPickUI5Provider.label === 'Gateway' || quickPickUI5Provider.label === 'CDN SAPUI5') {
+        url = `https://sapui5.hana.ondemand.com/`;
+        framework = 'SAPUI5';
+      } else if (quickPickUI5Provider.label === 'CDN OpenUI5') {
+        framework = 'OpenUI5';
+      } else {
+        return;
+      }
+      versions = await getVersions(url);
+    } catch (err) {
+      error = true;
+    }
+    if (!error) {
+      let quickPickUI5Version = await window.showQuickPick(versions, {
+        placeHolder: `Select ${framework} version | Actual value: ${ui5Version}`,
+        canPickMany: false,
+      });
+      if (!quickPickUI5Version) {
+        throw new Error('No major version selected');
+      }
+      let versionPatch = versions.find((versionData) => {
+        return versionData === quickPickUI5Version;
+      });
+
+      let quickPickUI5VersionPatch = await window.showQuickPick(versionPatch.patches, {
+        placeHolder: `Select ${framework} patch | Actual value: ${ui5Version}`,
+        canPickMany: false,
+      });
+      // @ts-ignore
+      if (!quickPickUI5VersionPatch) {
+        throw new Error('No ui5 version selected');
+      }
+      await Utils.getConfigurationGeneral().update(
+        'ui5Version',
+        // @ts-ignore
+        quickPickUI5VersionPatch.label,
+        ConfigurationTarget.Workspace
+      );
+    } else {
+      let inputBoxUI5Version = await window.showInputBox({
+        placeHolder: `Enter ${framework} version | Actual value: ${ui5Version}`,
+        value: Utils.getConfigurationGeneral('ui5Version'),
+      });
+      if (!inputBoxUI5Version) {
+        throw new Error('No version configured');
+      }
+      await Utils.getConfigurationGeneral().update('ui5Version', inputBoxUI5Version, ConfigurationTarget.Workspace);
+    }
+  } catch (err) {}
 }
 
 async function getVersions(url) {
