@@ -8,9 +8,14 @@ async function odataProvider() {
     let quickPickOdataProvider = await window.showQuickPick(
       [
         {
-          description: 'Gateway url',
+          description: 'Gateway url. Proxy all requests starting with /sap',
           label: 'Gateway',
           picked: odataProviderValue === 'Gateway',
+        },
+        {
+          description: 'Other destination url. Proxy all requests starting with odataMountPath',
+          label: 'Other',
+          picked: odataProviderValue === 'Other',
         },
         {
           description: 'Without odata provider',
@@ -19,7 +24,7 @@ async function odataProvider() {
         },
       ],
       {
-        placeHolder: `Select odata provider (proxy all /sap) | Actual value: ${odataProviderValue}`,
+        placeHolder: `Select odata provider | Actual value: ${odataProviderValue}`,
         canPickMany: false,
       }
     );
@@ -43,6 +48,29 @@ async function odataProvider() {
         throw new Error('No gateway url configured');
       }
       await Utils.getConfigurationServer().update('odataUri', inputBoxOdataUri, ConfigurationTarget.Workspace);
+    } else if (quickPickOdataProvider.label === 'Other') {
+      let odataUri = Utils.getConfigurationServer('odataUri');
+      let inputBoxOdataUri = await window.showInputBox({
+        placeHolder: `Enter destination url | Actual value: ${odataUri}`,
+        value: odataUri,
+      });
+      if (!inputBoxOdataUri) {
+        throw new Error('No gateway url configured');
+      }
+      await Utils.getConfigurationServer().update('odataUri', inputBoxOdataUri, ConfigurationTarget.Workspace);
+      let odataMountPath = Utils.getConfigurationServer('odataMountPath');
+      let inputBoxodataMountPath = await window.showInputBox({
+        placeHolder: `Enter mountpath | Actual value: ${odataMountPath}`,
+        value: odataMountPath,
+      });
+      if (!inputBoxodataMountPath) {
+        throw new Error('No mountpath url configured');
+      }
+      await Utils.getConfigurationServer().update(
+        'odataMountPath',
+        inputBoxodataMountPath,
+        ConfigurationTarget.Workspace
+      );
     }
   } catch (err) {}
 }

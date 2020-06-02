@@ -60,6 +60,7 @@ function loadConfig(restarting = false) {
   let watchExtensions = getConfigurationServer('watchExtensions');
   let odataProxy = getConfigurationServer('odataProxy');
   let odataUri = getConfigurationServer('odataUri');
+  let odataMountPath = getConfigurationServer('odataMountPath');
   let resourcesProxy = getConfigurationServer('resourcesProxy');
   let serveFolder = getConfigurationServer('serveFolder');
   let protocol = getConfigurationServer('protocol');
@@ -154,6 +155,7 @@ function loadConfig(restarting = false) {
     watchExtensions,
     odataProxy,
     odataUri,
+    odataMountPath,
     resourcesProxy,
     serveFolder,
     index,

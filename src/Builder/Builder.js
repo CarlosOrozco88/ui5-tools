@@ -5,6 +5,9 @@ import Utils from '../Utils/Utils';
 import rimraf from 'rimraf';
 import preload from 'openui5-preload';
 import terser from 'terser';
+import { pd as prettyData } from 'pretty-data';
+import less from 'less';
+const xmlHtmlPrePattern = /<(?:\w+:)?pre>/;
 
 async function build(projectPath = undefined) {
   if (!projectPath) {
@@ -113,6 +116,16 @@ function copyRecursiveSync(src, dest, debugSources = true, uglifySources = true)
         let jsonStringified = JSON.stringify(JSON.parse(json));
         fs.writeFileSync(dest, jsonStringified);
         break;
+      case '.xml':
+        let xml = fs.readFileSync(src, 'utf8');
+        if (!xmlHtmlPrePattern.test(xml)) {
+          xml = prettyData.xmlmin(xml, false);
+        }
+        fs.writeFileSync(dest, xml);
+        break;
+      case '.less':
+        // do not copy
+        break;
       default:
         fs.copyFileSync(src, dest);
         break;
@@ -120,6 +133,30 @@ function copyRecursiveSync(src, dest, debugSources = true, uglifySources = true)
   }
 }
 
+function compileLess({ fileName }) {
+  if (fileName && path.extname(fileName) === '.less') {
+    let filename = path.basename(fileName).replace('.less', '');
+    let { folders } = Utils.getConfig();
+    if (filename === 'styles' || folders.includes(filename)) {
+      console.log(fileName);
+      less
+        .render(fs.readFileSync(fileName, 'utf-8'), {
+          filename: fileName,
+        })
+        .then(
+          function (output) {
+            fs.writeFileSync(fileName.replace('.less', '.css'), output.css);
+          },
+          function (error) {
+            console.error(error);
+            throw new Error(error);
+          }
+        );
+    }
+  }
+}
+
 export default {
   build,
+  compileLess,
 };

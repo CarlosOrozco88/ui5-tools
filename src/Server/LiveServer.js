@@ -4,6 +4,10 @@ import fs from 'fs';
 import url from 'url';
 import http from 'http';
 import https from 'https';
+import path from 'path';
+
+import Utils from '../Utils/Utils';
+import Builder from '../Builder/Builder';
 
 let appLiveServer;
 
@@ -54,18 +58,11 @@ function start(expressApp, { foldersRoot, portLiveReload, watchExtensions, proto
   });
 }
 
-function stop() {
-  return new Promise((resolv, reject) => {
-    if (appLiveServer) {
-      // appLiveServer.server.on('close', () => {
-      //   resolv();
-      // });
-      appLiveServer.close();
-      resolv();
-    } else {
-      resolv();
-    }
-  });
+async function stop() {
+  if (appLiveServer) {
+    appLiveServer.close();
+  }
+  return;
 }
 
 export default {

@@ -16,7 +16,7 @@ function resetCache() {
   }
 }
 
-async function setODataProxy(expressApp, { auth }) {
+async function setODataProxy(expressApp, { auth, odataMountPath }) {
   let proxy, targetUri;
   let odataProxy = Utils.getConfigurationServer('odataProxy');
   // Options: Gateway, None
@@ -32,6 +32,18 @@ async function setODataProxy(expressApp, { auth }) {
         //logLevel: 'debug',
       });
       expressApp.use('/sap', proxy);
+      break;
+    case 'Other':
+      targetUri = Utils.getConfigurationServer('odataUri');
+
+      proxy = createProxyMiddleware({
+        pathRewrite: {},
+        target: targetUri,
+        secure: targetUri.indexOf('https') == 0,
+        changeOrigin: true,
+        //logLevel: 'debug',
+      });
+      expressApp.use(odataMountPath, proxy);
       break;
 
     default:

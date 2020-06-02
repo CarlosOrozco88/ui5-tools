@@ -1,4 +1,4 @@
-import { commands } from 'vscode';
+import { commands, workspace } from 'vscode';
 import Server from './Server/Server';
 import Configurator from './Configurator/Configurator';
 import Builder from './Builder/Builder';
@@ -23,6 +23,10 @@ export function activate(context) {
 
   subscriptions.push(registerCommand('ui5-tools.configurator.odataProvider', () => Configurator.odataProvider()));
   subscriptions.push(registerCommand('ui5-tools.configurator.ui5Provider', () => Configurator.ui5Provider()));
+
+  workspace.onDidChangeConfiguration(() => Server.restart());
+  workspace.onDidChangeWorkspaceFolders(() => Server.restart());
+  workspace.onDidSaveTextDocument((event) => Builder.compileLess(event));
 }
 
 export function deactivate() {}

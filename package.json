@@ -136,10 +136,12 @@
           "type": "string",
           "enum": [
             "Gateway",
+            "Other",
             "None"
           ],
           "enumDescriptions": [
             "Proxy OData requests to Gateway, proxy all with requests starting with /sap",
+            "Proxy OData requests to Other destination, proxy all with requests starting with odataMountPath config property",
             "Do not proxy OData requests"
           ],
           "default": "None",
@@ -149,6 +151,11 @@
           "type": "string",
           "default": "",
           "description": "Your odata server uri url (example: http://srvaspgwd.com:8080/)"
+        },
+        "ui5-tools.server.odataMountPath": {
+          "type": "string",
+          "default": "/sap",
+          "description": "The mount path for odata proxy"
         },
         "ui5-tools.server.resourcesProxy": {
           "type": "string",
@@ -200,6 +207,7 @@
     "@types/rimraf": "^3.0.0",
     "@types/terser": "^3.12.0",
     "@types/vscode": "^1.45.1",
+    "@types/apicache": "^1.2.2",
     "babel-loader": "^8.1.0",
     "eslint": "^7.0.0",
     "eslint-plugin-prettier": "^3.1.3",
@@ -214,16 +222,17 @@
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "@types/apicache": "^1.2.2",
     "agentkeepalive": "^4.1.2",
     "apicache": "^1.5.3",
     "connect-livereload": "^0.6.1",
     "ejs": "^3.1.3",
     "express": "^4.17.1",
     "http-proxy-middleware": "^1.0.4",
+    "less": "^3.11.1",
     "livereload": "^0.9.1",
     "openui5-preload": "3.0.0",
     "opn": "^6.0.0",
+    "pretty-data": "^0.40.0",
     "showdown": "^1.9.1",
     "terser": "^4.7.0"
   }
