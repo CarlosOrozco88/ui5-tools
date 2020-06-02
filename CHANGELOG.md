@@ -1,3 +1,10 @@
+## 0.1.7 (03-06-2020)
+
+- Added "Other" destination to odataProxy and odataMountPath
+- MD files bugs solved (docs folder)
+- Default UI5 proxy switched from OpenUI5 to SAPUI5
+- Autorestart server after changing configuration
+
 ## 0.1.6 (29-05-2020)
 
 - Breaking changes! options gatewayProxy/gatewayUri -> odataProxy/odataUri

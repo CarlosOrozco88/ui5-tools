@@ -26,7 +26,7 @@ export function activate(context) {
 
   workspace.onDidChangeConfiguration(() => Server.restart());
   workspace.onDidChangeWorkspaceFolders(() => Server.restart());
-  workspace.onDidSaveTextDocument((event) => Builder.compileLess(event));
+  //workspace.onDidSaveTextDocument((event) => Builder.compileLess(event));
 }
 
 export function deactivate() {}
