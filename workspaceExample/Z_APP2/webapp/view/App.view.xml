@@ -5,6 +5,9 @@
     <App>
       <Page showHeader="false">
         <Title text="{i18n>TITLE}" class="sapUiSmallMargin" />
+        <List busyIndicatorDelay="0" items="{northwind>/Customers}" headerText="Northwind odata customers" growing="true" growingThreshold="10">
+          <StandardListItem title="{northwind>CompanyName}" />
+        </List>
       </Page>
     </App>
 </mvc:View>

@@ -5,6 +5,9 @@
   <App>
       <Page showHeader="false">
         <Title text="{i18n>TITLE}" class="sapUiSmallMargin" />
+        <List busyIndicatorDelay="0" items="{northwind>/Regions}" headerText="Northwind odata regions">
+          <StandardListItem title="{northwind>RegionDescription}" />
+        </List>
       </Page>
     </App>
 </mvc:View>

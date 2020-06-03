@@ -24,26 +24,41 @@ async function setODataProxy(expressApp, { auth, odataMountPath }) {
     case 'Gateway':
       targetUri = Utils.getConfigurationServer('odataUri');
 
-      proxy = createProxyMiddleware({
-        pathRewrite: {},
-        target: targetUri,
-        secure: targetUri.indexOf('https') == 0,
-        changeOrigin: true,
-        //logLevel: 'debug',
-      });
-      expressApp.use('/sap', proxy);
+      if (targetUri) {
+        let targets = targetUri.split(',');
+        proxy = createProxyMiddleware({
+          pathRewrite: {},
+          target: targets[0].trim(),
+          secure: targets[0].trim().indexOf('https') == 0,
+          changeOrigin: true,
+          //logLevel: 'debug',
+        });
+        expressApp.use('/sap', proxy);
+      }
       break;
     case 'Other':
       targetUri = Utils.getConfigurationServer('odataUri');
 
-      proxy = createProxyMiddleware({
-        pathRewrite: {},
-        target: targetUri,
-        secure: targetUri.indexOf('https') == 0,
-        changeOrigin: true,
-        //logLevel: 'debug',
-      });
-      expressApp.use(odataMountPath, proxy);
+      if (targetUri) {
+        let targets = targetUri.split(',');
+        let mpaths = odataMountPath.split(',');
+        for (var i = 0; i < targets.length; i++) {
+          if (mpaths && mpaths[i]) {
+            proxy = createProxyMiddleware({
+              pathRewrite: function (i, path, req) {
+                let nPath = path.replace(mpaths[i].trim(), '');
+                return nPath;
+              }.bind(this, i),
+              target: targets[i].trim(),
+              secure: targets[i].trim().indexOf('https') == 0,
+              changeOrigin: true,
+              //logLevel: 'debug',
+            });
+            expressApp.use(mpaths[i], proxy);
+          }
+        }
+      }
+
       break;
 
     default:

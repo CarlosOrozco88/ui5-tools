@@ -1,3 +1,9 @@
+## 0.1.8 (03-06-2020)
+
+- Multiple odataUri and odataMountPath for `Other` odataProxy
+- Bug correction in `Other` odataProxy
+- Example in `workspaceExample` width multiple `Other` odataUri/odataMountPath pointing to northwind
+
 ## 0.1.7 (03-06-2020)
 
 - Added "Other" destination to odataProxy and odataMountPath

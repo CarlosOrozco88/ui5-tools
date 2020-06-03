@@ -2,7 +2,7 @@
   "name": "ui5-tools",
   "displayName": "UI5 Tools",
   "description": "Local development tools for UI5",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
@@ -141,7 +141,7 @@
           ],
           "enumDescriptions": [
             "Proxy OData requests to Gateway, proxy all with requests starting with /sap",
-            "Proxy OData requests to Other destination, proxy all with requests starting with odataMountPath config property",
+            "Proxy OData requests to Other/s destination/s, proxy all with requests starting with odataMountPath config property",
             "Do not proxy OData requests"
           ],
           "default": "None",
@@ -150,12 +150,12 @@
         "ui5-tools.server.odataUri": {
           "type": "string",
           "default": "",
-          "description": "Your odata server uri url (example: http://srvaspgwd.com:8080/)"
+          "description": "Your odata server uri url (example: http://srvaspgwd.com:8080/). For 'Other' odataProxy configuration, it supports multiple uri separated by comma (example: http://url1.com/,http://url2.com/)"
         },
         "ui5-tools.server.odataMountPath": {
           "type": "string",
-          "default": "/sap",
-          "description": "The mountpath for 'Other' odataProxy"
+          "default": "/odata",
+          "description": "The mountpath for 'Other' odataProxy. It supports multiple mountpaths, one for every odataUri configured (example: /odata,/destination/northwind)"
         },
         "ui5-tools.server.resourcesProxy": {
           "type": "string",
