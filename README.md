@@ -31,7 +31,7 @@ TBD
 
 - `ui5-tools.srcFolder`: source folder in your app | default: `webapp`
 - `ui5-tools.distFolder`: source folder in your app | default: `webapp`
-- `ui5-tools.ui5Version`: SAPUI5 Library version for CDN proxy in server and build correct preload files | default: `1.71.16`
+- `ui5-tools.ui5Version`: UI5 library version for CDN proxy in server and build correct preload files: `1.71.20`
 
 #### Server Settings
 
@@ -50,14 +50,11 @@ TBD
 
 #### Builder Settings
 
-- `ui5-tools.builder.debugSources`: create debug js files when building | default: `true`
-- `ui5-tools.builder.uglifySources`: uglify Component-preload.js and all js files when building | default: `true`
+- `ui5-tools.builder.debugSources`: Create debug js files when building | default: `true`
+- `ui5-tools.builder.uglifySources`: Uglify Component-preload.js and all js files when building | default: `true`
+- `ui5-tools.builder.buildLess`: Auto build less files into css when saving changes | default: `true`
 
 #### Deployer Settings
-
-- TBD
-
-#### Tester Settings
 
 - TBD
 

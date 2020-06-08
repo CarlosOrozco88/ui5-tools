@@ -109,7 +109,9 @@ async function restart() {
   if (status === STATUSES.STARTED) {
     await stop();
     await start(true);
+    return true;
   }
+  return false;
 }
 
 async function toggle() {

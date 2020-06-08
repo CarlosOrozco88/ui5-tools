@@ -16,7 +16,8 @@ function resetCache() {
   }
 }
 
-async function setODataProxy(expressApp, { auth, odataMountPath }) {
+async function setODataProxy(expressApp, config) {
+  let { envVars, odataMountPath } = config;
   let proxy, targetUri;
   let odataProxy = Utils.getConfigurationServer('odataProxy');
   // Options: Gateway, None
@@ -31,7 +32,8 @@ async function setODataProxy(expressApp, { auth, odataMountPath }) {
           target: targets[0].trim(),
           secure: targets[0].trim().indexOf('https') == 0,
           changeOrigin: true,
-          //logLevel: 'debug',
+          auth: getODATAAuth(config),
+          logLevel: 'error',
         });
         expressApp.use('/sap', proxy);
       }
@@ -42,7 +44,7 @@ async function setODataProxy(expressApp, { auth, odataMountPath }) {
       if (targetUri) {
         let targets = targetUri.split(',');
         let mpaths = odataMountPath.split(',');
-        for (var i = 0; i < targets.length; i++) {
+        for (let i = 0; i < targets.length; i++) {
           if (mpaths && mpaths[i]) {
             proxy = createProxyMiddleware({
               pathRewrite: function (i, path, req) {
@@ -52,7 +54,8 @@ async function setODataProxy(expressApp, { auth, odataMountPath }) {
               target: targets[i].trim(),
               secure: targets[i].trim().indexOf('https') == 0,
               changeOrigin: true,
-              //logLevel: 'debug',
+              auth: getODATAAuth(config, i),
+              logLevel: 'error',
             });
             expressApp.use(mpaths[i], proxy);
           }
@@ -67,6 +70,22 @@ async function setODataProxy(expressApp, { auth, odataMountPath }) {
   return;
 }
 
+function getODATAAuth({ envVars }, index) {
+  let auth = undefined;
+  if (envVars) {
+    let userKey = 'UI5TOOLS_ODATA_USER';
+    let passKey = 'UI5TOOLS_ODATA_PASSWORD';
+    if (index) {
+      userKey += `_${index + 1}`;
+      passKey += `_${index + 1}`;
+    }
+    if (envVars[userKey] && envVars[passKey]) {
+      auth = `${envVars[userKey]}:${envVars[passKey]}`;
+    }
+  }
+  return auth;
+}
+
 async function setResourcesProxy(expressApp, config) {
   let { ui5Version, framework } = config;
   let targetUri, proxy;
@@ -75,12 +94,12 @@ async function setResourcesProxy(expressApp, config) {
   // Options: Gateway, CDN SAPUI5, CDN OpenUI5, None
   switch (resourcesProxy) {
     case 'Gateway':
-      targetUri = Utils.getConfigurationServer('odataUri');
+      targetUri = Utils.getConfigurationServer('resourcesUri');
 
       if (targetUri) {
         proxy = createProxyMiddleware({
           pathRewrite: function (path, req) {
-            var nPath = path;
+            let nPath = path;
             if (path.indexOf('/resources/') === 0) {
               nPath = `/sap/public/bc/ui5_ui5/1${path}`;
             } else {
@@ -91,7 +110,7 @@ async function setResourcesProxy(expressApp, config) {
           target: targetUri,
           secure: targetUri.indexOf('https') == 0,
           changeOrigin: true,
-          //logLevel: 'debug',
+          logLevel: 'error',
         });
 
         expressApp.use(['/resources', '/**/resources'], cacheResources, proxy);
@@ -105,7 +124,7 @@ async function setResourcesProxy(expressApp, config) {
       if (ui5Version) {
         proxy = createProxyMiddleware({
           pathRewrite: function (path, req) {
-            var nPath = path;
+            let nPath = path;
             if (path.indexOf('/resources/') > 0) {
               nPath = path.slice(path.indexOf('/resources/'), path.length);
             }
@@ -114,7 +133,7 @@ async function setResourcesProxy(expressApp, config) {
           target: targetUri,
           secure: targetUri.indexOf('https') == 0,
           changeOrigin: true,
-          logLevel: 'debug',
+          logLevel: 'error',
         });
 
         expressApp.use(['/resources', '/**/resources'], cacheResources, proxy);
@@ -157,7 +176,7 @@ function setTestResourcesProxy(expressApp, { ui5Version }) {
       target: targetUri,
       secure: targetUri.indexOf('https') == 0,
       changeOrigin: true,
-      //logLevel: 'debug',
+      logLevel: 'error',
     });
 
     expressApp.use('/flp/test-resources/**', cacheResources, proxy);

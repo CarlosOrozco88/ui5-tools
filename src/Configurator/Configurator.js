@@ -113,14 +113,14 @@ async function ui5Provider() {
     );
 
     if (quickPickUI5Provider.label === 'Gateway') {
-      let inputBoxOdataUri = await window.showInputBox({
+      let inputBoxResourcesUri = await window.showInputBox({
         placeHolder: 'Enter gateway url',
-        value: Utils.getConfigurationServer('odataUri'),
+        value: Utils.getConfigurationServer('resourcesUri'),
       });
-      if (!inputBoxOdataUri) {
+      if (!inputBoxResourcesUri) {
         throw new Error('No gateway url configured');
       }
-      await Utils.getConfigurationServer().update('odataUri', inputBoxOdataUri, ConfigurationTarget.Workspace);
+      await Utils.getConfigurationServer().update('resourcesUri', inputBoxResourcesUri, ConfigurationTarget.Workspace);
     }
 
     let ui5Version = Utils.getConfigurationGeneral('ui5Version');

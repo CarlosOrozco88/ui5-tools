@@ -3,7 +3,6 @@
 .git
 .gitignore
 .prettierrc.json
-examples/**
 jsconfig.json
 node_modules
 package-json.lock

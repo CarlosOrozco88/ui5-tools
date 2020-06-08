@@ -1,0 +1,43 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core"
+  xmlns:f="sap.ui.layout.form"
+  displayBlock="true"
+  width="100%"
+  height="100%">
+  <Page title="Info">
+    <f:SimpleForm columnsXL="3" columnsL="2" columns="1" layout="ColumnLayout">
+      <f:content>
+        <core:Title text="General" />
+        <Label text="Source folder" />
+        <Text text="{ui5tools>/config/srcFolder}" />
+        <Label text="Dist folder" />
+        <Text text="{ui5tools>/config/distFolder}" />
+        <Label text="UI5 Version" />
+        <Text text="{ui5tools>/config/ui5Version}" />
+
+        <core:Title text="Server" />
+        <Label text="Resources proxy" />
+        <Text text="{ui5tools>/config/resourcesProxy}" />
+        <Label text="Resources URL" />
+        <Text text="{ui5tools>/config/resourcesUri}" />
+        <Label text="OData proxy" />
+        <Text text="{ui5tools>/config/odataProxy}" />
+        <Label text="Gateway URL" />
+        <Text text="{ui5tools>/config/odataUri}" />
+        <Label text="Watch" />
+        <Text text="{ui5tools>/config/watch}" />
+        <Label text="Watch extensions" />
+        <Text text="{ui5tools>/config/watchExtensions}" />
+
+        <core:Title text="Builder" />
+        <Label text="Debug resources" />
+        <Text text="{ui5tools>/config/debugSources}" />
+        <Label text="Uglify resources" />
+        <Text text="{ui5tools>/config/uglifySources}" />
+        <Label text="Auto build less" />
+        <Text text="{ui5tools>/config/buildLess}" />
+      </f:content>
+    </f:SimpleForm>
+  </Page>
+</mvc:View>

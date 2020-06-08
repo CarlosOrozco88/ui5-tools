@@ -1,3 +1,9 @@
+## 0.2.0 (09-06-2020)
+
+- Authentication with `.env` file for Other proxies
+- Less autobuild to css
+- Breaking changes! new option `resourcesUri` to separate from `odataUri` for gateway users
+
 ## 0.1.8 (03-06-2020)
 
 - Multiple odataUri and odataMountPath for `Other` odataProxy

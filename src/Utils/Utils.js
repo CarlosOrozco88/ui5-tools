@@ -1,6 +1,7 @@
 import { workspace } from 'vscode';
 import path from 'path';
 import fs from 'fs';
+import dotenv from 'dotenv';
 
 let config = {};
 
@@ -62,6 +63,7 @@ function loadConfig(restarting = false) {
   let odataUri = getConfigurationServer('odataUri');
   let odataMountPath = getConfigurationServer('odataMountPath');
   let resourcesProxy = getConfigurationServer('resourcesProxy');
+  let resourcesUri = getConfigurationServer('resourcesUri');
   let serveFolder = getConfigurationServer('serveFolder');
   let protocol = getConfigurationServer('protocol');
   let index = 'index.html';
@@ -70,20 +72,27 @@ function loadConfig(restarting = false) {
 
   let debugSources = getConfigurationBuilder('debugSources');
   let uglifySources = getConfigurationBuilder('uglifySources');
+  let buildLess = getConfigurationBuilder('buildLess');
   let portLiveReload = 35729;
   // @ts-ignore
-  let lrPath = __non_webpack_require__.resolve('../scripts/livereload');
+  let lrPath = __non_webpack_require__.resolve('../static/scripts/livereload');
 
-  let ui5ToolsPath = lrPath.slice(0, lrPath.indexOf('scripts'));
+  let ui5ToolsPath = lrPath.slice(0, lrPath.indexOf('static'));
   let cert = {
-    key: fs.readFileSync(path.join(ui5ToolsPath, 'cert', 'server.key')),
-    cert: fs.readFileSync(path.join(ui5ToolsPath, 'cert', 'server.cert')),
+    key: fs.readFileSync(path.join(ui5ToolsPath, 'static', 'cert', 'server.key')),
+    cert: fs.readFileSync(path.join(ui5ToolsPath, 'static', 'cert', 'server.cert')),
   };
 
   let open = restarting ? false : openBrowser;
 
   let baseDir = getRoot();
-
+  let dotEnvConfig = dotenv.config({
+    path: path.join(baseDir, '.env'),
+  });
+  let envVars = {};
+  if (dotEnvConfig.parsed) {
+    envVars = dotEnvConfig.parsed;
+  }
   let files = [];
   let serveStatic = [];
   let routes = {};
@@ -157,12 +166,14 @@ function loadConfig(restarting = false) {
     odataUri,
     odataMountPath,
     resourcesProxy,
+    resourcesUri,
     serveFolder,
     index,
     protocol,
     // Builder config
     debugSources,
     uglifySources,
+    buildLess,
     // Modified config
     baseDir,
     foldersRoot,
@@ -177,11 +188,7 @@ function loadConfig(restarting = false) {
     manifests,
     framework,
     // auth
-    auth: {
-      gatewayUser: config.auth ? config.auth.gatewayUser : '',
-      gatewayPassword: config.auth ? config.auth.gatewayPassword : '',
-      authGateway: config.auth ? config.auth.authGateway : undefined,
-    },
+    envVars,
   };
   config = nConfig;
   return nConfig;

@@ -26,7 +26,7 @@ function setServerIndexMiddleware(expressApp, config) {
   };
   Utils.getOptionsVersion(ui5toolsData, config);
 
-  let indexPath = path.join(ui5ToolsPath, 'index', 'ui5', 'webapp');
+  let indexPath = path.join(ui5ToolsPath, 'static', 'index', 'ui5', 'webapp');
   let indexHTML = function (req, res, next) {
     res.render(path.join(indexPath, 'index'), { theme: ui5toolsData.theme });
   };
@@ -44,7 +44,7 @@ function setServerIndexMiddleware(expressApp, config) {
   });
 
   // Serve app files
-  expressApp.use('/', express.static(path.join(ui5ToolsPath, 'index', 'ui5', 'webapp')));
+  expressApp.use('/', express.static(path.join(ui5ToolsPath, 'static', 'index', 'ui5', 'webapp')));
 
   // Serve app data
   expressApp.get('/ui5tools.json', function (req, res) {
@@ -110,7 +110,7 @@ function setLaunchpadMiddleware(expressApp, config) {
     // });
 
     let ui5toolsData = Utils.getOptionsVersion();
-    let flpPath = path.join(ui5ToolsPath, 'index', 'flp');
+    let flpPath = path.join(ui5ToolsPath, 'static', 'index', 'flp');
 
     let indexFLP = function (req, res, next) {
       res.render(path.join(flpPath, 'index'), { theme: ui5toolsData.theme });
