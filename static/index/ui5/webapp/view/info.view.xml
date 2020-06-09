@@ -11,6 +11,8 @@
         <core:Title text="General" />
         <Label text="Source folder" />
         <Text text="{ui5tools>/config/srcFolder}" />
+        <Label text="Library folder" />
+        <Text text="{ui5tools>/config/libraryFolder}" />
         <Label text="Dist folder" />
         <Text text="{ui5tools>/config/distFolder}" />
         <Label text="UI5 Version" />

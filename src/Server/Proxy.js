@@ -17,7 +17,7 @@ function resetCache() {
 }
 
 async function setODataProxy(expressApp, config) {
-  let { envVars, odataMountPath } = config;
+  let { odataMountPath } = config;
   let proxy, targetUri;
   let odataProxy = Utils.getConfigurationServer('odataProxy');
   // Options: Gateway, None
@@ -108,7 +108,7 @@ async function setResourcesProxy(expressApp, config) {
             return nPath;
           },
           target: targetUri,
-          secure: targetUri.indexOf('https') == 0,
+          secure: false, //targetUri.indexOf('https') == 0,
           changeOrigin: true,
           logLevel: 'error',
         });
@@ -131,7 +131,7 @@ async function setResourcesProxy(expressApp, config) {
             return nPath;
           },
           target: targetUri,
-          secure: targetUri.indexOf('https') == 0,
+          secure: false, //targetUri.indexOf('https') == 0,
           changeOrigin: true,
           logLevel: 'error',
         });
@@ -174,7 +174,7 @@ function setTestResourcesProxy(expressApp, { ui5Version }) {
         '^/flp/': '/',
       },
       target: targetUri,
-      secure: targetUri.indexOf('https') == 0,
+      secure: false, //targetUri.indexOf('https') == 0,
       changeOrigin: true,
       logLevel: 'error',
     });

@@ -158,7 +158,6 @@ async function ui5Provider() {
         placeHolder: `Select ${framework} patch | Actual value: ${ui5Version}`,
         canPickMany: false,
       });
-      // @ts-ignore
       if (!quickPickUI5VersionPatch) {
         throw new Error('No ui5 version selected');
       }

@@ -29,8 +29,8 @@ TBD
 
 #### General Settings
 
-- `ui5-tools.srcFolder`: source folder in your app | default: `webapp`
-- `ui5-tools.distFolder`: source folder in your app | default: `webapp`
+- `ui5-tools.srcFolder`: source folder in your app | default: `webapp,src`
+- `ui5-tools.distFolder`: source folder in your app | default: `dist`
 - `ui5-tools.ui5Version`: UI5 library version for CDN proxy in server and build correct preload files: `1.71.20`
 
 #### Server Settings

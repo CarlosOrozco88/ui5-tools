@@ -2,7 +2,7 @@
   "name": "ui5-tools",
   "displayName": "UI5 Tools",
   "description": "Local development tools for UI5",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
@@ -72,10 +72,15 @@
           "default": "webapp",
           "description": "Source folder in your app"
         },
+        "ui5-tools.libraryFolder": {
+          "type": "string",
+          "default": "src",
+          "description": "Source folder in your library"
+        },
         "ui5-tools.distFolder": {
           "type": "string",
           "default": "dist",
-          "description": "Dist folder in your app"
+          "description": "Dist folder in your app or library"
         },
         "ui5-tools.ui5Version": {
           "type": "string",
@@ -193,6 +198,16 @@
           "type": "boolean",
           "default": true,
           "description": "Auto build less files into css when saving changes"
+        },
+        "ui5-tools.builder.replaceStrings": {
+          "type": "boolean",
+          "default": true,
+          "description": "Replace strings for values"
+        },
+        "ui5-tools.builder.replaceExtensions": {
+          "type": "string",
+          "default": "xml,js,json,properties",
+          "description": "File extensions to look for keys to replace"
         }
       }
     }
@@ -214,7 +229,6 @@
     "@types/glob": "^7.1.1",
     "@types/mocha": "^7.0.2",
     "@types/node": "^14.0.4",
-    "@types/rimraf": "^3.0.0",
     "@types/terser": "^3.12.0",
     "@types/vscode": "^1.45.1",
     "@types/apicache": "^1.2.2",
@@ -240,6 +254,7 @@
     "express": "^4.17.1",
     "http-proxy-middleware": "^1.0.4",
     "less": "^3.11.1",
+    "less-openui5": "^0.8.6",
     "livereload": "^0.9.1",
     "openui5-preload": "3.0.0",
     "opn": "^6.0.0",

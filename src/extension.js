@@ -5,9 +5,9 @@ import Builder from './Builder/Builder';
 import StatusBar from './StatusBar/StatusBar';
 import Utils from './Utils/Utils';
 
-export function activate(context) {
-  startExtension();
+import path from 'path';
 
+export function activate(context) {
   StatusBar.init(context);
   if (Utils.getConfigurationServer('startOnLaunch')) {
     Server.start();
@@ -16,29 +16,48 @@ export function activate(context) {
   const { registerCommand } = commands;
   const { subscriptions } = context;
 
+  // Configure commands
   subscriptions.push(registerCommand('ui5-tools.server.start', () => Server.start()));
   subscriptions.push(registerCommand('ui5-tools.server.stop', () => Server.stop()));
   subscriptions.push(registerCommand('ui5-tools.server.restart', () => Server.restart()));
   subscriptions.push(registerCommand('ui5-tools.server.toggle', () => Server.toggle()));
 
-  subscriptions.push(registerCommand('ui5-tools.builder.build', () => Builder.build()));
+  subscriptions.push(registerCommand('ui5-tools.builder.build', () => Builder.askProjectToBuild()));
 
   subscriptions.push(registerCommand('ui5-tools.configurator.odataProvider', () => Configurator.odataProvider()));
   subscriptions.push(registerCommand('ui5-tools.configurator.ui5Provider', () => Configurator.ui5Provider()));
 
-  workspace.onDidSaveTextDocument((event) => Builder.compileLessAuto(event));
-
-  workspace.onDidChangeConfiguration(() => startExtension());
-  workspace.onDidChangeWorkspaceFolders(() => startExtension());
-  workspace.onDidSaveTextDocument(({ fileName }) => {
-    if (fileName.slice(-4) === '.env' || fileName.slice(-13) === 'manifest.json') {
-      startExtension();
-    }
-  });
+  // Configure listeners
+  workspace.onDidChangeConfiguration((event) => onDidChangeConfiguration(event));
+  workspace.onDidChangeWorkspaceFolders((event) => onDidChangeWorkspaceFolders(event));
+  workspace.onDidSaveTextDocument((event) => onDidSaveTextDocument(event));
 }
 
-async function startExtension() {
+async function onDidChangeConfiguration(event) {
   Server.restart();
+}
+async function onDidChangeWorkspaceFolders(event) {
+  Server.restart();
+}
+
+async function onDidSaveTextDocument(event) {
+  let { fileName, languageId } = event;
+
+  // Configure auto build less
+  switch (languageId) {
+    case 'less':
+      Builder.compileLessAuto(event);
+      break;
+  }
+
+  // Configure restart server
+  let baseName = path.basename(fileName);
+  switch (baseName) {
+    case '.env':
+    case 'manifest.json':
+      Server.restart();
+      break;
+  }
 }
 
 export function deactivate() {}

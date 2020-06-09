@@ -1,4 +1,4 @@
-import { workspace } from 'vscode';
+import { workspace, RelativePattern, Uri } from 'vscode';
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
@@ -51,6 +51,7 @@ function getRoot() {
 
 function loadConfig(restarting = false) {
   let srcFolder = getConfigurationGeneral('srcFolder');
+  let libraryFolder = getConfigurationGeneral('libraryFolder');
   let distFolder = getConfigurationGeneral('distFolder');
   let ui5Version = getConfigurationGeneral('ui5Version');
 
@@ -151,6 +152,7 @@ function loadConfig(restarting = false) {
   let nConfig = {
     // General Config
     srcFolder,
+    libraryFolder,
     distFolder,
     ui5Version,
     ui5ToolsPath,
@@ -195,6 +197,44 @@ function loadConfig(restarting = false) {
 }
 function getConfig() {
   return config;
+}
+
+async function getManifest(uriOrManifest) {
+  let manifest = undefined;
+  if (uriOrManifest) {
+    if (typeof uriOrManifest === 'string') {
+      let manifestString = await workspace.findFiles(
+        new RelativePattern(uriOrManifest, `**/manifest.json`),
+        `**/{dist,node_modules}/**`,
+        1
+      );
+      if (manifestString.length) {
+        let uri = Uri.file(manifestString[0].fsPath);
+        let file = await workspace.fs.readFile(uri);
+        manifest = JSON.parse(file.toString());
+      }
+    } else {
+      manifest = uriOrManifest;
+    }
+  }
+  return manifest;
+}
+
+async function getManifestLibrary(uriOrManifest) {
+  let isLib = false;
+  let manifest = await getManifest(uriOrManifest);
+  if (manifest && manifest['sap.app'].type === 'library') {
+    isLib = true;
+  }
+  return isLib;
+}
+async function getManifestId(uriOrManifest) {
+  let manifestId = undefined;
+  let manifest = await getManifest(uriOrManifest);
+  if (manifest && manifest['sap.app'].id) {
+    manifestId = manifest['sap.app'].id;
+  }
+  return manifestId;
 }
 
 function checkFolder(
@@ -287,4 +327,7 @@ export default {
   getRoot,
   loadConfig,
   getConfig,
+  getManifest,
+  getManifestLibrary,
+  getManifestId,
 };

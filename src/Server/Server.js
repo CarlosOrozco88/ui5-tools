@@ -12,8 +12,10 @@ import Index from './Index';
 const expressApp = express();
 // @ts-ignore
 expressApp.engine('ejs', require('ejs').__express);
+
 let server;
 let status = 0;
+
 const STATUSES = {
   STOPPED: 0,
   STARTING: 1,
@@ -22,55 +24,65 @@ const STATUSES = {
 };
 
 async function start(restarting = false) {
-  try {
-    if (status !== STATUSES.STOPPED) {
-      return;
-    }
-    if (expressApp._router && expressApp._router.stack) {
-      expressApp._router.stack.splice(2, expressApp._router.stack.length);
-    }
+  let started = false;
+  if (status === STATUSES.STOPPED) {
+    try {
+      if (expressApp._router && expressApp._router.stack) {
+        expressApp._router.stack.splice(2, expressApp._router.stack.length);
+      }
 
-    expressApp.set('view engine', 'ejs');
-    status = STATUSES.STARTING;
-    StatusBar.startingText();
+      expressApp.set('view engine', 'ejs');
+      status = STATUSES.STARTING;
+      StatusBar.startingText();
 
-    // Reload config, checks new projects
-    let config = Utils.loadConfig(restarting);
-    let { foldersRootMap, port, watch, protocol, cert } = config;
+      // Reload config, checks new projects
+      let config = Utils.loadConfig(restarting);
+      let { foldersRootMap } = config;
 
-    if (watch) {
-      await LiveServer.start(expressApp, config);
-    }
+      let watch = Utils.getConfigurationServer('watch');
+      if (watch) {
+        await LiveServer.start(expressApp, config);
+      }
 
-    Object.entries(foldersRootMap).forEach(([key, folderRoot]) => {
-      expressApp.use(key, express.static(folderRoot));
-    });
-
-    Proxy.resetCache();
-
-    await Proxy.setODataProxy(expressApp, config);
-    await Proxy.setResourcesProxy(expressApp, config);
-    await Index.setIndexMiddleware(expressApp, config);
-
-    if (protocol === 'https') {
-      server = https.createServer(cert, expressApp).listen(port, () => {
-        serverReady(config, restarting);
+      Object.entries(foldersRootMap).forEach(([key, folderRoot]) => {
+        expressApp.use(key, express.static(folderRoot));
       });
-    } else {
-      server = http.createServer(expressApp).listen(port, () => {
-        serverReady(config, restarting);
-      });
-    }
 
-    server.timeout = 30 * 1000;
-  } catch (e) {
-    status = STATUSES.STOPPING;
-    StatusBar.stoppingText();
-    throw new Error(e);
+      Proxy.resetCache();
+
+      await Proxy.setODataProxy(expressApp, config);
+      await Proxy.setResourcesProxy(expressApp, config);
+      await Index.setIndexMiddleware(expressApp, config);
+
+      let protocol = Utils.getConfigurationServer('protocol');
+      let port = Utils.getConfigurationServer('port');
+      if (protocol === 'https') {
+        let { cert } = config;
+        server = https.createServer(cert, expressApp).listen(port, () => {
+          serverReady(restarting);
+        });
+      } else {
+        server = http.createServer(expressApp).listen(port, () => {
+          serverReady(restarting);
+        });
+      }
+
+      server.timeout = 30 * 1000;
+      started = true;
+    } catch (e) {
+      status = STATUSES.STOPPING;
+      StatusBar.stoppingText();
+      throw new Error(e);
+    }
   }
+  return started;
 }
 
-function serverReady({ open, folders, index, port, protocol }, restarting = false) {
+function serverReady(restarting = false) {
+  let protocol = Utils.getConfigurationServer('protocol');
+  let port = Utils.getConfigurationServer('port');
+  let open = Utils.getConfigurationServer('open');
+
   status = STATUSES.STARTED;
   StatusBar.stopText();
 
@@ -92,26 +104,29 @@ function stopServer() {
   });
 }
 
-function stop() {
-  if (status !== STATUSES.STARTED) {
-    return Promise.resolve();
-  }
-  status = STATUSES.STOPPING;
-  StatusBar.stoppingText();
+async function stop() {
+  let stopped = false;
+  if (status === STATUSES.STARTED) {
+    status = STATUSES.STOPPING;
+    StatusBar.stoppingText();
 
-  return Promise.all([stopServer(), LiveServer.stop()]).then(() => {
+    await Promise.all([stopServer(), LiveServer.stop()]);
+
     status = STATUSES.STOPPED;
     StatusBar.startText();
-  });
+    stopped = true;
+  }
+  return stopped;
 }
 
 async function restart() {
+  let restarted = false;
   if (status === STATUSES.STARTED) {
     await stop();
     await start(true);
-    return true;
+    restarted = true;
   }
-  return false;
+  return restarted;
 }
 
 async function toggle() {
@@ -123,7 +138,7 @@ async function toggle() {
       await stop();
       break;
   }
-  return;
+  return true;
 }
 
 export default {

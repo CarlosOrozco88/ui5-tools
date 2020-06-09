@@ -4,10 +4,6 @@ import fs from 'fs';
 import url from 'url';
 import http from 'http';
 import https from 'https';
-import path from 'path';
-
-import Utils from '../Utils/Utils';
-import Builder from '../Builder/Builder';
 
 let appLiveServer;
 
@@ -52,17 +48,19 @@ function start(expressApp, { foldersRoot, portLiveReload, watchExtensions, proto
           port: portLiveReload,
         })
       );
-    } catch (e) {
-      reject(e);
+    } catch (error) {
+      reject(error);
     }
   });
 }
 
 async function stop() {
+  let stopped = false;
   if (appLiveServer) {
     appLiveServer.close();
+    stopped = true;
   }
-  return;
+  return stopped;
 }
 
 export default {

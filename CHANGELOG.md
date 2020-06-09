@@ -1,3 +1,7 @@
+## 0.2.1 (09-06-2020)
+
+- SSL proxy verification default to false
+
 ## 0.2.0 (09-06-2020)
 
 - Authentication with `.env` file for Other proxies

@@ -18,6 +18,7 @@ const config = {
     vscode: 'commonjs vscode',
     bufferutil: 'commonjs bufferutil',
     'utf-8-validate': 'commonjs utf-8-validate',
+    'clean-css': 'commonjs clean-css',
   },
   resolve: {
     extensions: ['.js'],
