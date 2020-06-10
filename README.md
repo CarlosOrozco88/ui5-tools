@@ -1,5 +1,5 @@
 <p align="center">
-<img src="images/logo_blue.png" width="100" />
+<img src="static/images/logo_blue.png" width="100" />
 <h1 align="center">ui5-tools Extension</h1>
 </p>
 
