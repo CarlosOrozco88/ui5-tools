@@ -1,6 +1,10 @@
-## 0.2.1 (09-06-2020)
+## 0.2.1 (10-06-2020)
 
 - SSL proxy verification default to false
+- Replace strings in builder
+- New configurator command: replace strings
+- Auto theme less builder
+- Cache bug solved while restarting server (.env, manifest.json)
 
 ## 0.2.0 (09-06-2020)
 

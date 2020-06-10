@@ -11,17 +11,13 @@ You can find examples of vscode workspace configuration in [examples](examples) 
 
 #### Server
 
-For local development, with configurable proxy to odata service (Gateway) and proxy to resources (Gateway, CDN SAPUI5, CDN OpenUI5), ui5 version is configurable also.
+For local development, with configurable proxy to one o multiple odata service (Gateway, Other, None) and proxy to resources (Gateway, CDN SAPUI5, CDN OpenUI5, None), ui5 version is configurable also.
 
 #### Build
 
-Component-preload.js, checking ui5 version configured for correct build. Also creates dbg files, uglify, etc.
+Creates Component-preload.js file, checking configured ui5 version for correct build. Also creates dbg files, compile less files, uglify files, replace strings... if needed. Is all configurable.
 
 #### Deployer
-
-TBD
-
-#### Tester tools
 
 TBD
 
@@ -53,6 +49,9 @@ TBD
 - `ui5-tools.builder.debugSources`: Create debug js files when building | default: `true`
 - `ui5-tools.builder.uglifySources`: Uglify Component-preload.js and all js files when building | default: `true`
 - `ui5-tools.builder.buildLess`: Auto build less files into css when saving changes | default: `true`
+- `ui5-tools.builder.replaceStrings`: Replace strings when building | default: `true`
+- `ui5-tools.builder.replaceExtensions`: File extensions to look for keys to replace | default: `xml,js,json,properties`
+- `ui5-tools.builder.replaceKeysValues`: Key/Value pair list. Replace <% key %> with 'value' while building the app | default: `[{'key':'TIMESTAMP','value':'COMPUTED_TIMESTAMP'}]`
 
 #### Deployer Settings
 
@@ -66,11 +65,12 @@ TBD
 - `ui5-tools.server.stop`: stop server
 - `ui5-tools.server.restart`: restart server
 
+#### Builder Commands
+
+- `ui5-tools.builder.build`: build ui5 project
+
 #### Configurator Commands
 
 - `ui5-tools.configurator.odataProvider`: configure odata provider
 - `ui5-tools.configurator.ui5Provider`: configure ui5 provider
-
-#### Builder Commands
-
-- `ui5-tools.builder.build`: build ui5 project
+- `ui5-tools.configurator.replaceStrings`: configure replace strings

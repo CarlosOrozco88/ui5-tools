@@ -60,6 +60,10 @@
         "title": "UI5 Tools: Configurator > Configure UI5 provider"
       },
       {
+        "command": "ui5-tools.configurator.replaceStrings",
+        "title": "UI5 Tools: Configurator > Configure replace strings"
+      },
+      {
         "command": "ui5-tools.builder.build",
         "title": "UI5 Tools: Builder > Build UI5 Project"
       }
@@ -202,12 +206,33 @@
         "ui5-tools.builder.replaceStrings": {
           "type": "boolean",
           "default": true,
-          "description": "Replace strings for values"
+          "description": "Replace strings when building"
         },
         "ui5-tools.builder.replaceExtensions": {
           "type": "string",
           "default": "xml,js,json,properties",
           "description": "File extensions to look for keys to replace"
+        },
+        "ui5-tools.builder.replaceKeysValues": {
+          "type": "array",
+          "title": "Key/Value pair",
+          "properties": {
+            "key": {
+              "type": "string",
+              "description": "Key to look for"
+            },
+            "value": {
+              "type": "string",
+              "description": "Value to replace the key"
+            }
+          },
+          "default": [
+            {
+              "key": "TIMESTAMP",
+              "value": "COMPUTED_TIMESTAMP"
+            }
+          ],
+          "description": "Key/Value pair list. Replace <% key %> with 'value' while building the app"
         }
       }
     }

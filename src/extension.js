@@ -24,8 +24,13 @@ export function activate(context) {
 
   subscriptions.push(registerCommand('ui5-tools.builder.build', () => Builder.askProjectToBuild()));
 
-  subscriptions.push(registerCommand('ui5-tools.configurator.odataProvider', () => Configurator.odataProvider()));
-  subscriptions.push(registerCommand('ui5-tools.configurator.ui5Provider', () => Configurator.ui5Provider()));
+  subscriptions.push(
+    registerCommand('ui5-tools.configurator.odataProvider', () => Configurator.OdataProvider.wizard())
+  );
+  subscriptions.push(registerCommand('ui5-tools.configurator.ui5Provider', () => Configurator.Ui5Provider.wizard()));
+  subscriptions.push(
+    registerCommand('ui5-tools.configurator.replaceStrings', () => Configurator.ReplaceStrings.wizard())
+  );
 
   // Configure listeners
   workspace.onDidChangeConfiguration((event) => onDidChangeConfiguration(event));
@@ -34,28 +39,25 @@ export function activate(context) {
 }
 
 async function onDidChangeConfiguration(event) {
-  Server.restart();
+  let cleanCache = event.affectsConfiguration('ui5-tools.ui5Version');
+  Server.restart(cleanCache);
 }
 async function onDidChangeWorkspaceFolders(event) {
-  Server.restart();
+  Server.restart(false);
 }
 
 async function onDidSaveTextDocument(event) {
-  let { fileName, languageId } = event;
+  let { fileName } = event;
 
   // Configure auto build less
-  switch (languageId) {
-    case 'less':
-      Builder.compileLessAuto(event);
-      break;
-  }
+  Builder.liveCompileLess(event);
 
   // Configure restart server
   let baseName = path.basename(fileName);
   switch (baseName) {
     case '.env':
     case 'manifest.json':
-      Server.restart();
+      Server.restart(false);
       break;
   }
 }

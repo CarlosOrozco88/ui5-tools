@@ -23,7 +23,7 @@ const STATUSES = {
   STOPPING: 3,
 };
 
-async function start(restarting = false) {
+async function start(restarting = false, cleanCache = true) {
   let started = false;
   if (status === STATUSES.STOPPED) {
     try {
@@ -48,7 +48,9 @@ async function start(restarting = false) {
         expressApp.use(key, express.static(folderRoot));
       });
 
-      Proxy.resetCache();
+      if (cleanCache) {
+        Proxy.resetCache();
+      }
 
       await Proxy.setODataProxy(expressApp, config);
       await Proxy.setResourcesProxy(expressApp, config);
@@ -81,12 +83,12 @@ async function start(restarting = false) {
 function serverReady(restarting = false) {
   let protocol = Utils.getConfigurationServer('protocol');
   let port = Utils.getConfigurationServer('port');
-  let open = Utils.getConfigurationServer('open');
+  let openBrowser = Utils.getConfigurationServer('openBrowser');
 
   status = STATUSES.STARTED;
   StatusBar.stopText();
 
-  if (open && !restarting) {
+  if (openBrowser && !restarting) {
     opn(`${protocol}://localhost:${port}`);
   }
 }
@@ -119,11 +121,11 @@ async function stop() {
   return stopped;
 }
 
-async function restart() {
+async function restart(cleanCache = true) {
   let restarted = false;
   if (status === STATUSES.STARTED) {
     await stop();
-    await start(true);
+    await start(true, cleanCache);
     restarted = true;
   }
   return restarted;

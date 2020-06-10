@@ -257,24 +257,47 @@ async function replaceStrings(folderPath) {
   let replaceExtensions = Utils.getConfigurationBuilder('replaceExtensions');
   let pattern = new RelativePattern(folderPath, `**/*.{${replaceExtensions}}`);
   let files = await workspace.findFiles(pattern);
-  let timestamp = new Date().getTime().toString();
-  let keysValues = [{ key: 'TIMESTAMP', value: timestamp }];
+
+  let calculedKeys = {};
   if (files.length) {
     try {
       for (let i = 0; i < files.length; i++) {
-        let rawFile = await workspace.fs.readFile(files[i]);
-        let stringfile = rawFile.toString();
-        keysValues.forEach((replacement) => {
-          stringfile = stringfile.replace(new RegExp('{{' + replacement.key + '}}', 'g'), replacement.value);
-        });
-
-        await workspace.fs.writeFile(files[i], Buffer.from(stringfile));
+        await replaceStringsFile(files[i], calculedKeys);
       }
     } catch (error) {
       throw new Error(error);
     }
   }
   return true;
+}
+
+async function replaceStringsFile(file, calculedKeys = {}) {
+  let keysValues = Utils.getConfigurationBuilder('replaceKeysValues');
+
+  let rawFile = await workspace.fs.readFile(file);
+  let stringfile = rawFile.toString();
+  keysValues.forEach((replacement) => {
+    let { key, value } = replaceStringsValue(replacement, calculedKeys);
+
+    stringfile = stringfile.replace(new RegExp('(<%){1}[\\s]*(' + key + '){1}[\\s]*(%>){1}', 'g'), value.toString());
+  });
+
+  await workspace.fs.writeFile(file, Buffer.from(stringfile));
+  return true;
+}
+
+function replaceStringsValue({ key, value = '' }, calculedKeys) {
+  if (value.indexOf('COMPUTED_') === 0) {
+    switch (key.replace('COMPUTED_', '')) {
+      case 'TIMESTAMP':
+        if (!calculedKeys[key]) {
+          calculedKeys[key] = new Date().getTime();
+        }
+        value = calculedKeys[key];
+        break;
+    }
+  }
+  return { key, value };
 }
 
 /**
@@ -413,7 +436,7 @@ async function compressFiles(folderPath) {
       }
 
       // Compress xml files
-      let patternXml = new RelativePattern(folderPath, `**/*.json`);
+      let patternXml = new RelativePattern(folderPath, `**/*.xml`);
       let xmlFiles = await workspace.findFiles(patternXml);
 
       for (let i = 0; i < xmlFiles.length; i++) {
@@ -501,7 +524,7 @@ function createPreload(srcPath, destPath, manifest) {
   });
 }
 
-async function compileLessAuto(event) {
+async function liveCompileLess(event) {
   let buildLess = Utils.getConfigurationBuilder('buildLess');
   if (buildLess) {
     let { fileName, languageId } = event;
@@ -540,5 +563,5 @@ async function compileLessAuto(event) {
 
 export default {
   askProjectToBuild,
-  compileLessAuto,
+  liveCompileLess,
 };
