@@ -1,79 +1,124 @@
 import { window, ConfigurationTarget } from 'vscode';
-import Utils from '../Utils/Utils';
+import Config from '../Utils/Config';
 
-async function wizard() {
+export default async function wizard() {
   try {
-    let odataProviderValue = Utils.getConfigurationServer('odataProxy');
-    let quickPickOdataProvider = await window.showQuickPick(
-      [
-        {
-          description: 'Gateway url. Proxy all requests starting with /sap',
-          label: 'Gateway',
-          picked: odataProviderValue === 'Gateway',
-        },
-        {
-          description: 'Other destination url. Proxy all requests starting with odataMountPath',
-          label: 'Other',
-          picked: odataProviderValue === 'Other',
-        },
-        {
-          description: 'Without odata provider',
-          label: 'None',
-          picked: odataProviderValue === 'None',
-        },
-      ],
-      {
-        placeHolder: `Select odata provider | Actual value: ${odataProviderValue}`,
-        canPickMany: false,
-      }
-    );
-    if (!quickPickOdataProvider.label) {
-      throw new Error('No odata proxy configured');
-    }
+    let odataProxyValue = await quickPickOdataProxy();
 
-    await Utils.getConfigurationServer().update(
-      'odataProxy',
-      quickPickOdataProvider.label,
-      ConfigurationTarget.Workspace
-    );
-
-    if (quickPickOdataProvider.label === 'Gateway') {
-      let odataUri = Utils.getConfigurationServer('odataUri');
-      let inputBoxOdataUri = await window.showInputBox({
-        placeHolder: `Enter gateway url | Actual value: ${odataUri}`,
-        value: odataUri,
-      });
-      if (!inputBoxOdataUri) {
-        throw new Error('No gateway url configured');
-      }
-      await Utils.getConfigurationServer().update('odataUri', inputBoxOdataUri, ConfigurationTarget.Workspace);
-    } else if (quickPickOdataProvider.label === 'Other') {
-      let odataUri = Utils.getConfigurationServer('odataUri');
-      let inputBoxOdataUri = await window.showInputBox({
-        placeHolder: `Enter destination url/s separated by comma | Actual value: ${odataUri}`,
-        value: odataUri,
-      });
-      if (!inputBoxOdataUri) {
-        throw new Error('No destination url configured');
-      }
-      await Utils.getConfigurationServer().update('odataUri', inputBoxOdataUri, ConfigurationTarget.Workspace);
-      let odataMountPath = Utils.getConfigurationServer('odataMountPath');
-      let inputBoxodataMountPath = await window.showInputBox({
-        placeHolder: `Enter mountpath/s separated by comma | Actual value: ${odataMountPath}`,
-        value: odataMountPath,
-      });
-      if (!inputBoxodataMountPath) {
-        throw new Error('No mountpath url configured');
-      }
-      await Utils.getConfigurationServer().update(
-        'odataMountPath',
-        inputBoxodataMountPath,
-        ConfigurationTarget.Workspace
-      );
+    if (odataProxyValue === 'Gateway') {
+      await inputBoxGatewayUri();
+    } else if (odataProxyValue === 'Other') {
+      await inputBoxOtherUri();
+      await inputBoxOdataMountPath();
     }
-  } catch (err) {}
+  } catch (error) {
+    throw new Error(error);
+  }
+  return true;
 }
 
-export default {
-  wizard,
-};
+function quickPickOdataProxy() {
+  return new Promise(async (resolv, reject) => {
+    let odataProviderValue = Config.server('odataProxy');
+    let quickpick = await window.createQuickPick();
+    quickpick.title = 'ui5-tools > Configurator > oDataProvider: Select odata provider';
+    quickpick.step = 1;
+    quickpick.totalSteps = 1;
+    quickpick.items = [
+      {
+        description: 'Gateway url. Proxy all requests starting with /sap',
+        label: 'Gateway',
+      },
+      {
+        description: 'Other destination url. Proxy all requests starting with odataMountPath',
+        label: 'Other',
+      },
+      {
+        description: 'Without odata provider',
+        label: 'None',
+      },
+    ];
+    quickpick.placeholder = `Select odata provider | Actual value: ${odataProviderValue}`;
+    quickpick.canSelectMany = false;
+    quickpick.onDidAccept(async () => {
+      if (quickpick.selectedItems.length) {
+        let value = quickpick.selectedItems[0].label;
+        await Config.server().update('odataProxy', value, ConfigurationTarget.Workspace);
+        resolv(value);
+      } else {
+        reject('No odata proxy configured');
+      }
+      quickpick.hide();
+    });
+    quickpick.show();
+  });
+}
+
+function inputBoxGatewayUri() {
+  return new Promise(async (resolv, reject) => {
+    let odataUri = Config.server('odataUri');
+    let inputBox = await window.createInputBox();
+    inputBox.title = 'ui5-tools > Configurator > oDataProvider: Enter gateway url';
+    inputBox.step = 1;
+    inputBox.totalSteps = 1;
+    inputBox.placeholder = odataUri;
+    inputBox.value = odataUri;
+    inputBox.ignoreFocusOut = true;
+    inputBox.onDidAccept(async () => {
+      if (inputBox.value) {
+        await Config.server().update('odataUri', inputBox.value, ConfigurationTarget.Workspace);
+        resolv(inputBox.value);
+      } else {
+        reject('No gateway url configured');
+      }
+      inputBox.hide();
+    });
+    inputBox.show();
+  });
+}
+
+function inputBoxOtherUri() {
+  return new Promise(async (resolv, reject) => {
+    let odataUri = Config.server('odataUri');
+    let inputBox = await window.createInputBox();
+    inputBox.title = 'ui5-tools > Configurator > oDataProvider: Enter destination url/s separated by comma';
+    inputBox.step = 1;
+    inputBox.totalSteps = 2;
+    inputBox.placeholder = odataUri;
+    inputBox.value = odataUri;
+    inputBox.ignoreFocusOut = true;
+    inputBox.onDidAccept(async () => {
+      if (inputBox.value) {
+        await Config.server().update('odataUri', inputBox.value, ConfigurationTarget.Workspace);
+        resolv(inputBox.value);
+      } else {
+        reject('No destination url configured');
+      }
+      inputBox.hide();
+    });
+    inputBox.show();
+  });
+}
+
+async function inputBoxOdataMountPath() {
+  return new Promise(async (resolv, reject) => {
+    let odataMountPath = Config.server('odataMountPath');
+    let inputBox = await window.createInputBox();
+    inputBox.title = 'ui5-tools > Configurator > oDataProvider: Enter mountpath/s separated by comma';
+    inputBox.step = 2;
+    inputBox.totalSteps = 2;
+    inputBox.placeholder = odataMountPath;
+    inputBox.value = odataMountPath;
+    inputBox.ignoreFocusOut = true;
+    inputBox.onDidAccept(async () => {
+      if (inputBox.value) {
+        await Config.server().update('odataMountPath', inputBox.value, ConfigurationTarget.Workspace);
+        resolv(inputBox.value);
+      } else {
+        reject('No mountpath url configured');
+      }
+      inputBox.hide();
+    });
+    inputBox.show();
+  });
+}

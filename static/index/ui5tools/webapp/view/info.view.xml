@@ -6,7 +6,7 @@
   width="100%"
   height="100%">
   <Page title="Info">
-    <f:SimpleForm columnsXL="3" columnsL="2" columns="1" layout="ColumnLayout">
+    <f:SimpleForm columnsXL="3" columnsL="2" columnsM="1" layout="ColumnLayout">
       <f:content>
         <core:Title text="General" />
         <Label text="Source folder" />
@@ -20,25 +20,25 @@
 
         <core:Title text="Server" />
         <Label text="Resources proxy" />
-        <Text text="{ui5tools>/config/resourcesProxy}" />
+        <Text text="{ui5tools>/config/server/resourcesProxy}" />
         <Label text="Resources URL" />
-        <Text text="{ui5tools>/config/resourcesUri}" />
+        <Text text="{ui5tools>/config/server/resourcesUri}" />
         <Label text="OData proxy" />
-        <Text text="{ui5tools>/config/odataProxy}" />
+        <Text text="{ui5tools>/config/server/odataProxy}" />
         <Label text="Gateway URL" />
-        <Text text="{ui5tools>/config/odataUri}" />
+        <Text text="{ui5tools>/config/server/odataUri}" />
         <Label text="Watch" />
-        <Text text="{ui5tools>/config/watch}" />
+        <Text text="{ui5tools>/config/server/watch}" />
         <Label text="Watch extensions" />
-        <Text text="{ui5tools>/config/watchExtensions}" />
+        <Text text="{ui5tools>/config/server/watchExtensions}" />
 
         <core:Title text="Builder" />
         <Label text="Debug resources" />
-        <Text text="{ui5tools>/config/debugSources}" />
+        <Text text="{ui5tools>/config/builder/debugSources}" />
         <Label text="Uglify resources" />
-        <Text text="{ui5tools>/config/uglifySources}" />
+        <Text text="{ui5tools>/config/builder/uglifySources}" />
         <Label text="Auto build less" />
-        <Text text="{ui5tools>/config/buildLess}" />
+        <Text text="{ui5tools>/config/builder/buildLess}" />
       </f:content>
     </f:SimpleForm>
   </Page>

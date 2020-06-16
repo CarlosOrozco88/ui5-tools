@@ -3,16 +3,15 @@
 .git
 .gitignore
 .prettierrc.json
+babel.config.json
 jsconfig.json
 node_modules
 package-json.lock
 test/**
 webpack.config.js
 workspaceExample
+src
+.vscode
 
 .DS_Store
 *.vsix
-
-#Externals
-#!node_modules/express
-#!node_modules/livereload

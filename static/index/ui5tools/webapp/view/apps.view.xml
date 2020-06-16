@@ -5,10 +5,10 @@
     width="100%"
     height="100%">
     <Page title="Workspace Apps">
-        <HBox items="{ui5tools>/config/folders}" wrap="Wrap">
+        <HBox items="{ui5tools>/ui5Apps}" wrap="Wrap">
             <GenericTile class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout"
-                header="{ui5tools>}"
-                subheader=""
+                header="{ui5tools>folderName}"
+                subheader="{ui5tools>namespace}"
                 sizeBehavior="Small"
                 press="pressTile">
             </GenericTile>

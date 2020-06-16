@@ -38,10 +38,76 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
+    "keybindings": [
       {
         "command": "ui5-tools.server.start",
-        "title": "UI5 Tools: Server > Start"
+        "key": "alt+s alt+s",
+        "mac": "alt+s alt+s",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "ui5-tools.server.startProduction",
+        "key": "alt+s alt+p",
+        "mac": "alt+s alt+p",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "ui5-tools.server.stop",
+        "key": "alt+s alt+x",
+        "mac": "alt+s alt+x",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "ui5-tools.server.restart",
+        "key": "alt+s alt+r",
+        "mac": "alt+s alt+r",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "ui5-tools.server.toggle",
+        "key": "alt+s alt+t",
+        "mac": "alt+s alt+t",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "ui5-tools.configurator.odataProvider",
+        "key": "alt+c alt+o",
+        "mac": "alt+c alt+o",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "ui5-tools.configurator.ui5Provider",
+        "key": "alt+c alt+u",
+        "mac": "alt+c alt+u",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "ui5-tools.configurator.replaceStrings",
+        "key": "alt+c alt+r",
+        "mac": "alt+c alt+r",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "ui5-tools.builder.build",
+        "key": "alt+b alt+b",
+        "mac": "alt+b alt+b",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "ui5-tools.builder.buildAll",
+        "key": "alt+b alt+a",
+        "mac": "alt+b alt+a",
+        "when": "editorTextFocus"
+      }
+    ],
+    "commands": [
+      {
+        "command": "ui5-tools.server.startDevelopment",
+        "title": "UI5 Tools: Server > Start in development mode"
+      },
+      {
+        "command": "ui5-tools.server.startProduction",
+        "title": "UI5 Tools: Server > Start in production mode"
       },
       {
         "command": "ui5-tools.server.stop",
@@ -50,6 +116,10 @@
       {
         "command": "ui5-tools.server.restart",
         "title": "UI5 Tools: Server > Restart"
+      },
+      {
+        "command": "ui5-tools.server.toggle",
+        "title": "UI5 Tools: Server > Toggle"
       },
       {
         "command": "ui5-tools.configurator.odataProvider",
@@ -65,7 +135,11 @@
       },
       {
         "command": "ui5-tools.builder.build",
-        "title": "UI5 Tools: Builder > Build UI5 Project"
+        "title": "UI5 Tools: Builder > Build UI5 project"
+      },
+      {
+        "command": "ui5-tools.builder.buildAll",
+        "title": "UI5 Tools: Builder > Build all UI5 projects"
       }
     ],
     "configuration": {
@@ -138,7 +212,7 @@
         },
         "ui5-tools.server.watchExtensions": {
           "type": "string",
-          "default": "css,js,json,xml,html,properties",
+          "default": "css,js,json,xml,html,properties,jpg,png,gif",
           "description": "Extensions to listen for live reload"
         },
         "ui5-tools.server.odataProxy": {
@@ -248,43 +322,45 @@
     "test": "node ./test/runTest.js"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.6",
-    "@babel/preset-env": "^7.9.6",
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
     "@types/express": "^4.17.6",
-    "@types/glob": "^7.1.1",
+    "@types/glob": "^7.1.2",
     "@types/mocha": "^7.0.2",
-    "@types/node": "^14.0.4",
+    "@types/node": "^14.0.13",
     "@types/terser": "^3.12.0",
     "@types/vscode": "^1.45.1",
     "@types/apicache": "^1.2.2",
     "babel-loader": "^8.1.0",
-    "eslint": "^7.0.0",
+    "eslint": "^7.2.0",
     "eslint-plugin-prettier": "^3.1.3",
     "glob": "^7.1.6",
-    "mocha": "^7.1.2",
+    "mocha": "^8.0.1",
     "node-loader": "^0.6.0",
     "prettier": "^2.0.5",
     "tslint": "^6.1.2",
-    "typescript": "^3.9.3",
-    "vscode-test": "^1.3.0",
+    "typescript": "^3.9.5",
+    "vscode-test": "^1.4.0",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "agentkeepalive": "^4.1.2",
     "apicache": "^1.5.3",
+    "chokidar": "^3.4.0",
     "connect-livereload": "^0.6.1",
     "dotenv": "^8.2.0",
     "ejs": "^3.1.3",
     "express": "^4.17.1",
     "http-proxy-middleware": "^1.0.4",
-    "less": "^3.11.1",
+    "less": "^3.11.3",
     "less-openui5": "^0.8.6",
     "livereload": "^0.9.1",
     "openui5-preload": "3.0.0",
     "opn": "^6.0.0",
+    "portfinder": "^1.0.26",
     "pretty-data": "^0.40.0",
     "showdown": "^1.9.1",
-    "terser": "^4.7.0"
+    "terser": "^4.7.0",
+    "ws": "^7.3.0"
   }
 }

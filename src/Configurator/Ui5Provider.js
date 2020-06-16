@@ -1,10 +1,10 @@
 import { window, ConfigurationTarget } from 'vscode';
-import Utils from '../Utils/Utils';
+import Config from '../Utils/Config';
 import https from 'https';
 
-async function wizard() {
+export default async function wizard() {
   try {
-    let ui5ProviderValue = Utils.getConfigurationServer('resourcesProxy');
+    let ui5ProviderValue = Config.server('resourcesProxy');
     let quickPickUI5Provider = await window.showQuickPick(
       [
         {
@@ -33,24 +33,20 @@ async function wizard() {
       return;
     }
 
-    await Utils.getConfigurationServer().update(
-      'resourcesProxy',
-      quickPickUI5Provider.label,
-      ConfigurationTarget.Workspace
-    );
+    await Config.server().update('resourcesProxy', quickPickUI5Provider.label, ConfigurationTarget.Workspace);
 
     if (quickPickUI5Provider.label === 'Gateway') {
       let inputBoxResourcesUri = await window.showInputBox({
         placeHolder: 'Enter gateway url',
-        value: Utils.getConfigurationServer('resourcesUri'),
+        value: Config.server('resourcesUri'),
       });
       if (!inputBoxResourcesUri) {
         throw new Error('No gateway url configured');
       }
-      await Utils.getConfigurationServer().update('resourcesUri', inputBoxResourcesUri, ConfigurationTarget.Workspace);
+      await Config.server().update('resourcesUri', inputBoxResourcesUri, ConfigurationTarget.Workspace);
     }
 
-    let ui5Version = Utils.getConfigurationGeneral('ui5Version');
+    let ui5Version = Config.general('ui5Version');
     let error = false,
       versions,
       framework;
@@ -88,7 +84,7 @@ async function wizard() {
       if (!quickPickUI5VersionPatch) {
         throw new Error('No ui5 version selected');
       }
-      await Utils.getConfigurationGeneral().update(
+      await Config.general().update(
         'ui5Version',
         // @ts-ignore
         quickPickUI5VersionPatch.label,
@@ -97,20 +93,23 @@ async function wizard() {
     } else {
       let inputBoxUI5Version = await window.showInputBox({
         placeHolder: `Enter ${framework} version | Actual value: ${ui5Version}`,
-        value: Utils.getConfigurationGeneral('ui5Version'),
+        value: Config.general('ui5Version'),
       });
       if (!inputBoxUI5Version) {
         throw new Error('No version configured');
       }
-      await Utils.getConfigurationGeneral().update('ui5Version', inputBoxUI5Version, ConfigurationTarget.Workspace);
+      await Config.general().update('ui5Version', inputBoxUI5Version, ConfigurationTarget.Workspace);
     }
-  } catch (err) {}
+  } catch (error) {
+    throw new Error(error);
+  }
+  return true;
 }
 
 async function getVersions(url) {
+  let versions = [];
   try {
     let versionsValues = await Promise.all([getVersionOverview(url), getNeoApp(url)]);
-    let versions = [];
     let mapVersions = {};
     versionsValues[0].versions.forEach((versionData) => {
       if (versionData.version.length > 1) {
@@ -155,10 +154,10 @@ async function getVersions(url) {
         }
       }
     });
-    return versions;
   } catch (err) {
     throw new Error(err);
   }
+  return versions;
 }
 
 function getVersionOverview(url) {
@@ -188,7 +187,7 @@ function getVersionOverview(url) {
         }
       )
       .on('error', (e) => {
-        reject();
+        reject(e);
       });
   });
 }
@@ -220,11 +219,7 @@ function getNeoApp(url) {
         }
       )
       .on('error', (e) => {
-        reject();
+        reject(e);
       });
   });
 }
-
-export default {
-  wizard,
-};

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ui5-tools Workspace</title>
+
+    <script
+      id="sap-ui-bootstrap"
+      src="resources/sap-ui-core.js"
+      data-sap-ui-libs="sap.m"
+      data-sap-ui-xx-waitForTheme="true"
+      data-sap-ui-theme="<%= theme %>"
+      data-sap-ui-resourceRoots='{
+        "ui5tools": "./"
+      }'
+      data-sap-ui-compatVersion="edge"
+      data-sap-ui-xx-bindingSyntax="complex"
+      <% if(edge) { %>
+        data-sap-ui-onInit="module:sap/ui/core/ComponentSupport"
+        data-sap-ui-async="true"
+      <% } else { %>
+        data-sap-ui-preload="async"
+      <% } %>
+    >
+    </script>
+
+    <% if(!edge) { %>
+      <script type="text/javascript">
+        sap.ui.getCore().attachInit(function () {
+          sap.ui.require(['sap/ui/core/ComponentContainer'], function (ComponentContainer) {
+            new ComponentContainer({
+              name: 'ui5tools',
+              height: '100%',
+              width: '100%',
+              async: true,
+              manifest: true,
+            }).placeAt('content');
+          });
+        });
+      </script>
+    <% } %>
+  </head>
+
+  <body class="sapUiBody">
+    <% if(edge) { %>
+      <div data-sap-ui-component data-name="ui5tools" data-id="container" data-settings='{"id" : "ui5tools"}'></div>
+    <% } else { %>
+      <div id="content"></div>
+    <% } %>
+  </body>
+</html>

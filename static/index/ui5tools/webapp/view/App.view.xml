@@ -17,7 +17,7 @@
                     </layoutData>
                 </Button>
 
-                <Title text="{ui5tools>/config/serverName}">
+                <Title text="{ui5tools>/config/server/name}">
                     <layoutData>
                         <OverflowToolbarLayoutData priority="NeverOverflow" />
                     </layoutData>
