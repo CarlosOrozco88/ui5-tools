@@ -60,7 +60,6 @@ export default {
     if (this.serverMode !== SERVER_MODES.PROD) {
       await this.stop();
     }
-    //await Builder.buildAllProjects();
     this.serverMode = SERVER_MODES.PROD;
     await this.start({ restarting, cleanCache });
     return;

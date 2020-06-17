@@ -1,5 +1,7 @@
 import { createProxyMiddleware } from 'http-proxy-middleware';
+
 import Config from '../../Utils/Config';
+import Utils from '../../Utils/Utils';
 
 export default {
   async set(serverApp) {
@@ -57,6 +59,7 @@ export default {
   },
 
   getODATAAuth(index) {
+    Utils.loadEnv();
     let auth = undefined;
 
     let userKey = 'UI5TOOLS_ODATA_USER';

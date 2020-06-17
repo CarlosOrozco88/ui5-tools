@@ -487,7 +487,7 @@ export default {
             dest: destPath,
             compatVersion: compatVersion,
             compress: true,
-            verbose: false,
+            log: false,
             components: !isLibrary ? namespace : false,
             libraries: isLibrary ? namespace : false,
           });

@@ -26,6 +26,12 @@ export async function activate(context) {
   // Configure commands
   subscriptions.push(registerCommand('ui5-tools.server.startDevelopment', () => Server.startDevelopment()));
   subscriptions.push(registerCommand('ui5-tools.server.startProduction', () => Server.startProduction()));
+  subscriptions.push(
+    registerCommand('ui5-tools.server.startBuildProduction', async () => {
+      await Builder.buildAllProjects();
+      Server.startProduction();
+    })
+  );
   subscriptions.push(registerCommand('ui5-tools.server.stop', () => Server.stop()));
   subscriptions.push(registerCommand('ui5-tools.server.restart', () => Server.restart()));
   subscriptions.push(registerCommand('ui5-tools.server.toggle', () => Server.toggle()));
