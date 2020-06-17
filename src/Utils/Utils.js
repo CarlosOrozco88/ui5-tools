@@ -111,7 +111,13 @@ export default {
 
   getFramework() {
     let resourcesProxy = Config.server('resourcesProxy');
-    return resourcesProxy.indexOf('OpenUI5') >= 0 ? 'openui5' : 'sapui5';
+    let framework = '';
+    if (resourcesProxy.indexOf('OpenUI5') >= 0) {
+      framework = 'openui5';
+    } else if (resourcesProxy.indexOf('SAPUI5') >= 0 || resourcesProxy === 'Gateway') {
+      framework = 'sapui5';
+    }
+    return framework;
   },
 
   async getManifest(uriOrManifest) {

@@ -33,22 +33,18 @@ export async function activate(context) {
   subscriptions.push(registerCommand('ui5-tools.builder.build', () => Builder.askProjectToBuild()));
   subscriptions.push(registerCommand('ui5-tools.builder.buildAll', () => Builder.buildAllProjects()));
 
-  subscriptions.push(registerCommand('ui5-tools.configurator.odataProvider', () => OdataProvider()));
-  subscriptions.push(registerCommand('ui5-tools.configurator.ui5Provider', () => Ui5Provider()));
-  subscriptions.push(registerCommand('ui5-tools.configurator.replaceStrings', () => ReplaceStrings()));
+  subscriptions.push(registerCommand('ui5-tools.configurator.odataProvider', () => OdataProvider.wizard()));
+  subscriptions.push(registerCommand('ui5-tools.configurator.ui5Provider', () => Ui5Provider.wizard()));
+  subscriptions.push(registerCommand('ui5-tools.configurator.replaceStrings', () => ReplaceStrings.wizard()));
 
   // Configure listeners
   workspace.onDidChangeConfiguration((event) => onDidChangeConfiguration(event));
-  workspace.onDidChangeWorkspaceFolders((event) => onDidChangeWorkspaceFolders(event));
   workspace.onDidSaveTextDocument((event) => onDidSaveTextDocument(event));
 }
 
 async function onDidChangeConfiguration(event) {
   let cleanCache = event.affectsConfiguration('ui5-tools.ui5Version');
   Server.restart({ cleanCache: cleanCache });
-}
-async function onDidChangeWorkspaceFolders(event) {
-  Server.restart({ cleanCache: false });
 }
 
 async function onDidSaveTextDocument(event) {

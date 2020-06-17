@@ -1,12 +1,31 @@
 import { window, ConfigurationTarget } from 'vscode';
-import Config from '../Utils/Config';
 import https from 'https';
 
-export default async function wizard() {
-  try {
-    let ui5ProviderValue = Config.server('resourcesProxy');
-    let quickPickUI5Provider = await window.showQuickPick(
-      [
+import Config from '../Utils/Config';
+import Utils from '../Utils/Utils';
+
+export default {
+  async wizard() {
+    try {
+      let ui5Provider = await this.quickPickUi5Provider();
+      if (ui5Provider === 'Gateway') {
+        let gatewayUri = await this.inputBoxGatewayUri();
+      }
+      if (ui5Provider !== 'None') {
+        let ui5Version = await this.setUi5Version();
+      }
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
+
+  async quickPickUi5Provider() {
+    return new Promise(async (resolv, reject) => {
+      let ui5ProviderValue = Config.server('resourcesProxy');
+
+      let quickpick = await window.createQuickPick();
+      quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 provider';
+      quickpick.items = [
         {
           description: 'Use resources from gateway',
           label: 'Gateway',
@@ -23,152 +42,224 @@ export default async function wizard() {
           description: 'Without resources proxy',
           label: 'None',
         },
-      ],
-      {
-        placeHolder: `Select odata provider (proxy all /sap) | Actual value: ${ui5ProviderValue}`,
-        canPickMany: false,
-      }
-    );
-    if (!quickPickUI5Provider) {
-      return;
-    }
-
-    await Config.server().update('resourcesProxy', quickPickUI5Provider.label, ConfigurationTarget.Workspace);
-
-    if (quickPickUI5Provider.label === 'Gateway') {
-      let inputBoxResourcesUri = await window.showInputBox({
-        placeHolder: 'Enter gateway url',
-        value: Config.server('resourcesUri'),
-      });
-      if (!inputBoxResourcesUri) {
-        throw new Error('No gateway url configured');
-      }
-      await Config.server().update('resourcesUri', inputBoxResourcesUri, ConfigurationTarget.Workspace);
-    }
-
-    let ui5Version = Config.general('ui5Version');
-    let error = false,
-      versions,
-      framework;
-    try {
-      let url = `https://openui5.hana.ondemand.com/`;
-      framework = 'None';
-      if (quickPickUI5Provider.label === 'Gateway' || quickPickUI5Provider.label === 'CDN SAPUI5') {
-        url = `https://sapui5.hana.ondemand.com/`;
-        framework = 'SAPUI5';
-      } else if (quickPickUI5Provider.label === 'CDN OpenUI5') {
-        framework = 'OpenUI5';
-      } else {
-        return;
-      }
-      versions = await getVersions(url);
-    } catch (err) {
-      error = true;
-    }
-    if (!error) {
-      let quickPickUI5Version = await window.showQuickPick(versions, {
-        placeHolder: `Select ${framework} version | Actual value: ${ui5Version}`,
-        canPickMany: false,
-      });
-      if (!quickPickUI5Version) {
-        throw new Error('No major version selected');
-      }
-      let versionPatch = versions.find((versionData) => {
-        return versionData === quickPickUI5Version;
-      });
-
-      let quickPickUI5VersionPatch = await window.showQuickPick(versionPatch.patches, {
-        placeHolder: `Select ${framework} patch | Actual value: ${ui5Version}`,
-        canPickMany: false,
-      });
-      if (!quickPickUI5VersionPatch) {
-        throw new Error('No ui5 version selected');
-      }
-      await Config.general().update(
-        'ui5Version',
-        // @ts-ignore
-        quickPickUI5VersionPatch.label,
-        ConfigurationTarget.Workspace
-      );
-    } else {
-      let inputBoxUI5Version = await window.showInputBox({
-        placeHolder: `Enter ${framework} version | Actual value: ${ui5Version}`,
-        value: Config.general('ui5Version'),
-      });
-      if (!inputBoxUI5Version) {
-        throw new Error('No version configured');
-      }
-      await Config.general().update('ui5Version', inputBoxUI5Version, ConfigurationTarget.Workspace);
-    }
-  } catch (error) {
-    throw new Error(error);
-  }
-  return true;
-}
-
-async function getVersions(url) {
-  let versions = [];
-  try {
-    let versionsValues = await Promise.all([getVersionOverview(url), getNeoApp(url)]);
-    let mapVersions = {};
-    versionsValues[0].versions.forEach((versionData) => {
-      if (versionData.version.length > 1) {
-        let cleanVersion = versionData.version.replace('.*', '');
-        let description = versionData.eom ? versionData.eom : versionData.support;
-        if (versionData.lts !== undefined) {
-          description = versionData.lts ? versionData.eom : versionData.support + ' ' + versionData.eom;
-        }
-        let cVersion = {
-          label: cleanVersion,
-          description: description,
-          patches: [],
-        };
-        mapVersions[cleanVersion] = cVersion;
-        versions.push(cVersion);
-      }
-    });
-    versionsValues[1].routes.forEach((versionData) => {
-      if (versionData.path.length > 1) {
-        let cleanVersion = versionData.path.replace('/', '');
-        let cleanVersionArray = cleanVersion.split('.');
-        cleanVersionArray.pop();
-        let cleanVersionMaster = cleanVersionArray.join('.');
-        if (mapVersions[cleanVersionMaster]) {
-          mapVersions[cleanVersionMaster].patches.push({
-            label: cleanVersion,
-            description: mapVersions[cleanVersionMaster].description,
-          });
+      ];
+      quickpick.placeholder = ui5ProviderValue;
+      quickpick.canSelectMany = false;
+      quickpick.onDidAccept(async () => {
+        if (quickpick.selectedItems.length) {
+          let value = quickpick.selectedItems[0].label;
+          await Config.server().update('resourcesProxy', value, ConfigurationTarget.Workspace);
+          resolv(value);
         } else {
-          let cVersion = {
-            label: cleanVersionMaster,
-            description: 'Out of Maintenance',
-            patches: [
-              {
-                label: cleanVersion,
-                description: 'Out of Maintenance',
-              },
-            ],
-          };
-          mapVersions[cleanVersionMaster] = cVersion;
-          versions.push(cVersion);
+          reject('No ui5 provider configured');
         }
+        quickpick.hide();
+      });
+      quickpick.show();
+    });
+  },
+
+  async inputBoxGatewayUri() {
+    return new Promise(async (resolv, reject) => {
+      let gatewayUri = Config.server('resourcesUri');
+      let inputBox = await window.createInputBox();
+      inputBox.title = 'ui5-tools > Configurator > Ui5Provider: Enter gateway url';
+      inputBox.step = 1;
+      inputBox.totalSteps = 1;
+      inputBox.placeholder = gatewayUri;
+      inputBox.value = gatewayUri;
+      inputBox.ignoreFocusOut = true;
+      inputBox.onDidAccept(async () => {
+        if (inputBox.value) {
+          await Config.server().update('resourcesUri', inputBox.value, ConfigurationTarget.Workspace);
+          resolv(inputBox.value);
+        } else {
+          reject('No gateway url configured');
+        }
+        inputBox.hide();
+      });
+      inputBox.show();
+    });
+  },
+
+  async setUi5Version() {
+    let versions;
+    try {
+      versions = await this.getUi5Versions();
+    } catch (error) {
+      throw new Error(error);
+    }
+    return new Promise(async (resolv, reject) => {
+      let ui5Version;
+      try {
+        let ui5Version;
+        if (versions) {
+          ui5Version = await this.quickPickUi5Version(versions);
+        } else {
+          ui5Version = await this.inputBoxUi5Version();
+        }
+        await Config.general().update('ui5Version', ui5Version, ConfigurationTarget.Workspace);
+        resolv(ui5Version);
+      } catch (error) {
+        reject(error);
+      }
+      resolv(ui5Version);
+    });
+  },
+
+  async quickPickUi5Version(versionsMajor) {
+    return new Promise(async (resolv, reject) => {
+      try {
+        let major = await this.quickPickUi5VersionMajor(versionsMajor);
+        let versionsMinor = versionsMajor.find((versionData) => {
+          return versionData.label === major;
+        });
+        let version = await this.quickPickUi5VersionMinor(versionsMinor.patches);
+
+        resolv(version);
+      } catch (error) {
+        reject(error);
       }
     });
-  } catch (err) {
-    throw new Error(err);
-  }
-  return versions;
-}
+  },
 
-function getVersionOverview(url) {
-  return new Promise((resolv, reject) => {
-    https
-      .get(
-        `${url}versionoverview.json`,
-        {
-          timeout: 1000 * 5, // 5 seconds
-        },
-        (res) => {
+  async quickPickUi5VersionMajor(versionsMajor) {
+    return new Promise(async (resolv, reject) => {
+      let ui5Version = Config.general('ui5Version');
+
+      let quickpick = await window.createQuickPick();
+      quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 major version';
+      quickpick.items = versionsMajor;
+      quickpick.placeholder = ui5Version;
+      quickpick.step = 1;
+      quickpick.totalSteps = 2;
+      quickpick.canSelectMany = false;
+      quickpick.onDidAccept(async () => {
+        if (quickpick.selectedItems.length) {
+          let value = quickpick.selectedItems[0].label;
+          resolv(value);
+        } else {
+          reject('No major version selected');
+        }
+        quickpick.hide();
+      });
+      quickpick.show();
+    });
+  },
+
+  async quickPickUi5VersionMinor(versionsMinor) {
+    return new Promise(async (resolv, reject) => {
+      let ui5Version = Config.general('ui5Version');
+
+      let quickpick = await window.createQuickPick();
+      quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 minor version';
+      quickpick.items = versionsMinor;
+      quickpick.placeholder = ui5Version;
+      quickpick.step = 2;
+      quickpick.totalSteps = 2;
+      quickpick.canSelectMany = false;
+      quickpick.onDidAccept(async () => {
+        if (quickpick.selectedItems.length) {
+          let value = quickpick.selectedItems[0].label;
+          resolv(value);
+        } else {
+          reject('No minor version selected');
+        }
+        quickpick.hide();
+      });
+      quickpick.show();
+    });
+  },
+
+  async inputBoxUi5Version() {
+    return new Promise(async (resolv, reject) => {
+      let framework = Utils.getFramework();
+      let ui5Version = Config.general('ui5Version');
+
+      let inputBox = await window.createInputBox();
+      inputBox.title = `ui5-tools > Configurator > Ui5Provider: Enter ${framework} versions`;
+      inputBox.step = 1;
+      inputBox.totalSteps = 1;
+      inputBox.placeholder = ui5Version;
+      inputBox.value = ui5Version;
+      inputBox.ignoreFocusOut = true;
+      inputBox.onDidAccept(async () => {
+        if (inputBox.value) {
+          resolv(inputBox.value);
+        } else {
+          reject('No version configured');
+        }
+        inputBox.hide();
+      });
+      inputBox.show();
+    });
+  },
+
+  async getUi5Versions(framework = Utils.getFramework()) {
+    let versions = [];
+    try {
+      if (framework !== 'None') {
+        let versionsValues = await Promise.all([this.getVersionOverview(framework), this.getNeoApp(framework)]);
+        let mapVersions = {};
+        versionsValues[0].versions.forEach((versionData) => {
+          if (versionData.version.length > 1) {
+            let cleanVersion = versionData.version.replace('.*', '');
+            let description = versionData.eom ? versionData.eom : versionData.support;
+            if (versionData.lts !== undefined) {
+              description = versionData.lts ? versionData.eom : versionData.support + ' ' + versionData.eom;
+            }
+            let cVersion = {
+              label: cleanVersion,
+              description: description,
+              patches: [],
+            };
+            mapVersions[cleanVersion] = cVersion;
+            versions.push(cVersion);
+          }
+        });
+        versionsValues[1].routes.forEach((versionData) => {
+          if (versionData.path.length > 1) {
+            let cleanVersion = versionData.path.replace('/', '');
+            let cleanVersionArray = cleanVersion.split('.');
+            cleanVersionArray.pop();
+            let cleanVersionMaster = cleanVersionArray.join('.');
+            if (mapVersions[cleanVersionMaster]) {
+              mapVersions[cleanVersionMaster].patches.push({
+                label: cleanVersion,
+                description: mapVersions[cleanVersionMaster].description,
+              });
+            } else {
+              let cVersion = {
+                label: cleanVersionMaster,
+                description: 'Out of Maintenance',
+                patches: [
+                  {
+                    label: cleanVersion,
+                    description: 'Out of Maintenance',
+                  },
+                ],
+              };
+              mapVersions[cleanVersionMaster] = cVersion;
+              versions.push(cVersion);
+            }
+          }
+        });
+      }
+    } catch (err) {
+      throw new Error(err);
+    }
+
+    return versions;
+  },
+
+  async getVersionOverview(framework = 'sapui5') {
+    return new Promise((resolv, reject) => {
+      let url = `https://${framework}.hana.ondemand.com/versionoverview.json`;
+      let options = {
+        timeout: 5000,
+      };
+      https
+        .get(url, options, (res) => {
           if (res.statusCode !== 200) {
             reject();
           } else {
@@ -184,23 +275,21 @@ function getVersionOverview(url) {
               }
             });
           }
-        }
-      )
-      .on('error', (e) => {
-        reject(e);
-      });
-  });
-}
+        })
+        .on('error', (e) => {
+          reject(e);
+        });
+    });
+  },
 
-function getNeoApp(url) {
-  return new Promise((resolv, reject) => {
-    https
-      .get(
-        `${url}neo-app.json`,
-        {
-          timeout: 1000 * 5, // 5 seconds
-        },
-        (res) => {
+  async getNeoApp(framework = 'sapui5') {
+    return new Promise((resolv, reject) => {
+      let url = `https://${framework}.hana.ondemand.com/neo-app.json`;
+      let options = {
+        timeout: 5000,
+      };
+      https
+        .get(url, options, (res) => {
           if (res.statusCode !== 200) {
             reject();
           } else {
@@ -216,10 +305,10 @@ function getNeoApp(url) {
               }
             });
           }
-        }
-      )
-      .on('error', (e) => {
-        reject(e);
-      });
-  });
-}
+        })
+        .on('error', (e) => {
+          reject(e);
+        });
+    });
+  },
+};
