@@ -29,13 +29,9 @@ export default {
         if (targetUri) {
           proxy = createProxyMiddleware({
             pathRewrite(path, req) {
-              let nPath = path;
-              if (path.indexOf('/resources/') === 0) {
-                nPath = `/sap/public/bc/ui5_ui5/1${path}`;
-              } else {
-                nPath = `/sap/bc/ui5_ui5/sap${path}`;
-              }
-              return nPath;
+              let basePath = '/sap/public/bc/ui5_ui5/1';
+              let resourcesPath = path.slice(path.indexOf('/resources/'), path.length);
+              return `${basePath}${resourcesPath}`;
             },
             target: targetUri,
             secure: false, //targetUri.indexOf('https') == 0,
@@ -54,11 +50,8 @@ export default {
         if (ui5Version) {
           proxy = createProxyMiddleware({
             pathRewrite(path, req) {
-              let nPath = path;
-              if (path.indexOf('/resources/') > 0) {
-                nPath = path.slice(path.indexOf('/resources/'), path.length);
-              }
-              return nPath;
+              let resourcesPath = path.slice(path.indexOf('/resources/'), path.length);
+              return resourcesPath;
             },
             target: targetUri,
             secure: false, //targetUri.indexOf('https') == 0,
@@ -69,20 +62,18 @@ export default {
           serverApp.use(['/resources', '/**/resources'], cacheResources, proxy);
         }
 
+        let testUrl = `${targetUri}resources/sap-ui-core.js`;
+        let options = {
+          timeout: 5000,
+        };
         https
-          .get(
-            `${targetUri}resources/sap-ui-core.js`,
-            {
-              timeout: 1000 * 5, // 5 seconds to check if ui5 is available
-            },
-            ({ statusCode }) => {
-              if (statusCode !== 200) {
-                let error = `Error: Unable to get sap-ui-core.js, framework ${framework} does not have ${ui5Version} available at CDN.`;
+          .get(testUrl, options, ({ statusCode }) => {
+            if (statusCode !== 200) {
+              let error = `Error: Unable to get sap-ui-core.js, framework ${framework} does not have ${ui5Version} available at CDN.`;
 
-                window.showErrorMessage(error);
-              }
+              window.showErrorMessage(error);
             }
-          )
+          })
           .on('error', (error) => {
             window.showErrorMessage(error.message);
           });

@@ -23,7 +23,7 @@ export default {
         let portLiveReload = await portfinder.getPortPromise({
           port: 35729,
         });
-        this.middleware(serverApp, portLiveReload);
+        this.middleware({ serverApp, portLiveReload, ui5Apps });
         await this.createServer(portLiveReload);
         resolv();
       } catch (error) {
@@ -116,10 +116,18 @@ export default {
     }
   },
 
-  middleware(serverApp, portLiveReload) {
+  middleware({ serverApp = undefined, portLiveReload = 35729, ui5Apps = [] } = {}) {
+    let include = [];
+
+    ui5Apps.forEach((ui5App) => {
+      include.push(new RegExp(`^/${ui5App.appServerPath}/(.*)`, 'g'));
+    });
+    // Include only workspace projects
+
     serverApp.use(
       connectLiveReload({
         port: portLiveReload,
+        include: include,
       })
     );
   },
@@ -196,7 +204,7 @@ export default {
   },
 
   debug(message) {
-    //console.log(message);
+    console.log(message);
     return message;
   },
 };
