@@ -9,10 +9,10 @@ export default {
     try {
       let ui5Provider = await this.quickPickUi5Provider();
       if (ui5Provider === 'Gateway') {
-        let gatewayUri = await this.inputBoxGatewayUri();
+        await this.inputBoxGatewayUri();
       }
       if (ui5Provider !== 'None') {
-        let ui5Version = await this.setUi5Version();
+        await this.setUi5Version();
       }
     } catch (error) {
       throw new Error(error);
