@@ -1,4 +1,4 @@
-## 0.2.1 (15-06-2020)
+## 0.2.1 (17-06-2020)
 
 - SSL proxy verification default to false
 - Replace strings in builder
@@ -8,6 +8,7 @@
 - New keymaps support
 - Major refactor
 - Implemented port finder
+- PDF corrupted error solved
 
 ## 0.2.0 (09-06-2020)
 

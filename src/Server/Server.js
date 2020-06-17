@@ -2,21 +2,23 @@ import express from 'express';
 import opn from 'opn';
 import http from 'http';
 import https from 'https';
+import path from 'path';
 import portfinder from 'portfinder';
 
 import LiveServer from './LiveServer';
 import StatusBar from '../StatusBar/StatusBar';
 import Utils from '../Utils/Utils';
 import Config from '../Utils/Config';
-import Builder from '../Builder/Builder';
 import OdataProxy from './Proxy/Odata';
 import ResourcesProxy from './Proxy/Resources';
 import IndexUI5Tools from './Index/UI5Tools';
 import IndexLaunchpad from './Index/Launchpad';
 import ejs from 'ejs';
+import { url } from 'inspector';
 
 const expressApp = express();
 expressApp.set('view engine', 'ejs');
+expressApp.disable('x-powered-by');
 // @ts-ignore
 expressApp.engine('ejs', ejs.__express);
 

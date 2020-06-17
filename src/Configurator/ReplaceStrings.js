@@ -58,16 +58,16 @@ export default {
           if (keyValue) {
             let newReplaceKeysValues = Config.builder('replaceKeysValues');
             let mapKeys = newReplaceKeysValues.map((keyValue) => keyValue.key);
-            if (mapKeys.indexOf(keyValue.groups.key) === -1) {
+            if (mapKeys.includes(keyValue.groups.key)) {
+              window.showErrorMessage(`${keyValue.groups.key} already exists`);
+              quickPickValueKey.hide();
+              resolv(true);
+            } else {
               newReplaceKeysValues.push({
                 key: keyValue.groups.key,
                 value: keyValue.groups.value,
               });
               await Config.builder().update('replaceKeysValues', newReplaceKeysValues, ConfigurationTarget.Workspace);
-              quickPickValueKey.hide();
-              resolv(true);
-            } else {
-              window.showErrorMessage(`${keyValue.groups.key} already exists`);
               quickPickValueKey.hide();
               resolv(true);
             }

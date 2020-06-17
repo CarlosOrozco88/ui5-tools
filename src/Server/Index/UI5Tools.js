@@ -18,7 +18,7 @@ export default {
     });
     if (!existBasePathInApp) {
       serverApp.get(`/`, (req, res) => {
-        res.redirect(`/${ui5ToolsIndex}`);
+        res.redirect(`/${ui5ToolsIndex}/`);
       });
     }
 

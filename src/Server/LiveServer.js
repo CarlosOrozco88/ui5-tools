@@ -119,7 +119,6 @@ export default {
   middleware(serverApp, portLiveReload) {
     serverApp.use(
       connectLiveReload({
-        ignore: [],
         port: portLiveReload,
       })
     );
@@ -150,7 +149,7 @@ export default {
     let watchExtensions = Config.server('watchExtensions').replace(/\\s/g, '');
     let watchExtensionsArray = watchExtensions.split(',');
     let fileExtension = path.extname(filePath).replace('.', '');
-    if (watchExtensionsArray.indexOf(fileExtension) >= 0) {
+    if (watchExtensionsArray.includes(fileExtension)) {
       this.refresh(filePath);
     }
   },
