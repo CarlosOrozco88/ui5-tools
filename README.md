@@ -27,7 +27,7 @@ You can find examples of vscode workspace configuration in [examples](examples) 
 - Server uses **folder hierarchy**. For product apps and Z apps, is possible to emulate gateway bsp paths
 - Start server in **development mode** or **production mode** (launches `distFolder` folder of each project)
 
-#### Build
+#### Builder
 
 - **Component-preload.js**, checking configured ui5 version for correct build.
 - **Dbg** files, configurable
