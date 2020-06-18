@@ -18,6 +18,7 @@ You can find examples of vscode workspace configuration in [examples](examples) 
 #### Server
 
 - Configurable **proxy** to one o multiple **odata service** (Gateway, Other, None)
+- Supports .env file for odata service authentication. `UI5TOOLS_ODATA_USER - UI5TOOLS_ODATA_PASSWORD`, `UI5TOOLS_ODATA_USER_2 - UI5TOOLS_ODATA_PASSWORD_2`, etc.
 - Configurable **proxy** to **resources** (Gateway, CDN SAPUI5, CDN OpenUI5, None)
 - Resources proxy has** built in server cache**
 - Configurable UI5 version

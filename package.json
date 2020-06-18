@@ -365,7 +365,7 @@
     "less": "^3.11.3",
     "less-openui5": "^0.8.6",
     "livereload": "^0.9.1",
-    "openui5-preload": "3.0.0",
+    "openui5-preload": "3.1.0",
     "opn": "^6.0.0",
     "portfinder": "^1.0.26",
     "pretty-data": "^0.40.0",
