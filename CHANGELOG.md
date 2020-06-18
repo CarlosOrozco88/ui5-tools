@@ -1,3 +1,7 @@
+## 0.3.1 (18-06-2020)
+
+- Livereload bug solved
+
 ## 0.3.0 (17-06-2020)
 
 - SSL proxy verification default to false
