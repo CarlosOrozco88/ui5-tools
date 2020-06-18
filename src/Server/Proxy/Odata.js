@@ -14,11 +14,11 @@ export default {
         targetUri = Config.server('odataUri');
 
         if (targetUri) {
-          let targets = targetUri.split(',');
+          let targets = targetUri.replace(/\\s/g).split(',');
           proxy = createProxyMiddleware({
             pathRewrite: {},
-            target: targets[0].trim(),
-            secure: targets[0].trim().indexOf('https') == 0,
+            target: targets[0],
+            secure: targets[0].indexOf('https') == 0,
             changeOrigin: true,
             auth: this.getODATAAuth(),
             logLevel: 'error',
@@ -30,17 +30,17 @@ export default {
         targetUri = Config.server('odataUri');
 
         if (targetUri) {
-          let targets = targetUri.split(',');
-          let mpaths = odataMountPath.split(',');
+          let targets = targetUri.replace(/\\s/g).split(',');
+          let mpaths = odataMountPath.replace(/\\s/g).split(',');
           for (let i = 0; i < targets.length; i++) {
             if (mpaths && mpaths[i]) {
               proxy = createProxyMiddleware({
                 pathRewrite: function (i, path, req) {
-                  let nPath = path.replace(mpaths[i].trim(), '');
+                  let nPath = path.replace(mpaths[i], '');
                   return nPath;
                 }.bind(this, i),
-                target: targets[i].trim(),
-                secure: targets[i].trim().indexOf('https') == 0,
+                target: targets[i],
+                secure: targets[i].indexOf('https') == 0,
                 changeOrigin: true,
                 auth: this.getODATAAuth(i),
                 logLevel: 'error',

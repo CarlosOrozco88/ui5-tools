@@ -120,14 +120,35 @@ export default {
     let include = [];
 
     ui5Apps.forEach((ui5App) => {
-      include.push(new RegExp(`^/${ui5App.appServerPath}/(.*)`, 'g'));
+      include.push(new RegExp(`^${ui5App.appServerPath}(.*)`, 'g'));
     });
     // Include only workspace projects
+    let ignore = [
+      /\.js(\?.*)?$/,
+      /\.css(\?.*)?$/,
+      /\.svg(\?.*)?$/,
+      /\.ico(\?.*)?$/,
+      /\.woff(\?.*)?$/,
+      /\.png(\?.*)?$/,
+      /\.jpg(\?.*)?$/,
+      /\.jpeg(\?.*)?$/,
+      /\.gif(\?.*)?$/,
+      /\.pdf(\?.*)?$/,
+      /^\/sap\/(.*)/,
+      /(.*)\/resources\/(.*)/,
+    ];
+    let odataM;
+    let odataMountPath = Config.server('odataMountPath');
+    let mpaths = odataMountPath.replace(/\\s/g).split(',');
+    mpaths.forEach((path) => {
+      let re = new RegExp(`^${path}`, 'g');
+      ignore.push(re);
+    });
 
     serverApp.use(
       connectLiveReload({
         port: portLiveReload,
-        include: include,
+        ignore: ignore,
       })
     );
   },
