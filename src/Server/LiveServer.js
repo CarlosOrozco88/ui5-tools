@@ -117,11 +117,11 @@ export default {
   },
 
   middleware({ serverApp = undefined, portLiveReload = 35729, ui5Apps = [] } = {}) {
-    let include = [];
+    // let include = [];
 
-    ui5Apps.forEach((ui5App) => {
-      include.push(new RegExp(`^${ui5App.appServerPath}(.*)`, 'g'));
-    });
+    // ui5Apps.forEach((ui5App) => {
+    //   include.push(new RegExp(`^${ui5App.appServerPath}(.*)`, 'g'));
+    // });
     // Include only workspace projects
     let ignore = [
       /\.js(\?.*)?$/,
@@ -137,7 +137,7 @@ export default {
       /^\/sap\/(.*)/,
       /(.*)\/resources\/(.*)/,
     ];
-    let odataM;
+
     let odataMountPath = Config.server('odataMountPath');
     let mpaths = odataMountPath.replace(/\\s/g).split(',');
     mpaths.forEach((path) => {
