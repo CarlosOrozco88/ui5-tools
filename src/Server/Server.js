@@ -2,7 +2,6 @@ import express from 'express';
 import opn from 'opn';
 import http from 'http';
 import https from 'https';
-import path from 'path';
 import portfinder from 'portfinder';
 
 import LiveServer from './LiveServer';
@@ -14,7 +13,6 @@ import ResourcesProxy from './Proxy/Resources';
 import IndexUI5Tools from './Index/UI5Tools';
 import IndexLaunchpad from './Index/Launchpad';
 import ejs from 'ejs';
-import { url } from 'inspector';
 
 const expressApp = express();
 expressApp.set('view engine', 'ejs');
