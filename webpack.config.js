@@ -19,18 +19,17 @@ const config = {
     bufferutil: 'commonjs bufferutil',
     'utf-8-validate': 'commonjs utf-8-validate',
     'clean-css': 'commonjs clean-css',
+    babylon: 'commonjs babylon',
   },
   resolve: {
-    extensions: ['.js'],
+    extensions: ['.js', '.json'],
   },
   module: {
     rules: [
       {
         test: /\.js$/,
         exclude: /(node_modules)/,
-        use: {
-          loader: 'babel-loader',
-        },
+        use: 'babel-loader',
       },
       {
         test: /\.node$/,

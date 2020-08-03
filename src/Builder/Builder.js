@@ -1,6 +1,7 @@
 import { workspace, window, RelativePattern, ProgressLocation, Progress, Uri, TextDocument } from 'vscode';
 import path from 'path';
 
+import os from 'os';
 import preload from 'openui5-preload';
 import terser from 'terser';
 import { pd as prettyData } from 'pretty-data';
@@ -164,10 +165,18 @@ export default {
       progress?.report({ increment: 10 * multiplier, message: `${folderName}${message}` });
       await this.compileLess(srcPath, destPath, manifest);
 
+      // babel js files
+      let bBabelSources = Config.builder('babelSources');
+      message = bBabelSources ? `Babelify js files` : message;
+      progress?.report({ increment: 5 * multiplier, message: `${folderName}${message}` });
+      if (bBabelSources) {
+        await this.babelifyJSFiles(destPath);
+      }
+
       // create dbg files
       let bDebugSources = Config.builder('debugSources');
       message = bDebugSources ? `Creating dbg files` : message;
-      progress?.report({ increment: 10 * multiplier, message: `${folderName}${message}` });
+      progress?.report({ increment: 5 * multiplier, message: `${folderName}${message}` });
       if (bDebugSources) {
         await this.createDebugFiles(destPath);
       }
@@ -344,6 +353,58 @@ export default {
             await workspace.fs.writeFile(Uri.file(cFSPath), Buffer.from(output.css));
           }
         }
+      }
+    }
+    return true;
+  },
+
+  /**
+   * Babelify js files
+   * @param {string} folderPath folder uri
+   */
+  async babelifyJSFiles(folderPath) {
+    if (Config.builder('babelSources')) {
+      try {
+        // Create -dbg files
+        let patternJs = new RelativePattern(folderPath, `**/*.js`);
+        let jsFiles = await workspace.findFiles(patternJs);
+
+        for (let i = 0; i < jsFiles.length; i++) {
+          let uriOrigJs = Uri.file(jsFiles[i].fsPath);
+          let jsFileRaw = await workspace.fs.readFile(uriOrigJs);
+
+          //@ts-ignore
+          let babelified = await require('@babel/core').transformAsync(jsFileRaw.toString(), {
+            plugins: [
+              [
+                //@ts-ignore
+                require('babel-plugin-transform-async-to-promises'),
+                {
+                  inlineHelpers: true,
+                },
+              ],
+              //@ts-ignore
+              [require('babel-plugin-transform-remove-console')],
+            ],
+            presets: [
+              [
+                //@ts-ignore
+                require('@babel/preset-env'),
+                {
+                  targets: {
+                    browsers: ['>0.25%', 'ie 11', 'not op_mini all'],
+                  },
+                },
+              ],
+            ],
+          });
+          var babelifiedCode = babelified.code.replace(/\r\n|\r|\n/g, os.EOL);
+
+          await workspace.fs.writeFile(uriOrigJs, Buffer.from(babelifiedCode));
+          console.log(babelifiedCode);
+        }
+      } catch (error) {
+        throw new Error(error);
       }
     }
     return true;

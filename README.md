@@ -56,6 +56,7 @@ TBD
 - `ui5-tools.server.startOnLaunch`: Start server at launch vscode | default: `false`
 - `ui5-tools.server.openBrowser`: Open browser al launch server | default: `true`
 - `ui5-tools.server.watch`: Activate live reload | default: `true`
+- `ui5-tools.server.timeout`: Server timeout (ms), 0 for disable timeout | default: `60000`
 - `ui5-tools.server.watchExtensions`: Extensions to listen for live reload | default: `css,js,json,xml,html,properties`
 - `ui5-tools.server.protocol`: Should use http or https | default: `http`
 - `ui5-tools.server.odataProxy`: Proxy all odata calls to a server | default: `None`
@@ -66,6 +67,7 @@ TBD
 
 #### Builder Settings
 
+- `ui5-tools.builder.babelSources`: Transform es6 to es5, internet explorer 11 compat | default: `false`
 - `ui5-tools.builder.debugSources`: Create debug js files when building | default: `true`
 - `ui5-tools.builder.uglifySources`: Uglify Component-preload.js and all js files when building | default: `true`
 - `ui5-tools.builder.buildLess`: Auto build less files into css when saving changes | default: `true`

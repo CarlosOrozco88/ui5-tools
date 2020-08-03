@@ -1,3 +1,8 @@
+## 0.4.0 (03-08-2020)
+
+- Babelify files for ie11 compatibility (only for builder)
+- Configurable server timeout (default: 60000ms)
+
 ## 0.3.1 (18-06-2020)
 
 - Livereload bug solved

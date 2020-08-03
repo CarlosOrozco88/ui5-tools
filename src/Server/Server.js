@@ -118,7 +118,10 @@ export default {
         } else {
           this.server = http.createServer(this.serverApp);
         }
-        this.server.timeout = 30 * 1000;
+        let timeout = Config.server('timeout');
+        if (timeout > 0) {
+          this.server.timeout = timeout;
+        }
         this.server.listen(port, () => {
           let openBrowser = Config.server('openBrowser');
           let ui5ToolsIndex = Utils.getUi5ToolsIndexFolder();
