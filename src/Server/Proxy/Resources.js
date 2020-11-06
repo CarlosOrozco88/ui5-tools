@@ -4,9 +4,26 @@ import https from 'https';
 import apicache from 'apicache';
 import Config from '../../Utils/Config';
 import Utils from '../../Utils/Utils';
+import onHeaders from 'on-headers';
 
-const onlyStatus200 = (req, res) => res.statusCode === 200;
-const cacheResources = apicache.middleware('1 day', onlyStatus200);
+const cacheResources = apicache
+  .options({
+    defaultDuration: '1 day',
+    statusCodes: {
+      exclude: [404, 403],
+    },
+    headers: {
+      'cache-control': 'no-cache',
+    },
+  })
+  .middleware();
+
+const onProxyRes = function (req, res, next) {
+  onHeaders(res, () => {
+    res.set('cache-control', 'no-cache');
+  });
+  next();
+};
 
 export default {
   resetCache() {
@@ -39,7 +56,7 @@ export default {
             logLevel: 'error',
           });
 
-          serverApp.use(['/resources', '/**/resources'], cacheResources, proxy);
+          serverApp.use(['/resources', '/**/resources'], onProxyRes, cacheResources, proxy);
         }
         break;
 
@@ -59,7 +76,7 @@ export default {
             logLevel: 'error',
           });
 
-          serverApp.use(['/resources', '/**/resources'], cacheResources, proxy);
+          serverApp.use(['/resources', '/**/resources'], onProxyRes, cacheResources, proxy);
         }
 
         let testUrl = `${targetUri}resources/sap-ui-core.js`;
@@ -99,7 +116,7 @@ export default {
         logLevel: 'error',
       });
 
-      serverApp.use('/flp/test-resources/**', cacheResources, proxy);
+      serverApp.use('/flp/test-resources/**', onProxyRes, cacheResources, proxy);
     }
   },
 };

@@ -9,9 +9,11 @@ export default {
     try {
       let ui5Provider = await this.quickPickUi5Provider();
       if (ui5Provider === 'Gateway') {
-        await this.inputBoxGatewayUri();
+        let sGatewayUri = await this.inputBoxGatewayUri();
+        let gatewayVersion = await this.getGatewayVersion(sGatewayUri);
+        await Config.general().update('ui5Version', gatewayVersion.version, ConfigurationTarget.Workspace);
       }
-      if (ui5Provider !== 'None') {
+      if (ui5Provider !== 'None' && ui5Provider !== 'Gateway') {
         await this.setUi5Version();
       }
     } catch (error) {
@@ -285,6 +287,37 @@ export default {
   async getNeoApp(framework = 'sapui5') {
     return new Promise((resolv, reject) => {
       let url = `https://${framework}.hana.ondemand.com/neo-app.json`;
+      let options = {
+        timeout: 5000,
+      };
+      https
+        .get(url, options, (res) => {
+          if (res.statusCode !== 200) {
+            reject();
+          } else {
+            let rawData = '';
+            res.on('data', (chunk) => {
+              rawData += chunk;
+            });
+            res.on('end', () => {
+              try {
+                resolv(JSON.parse(rawData));
+              } catch (e) {
+                reject(e.message);
+              }
+            });
+          }
+        })
+        .on('error', (e) => {
+          reject(e);
+        });
+    });
+  },
+
+  async getGatewayVersion(sGatewayUri) {
+    return new Promise((resolv, reject) => {
+      let url = `${sGatewayUri}/sap/public/bc/ui5_ui5/1/resources/sap-ui-version.json`;
+      url = url.split('//').join('/');
       let options = {
         timeout: 5000,
       };

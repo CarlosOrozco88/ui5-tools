@@ -1,3 +1,12 @@
+## 0.4.1 (06-11-2020)
+
+- Builder: now it is possible to auto-build themes (library.source.less) and styles (styles.less/projectNameFolder.less) on library and components both.
+- Configurator: auto detects ui5 version for gateway proxy (ui5 provider)
+- Server: now can serve root folder by setting srcFolder = '', if build folder is equal to srcFolder', Builder only generates css and Component-preload.
+- Updated default UI5 to version from 1.71.20 to 1.71.27
+- Corrected resources server cache
+- Infinite starting server bug solved related to manifest.json errors
+
 ## 0.4.0 (03-08-2020)
 
 - Babelify files for ie11 compatibility (only for builder)

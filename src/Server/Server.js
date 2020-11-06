@@ -43,12 +43,16 @@ export default {
    * Starts server in development mode (serving srcFolder)
    * @param {object} object params
    */
-  async startDevelopment({ restarting = false, cleanCache = true } = {}) {
+  async startDevelopment({ restarting = false } = {}) {
     if (this.serverMode !== SERVER_MODES.DEV) {
       await this.stop();
     }
     this.serverMode = SERVER_MODES.DEV;
-    await this.start({ restarting, cleanCache });
+    try {
+      await this.start({ restarting });
+    } catch (e) {
+      this.stop();
+    }
     return;
   },
 
@@ -56,12 +60,16 @@ export default {
    * Starts server in production mode (serving distFolder)
    * @param {object} object params
    */
-  async startProduction({ restarting = false, cleanCache = true } = {}) {
+  async startProduction({ restarting = false } = {}) {
     if (this.serverMode !== SERVER_MODES.PROD) {
       await this.stop();
     }
     this.serverMode = SERVER_MODES.PROD;
-    await this.start({ restarting, cleanCache });
+    try {
+      await this.start({ restarting });
+    } catch (e) {
+      this.stop();
+    }
     return;
   },
 
@@ -69,7 +77,7 @@ export default {
    * Start server
    * @param {object} object params
    */
-  async start({ restarting = false, cleanCache = true } = {}) {
+  async start({ restarting = false } = {}) {
     let started = false;
     if (this.status === STATUSES.STOPPED) {
       try {
@@ -77,9 +85,7 @@ export default {
         if (this.serverApp._router && this.serverApp._router.stack) {
           this.serverApp._router.stack.splice(2, this.serverApp._router.stack.length);
         }
-        if (cleanCache) {
-          ResourcesProxy.resetCache();
-        }
+        ResourcesProxy.resetCache();
 
         this.status = STATUSES.STARTING;
         StatusBar.startingText();
@@ -96,7 +102,7 @@ export default {
         ui5Apps.forEach((ui5App) => {
           let staticPath = ui5App.srcFsPath;
           if (this.serverMode === SERVER_MODES.PROD) {
-            staticPath = ui5App.distFsPath;
+              staticPath = ui5App.distFsPath;
           }
           this.serverApp.use(ui5App.appServerPath, express.static(staticPath));
         });
@@ -136,6 +142,8 @@ export default {
         this.stop();
         throw new Error(e);
       }
+    } else {
+      throw new Error("Error during server startup");
     }
     return started;
   },
@@ -171,14 +179,17 @@ export default {
     return stopped;
   },
 
-  async restart({ cleanCache = true } = {}) {
+  async restart() {
     let restarted = false;
     if (this.status === STATUSES.STARTED) {
       await this.stop({ restarting: true });
-      await this.startDevelopment({
-        restarting: true,
-        cleanCache: cleanCache,
-      });
+      try {
+        await this.startDevelopment({
+          restarting: true,
+        });
+      } catch (e) {
+        this.stop();
+      }
       restarted = true;
     }
     return restarted;

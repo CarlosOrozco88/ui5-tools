@@ -1,4 +1,4 @@
-import { workspace, RelativePattern, Uri, extensions } from 'vscode';
+import { window, workspace, RelativePattern, Uri, extensions } from 'vscode';
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
@@ -16,48 +16,55 @@ export default {
 
     for (let wsUri of workspace.workspaceFolders) {
       let manifestList = await workspace.findFiles(
-        new RelativePattern(wsUri, `**/{${srcFolder},${libraryFolder}}/manifest.json`),
-        `**/{dist,node_modules}/**`
+        new RelativePattern(wsUri, `**/manifest.json`),
+        new RelativePattern(wsUri, `**/{${distFolder},node_modules}/manifest.json`)
       );
 
       for (let i = 0; i < manifestList.length; i++) {
         let manifest = manifestList[i];
-
         let manifestUri = Uri.file(manifest.fsPath);
-        let manifestString = await workspace.fs.readFile(manifestUri);
-        let manifestJson = JSON.parse(manifestString.toString());
-        let isLibrary = await this.getManifestLibrary(manifestJson);
-        let namespace = await this.getManifestId(manifestJson);
-        let appSrcFolder = isLibrary ? libraryFolder : srcFolder;
 
-        if (namespace) {
-          let alreadyInList = ui5Apps.find((app) => {
-            return app.namespace === namespace;
-          });
-          if (!alreadyInList) {
-            let appFsPath = manifestUri.fsPath.replace(path.join(appSrcFolder, 'manifest.json'), '');
-            let appServerPath = url.parse(appFsPath.replace(workspaceRootPath, '')).path;
-            // clean all srcFolders/libraryFolders/distFolders if has any parent app
-            appServerPath = appServerPath
-              .replace(`/${libraryFolder}/`, '/')
-              .replace(`/${srcFolder}/`, '/')
-              .replace(`/${distFolder}/`, '/');
-            let srcFsPath = path.join(appFsPath, appSrcFolder);
-            let distFsPath = path.join(appFsPath, distFolder);
-            let folderName = path.basename(appFsPath);
+        try {
+          let manifestString = await workspace.fs.readFile(manifestUri);
+          let manifestJson = JSON.parse(manifestString.toString());
+          let isLibrary = await this.getManifestLibrary(manifestJson);
+          let namespace = await this.getManifestId(manifestJson);
+          let appSrcFolder = isLibrary ? libraryFolder : srcFolder;
 
-            ui5Apps.push({
-              appFsPath: appFsPath,
-              appServerPath: appServerPath,
-              isLibrary: isLibrary,
-              srcFsPath: srcFsPath,
-              distFsPath: distFsPath,
-              manifestUri: manifestUri,
-              manifest: manifestJson,
-              folderName: folderName,
-              namespace: manifestJson['sap.app']['id'],
+          if (namespace) {
+            let alreadyInList = ui5Apps.find((app) => {
+              return app.namespace === namespace;
             });
+            if (!alreadyInList) {
+              let manifestInnerPath = path.join(appSrcFolder, 'manifest.json');
+              let appFsPath = manifestUri.fsPath.replace(manifestInnerPath, '');
+              let appServerPath = url.parse(appFsPath.replace(workspaceRootPath, '')).path;
+              // clean all srcFolders/libraryFolders/distFolders if has any parent app
+              appServerPath = appServerPath
+                .replace(`/${libraryFolder}/`, '/')
+                .replace(`/${srcFolder}/`, '/')
+                .replace(`/${distFolder}/`, '/');
+              let srcFsPath = path.join(appFsPath, appSrcFolder);
+              let distFsPath = path.join(appFsPath, distFolder);
+              let folderName = path.basename(appFsPath);
+
+              ui5Apps.push({
+                appFsPath: appFsPath,
+                appServerPath: appServerPath,
+                isLibrary: isLibrary,
+                srcFsPath: srcFsPath,
+                distFsPath: distFsPath,
+                manifestUri: manifestUri,
+                manifest: manifestJson,
+                folderName: folderName,
+                namespace: manifestJson['sap.app']['id'],
+              });
+            }
           }
+        } catch (oError) {
+          window.showErrorMessage(`Please, verify ${manifestUri} project.
+          It has some errors.
+          Verify manifest.json is correct and has sap.app.type and sap.app.id`);
         }
       }
     }

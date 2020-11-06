@@ -49,8 +49,7 @@ export async function activate(context) {
 }
 
 async function onDidChangeConfiguration(event) {
-  let cleanCache = event.affectsConfiguration('ui5-tools.ui5Version');
-  Server.restart({ cleanCache: cleanCache });
+  Server.restart();
 }
 
 async function onDidSaveTextDocument(event) {
@@ -62,11 +61,11 @@ async function onDidSaveTextDocument(event) {
   let baseName = path.basename(fileName);
   switch (baseName) {
     case '.env':
-      Server.restart({ cleanCache: false });
+      Server.restart();
       break;
     case 'manifest.json':
       StatusBar.init();
-      Server.restart({ cleanCache: false });
+      Server.restart();
       break;
   }
 }
