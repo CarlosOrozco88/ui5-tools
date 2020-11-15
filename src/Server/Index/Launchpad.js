@@ -6,6 +6,7 @@ import ResourcesProxy from '../../Server/Proxy/Resources';
 export default {
   async set(serverApp) {
     if (Utils.isLaunchpadMounted()) {
+      Utils.logOutputServer('Mounting launchpad');
       // LAUNCHPAD IN /flp/
       let ui5Apps = await Utils.getAllUI5Apps();
       let baseDir = Utils.getWorkspaceRootPath();

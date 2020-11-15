@@ -6,9 +6,16 @@ import url from 'url';
 
 import Config from './Config';
 
+let ui5toolsOutput = window.createOutputChannel("ui5-tools");
+let ui5Apps = [];
+
 export default {
   async getAllUI5Apps() {
-    let ui5Apps = [];
+    return ui5Apps;
+  },
+
+  async refreshAllUI5Apps() {
+    ui5Apps = [];
     let workspaceRootPath = this.getWorkspaceRootPath();
     let srcFolder = Config.general('srcFolder');
     let libraryFolder = Config.general('libraryFolder');
@@ -62,9 +69,11 @@ export default {
             }
           }
         } catch (oError) {
-          window.showErrorMessage(`Please, verify ${manifestUri} project.
+          let sMessage = `Please, verify ${manifestUri} project.
           It has some errors.
-          Verify manifest.json is correct and has sap.app.type and sap.app.id`);
+          Verify manifest.json is correct and has sap.app.type and sap.app.id`;
+          this.logOutputGeneral(sMessage);
+          window.showErrorMessage(sMessage);
         }
       }
     }
@@ -77,6 +86,7 @@ export default {
       }
       return sort;
     });
+    this.logOutputGeneral(`${ui5Apps.length} ui5 projects detected`);
     return ui5Apps;
   },
 
@@ -208,4 +218,39 @@ export default {
     let resourcesProxy = Config.server('resourcesProxy');
     return resourcesProxy === 'CDN SAPUI5' || resourcesProxy === 'Gateway';
   },
+
+  logOutput(sText) {
+    ui5toolsOutput.appendLine(sText);
+    return console.log(sText);
+  },
+
+  logOutputGeneral (sText) {
+    return this.logOutput(`General: ${sText}`);
+  },
+
+  logOutputConfigurator (sText) {
+    return this.logOutput(`Configurator: ${sText}`);
+  },
+
+  logOutputBuilder(sText) {
+    return this.logOutput(`Builder: ${sText}`);
+  },
+
+  logOutputServer(sText) {
+    return this.logOutput(`Server: ${sText}`);
+  },
+
+  logOutputProxy(sText) {
+    return this.logOutput(`Server > Proxy: ${sText}`);
+  },
+
+  proxyLogProvider() {
+    return {
+      log: this.logOutputProxy.bind(this),
+      debug: this.logOutputProxy.bind(this),
+      info: this.logOutputProxy.bind(this),
+      warn: this.logOutputProxy.bind(this),
+      error: this.logOutputProxy.bind(this)
+    };
+  }
 };

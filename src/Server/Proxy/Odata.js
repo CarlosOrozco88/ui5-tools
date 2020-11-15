@@ -14,14 +14,17 @@ export default {
         targetUri = Config.server('odataUri');
 
         if (targetUri) {
+          Utils.logOutputServer(`Creating odataProxy to Gateway ${targetUri}`);
           let targets = targetUri.replace(/\\s/g).split(',');
+          let oAuth = this.getODATAAuth();
           proxy = createProxyMiddleware({
             pathRewrite: {},
             target: targets[0],
-            secure: targets[0].indexOf('https') == 0,
+            secure: Config.server('odataSecure'),
             changeOrigin: true,
-            auth: this.getODATAAuth(),
+            auth: oAuth,
             logLevel: 'error',
+            logProvider: Utils.proxyLogProvider.bind(Utils)
           });
           serverApp.use('/sap', proxy);
         }
@@ -34,16 +37,18 @@ export default {
           let mpaths = odataMountPath.replace(/\\s/g).split(',');
           for (let i = 0; i < targets.length; i++) {
             if (mpaths && mpaths[i]) {
+              Utils.logOutputServer(`Creating resourcesProxy to Other ${targets[i]}`);
               proxy = createProxyMiddleware({
                 pathRewrite: function (i, path, req) {
                   let nPath = path.replace(mpaths[i], '');
                   return nPath;
                 }.bind(this, i),
                 target: targets[i],
-                secure: targets[i].indexOf('https') == 0,
+                secure: Config.server('odataSecure'),
                 changeOrigin: true,
                 auth: this.getODATAAuth(i),
                 logLevel: 'error',
+                logProvider: Utils.proxyLogProvider.bind(Utils)
               });
               serverApp.use(mpaths[i], proxy);
             }

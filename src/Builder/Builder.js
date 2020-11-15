@@ -21,6 +21,7 @@ export default {
   async askProjectToBuild() {
     let ui5App = undefined;
     try {
+      Utils.logOutputBuilder(`Asking project to build`);
       let ui5Apps = await Utils.getAllUI5Apps();
       if (ui5Apps.length > 1) {
         let qpOptions = [];
@@ -54,6 +55,7 @@ export default {
    * Build all workspace projects
    */
   async buildAllProjects() {
+    Utils.logOutputBuilder(`Build all ui5 projects`);
     let ui5Apps = await Utils.getAllUI5Apps();
     await window.withProgress(
       {
@@ -86,6 +88,7 @@ export default {
   async buildProject(ui5App) {
     if (ui5App) {
       let folderName = ui5App.folderName;
+      Utils.logOutputBuilder(`Building ${folderName}`);
       await window.withProgress(
         {
           location: ProgressLocation.Notification,
@@ -229,6 +232,7 @@ export default {
   async cleanFolder(folderPath) {
     if (folderPath) {
       let uriToDelete = Uri.file(folderPath);
+      Utils.logOutputBuilder(`Deleting ${uriToDelete}`);
       try {
         await workspace.fs.delete(uriToDelete, {
           recursive: true,
@@ -254,6 +258,7 @@ export default {
 
     let calculedKeys = {};
     if (files.length) {
+      Utils.logOutputBuilder(`Replacing strings to folder ${folderPath}`);
       try {
         for (let i = 0; i < files.length; i++) {
           await this.replaceStringsFile(files[i], calculedKeys);
@@ -302,6 +307,7 @@ export default {
   async copyFolder(srcPath, destPath) {
     let uriSrc = Uri.file(srcPath);
     let uriDest = Uri.file(destPath);
+    Utils.logOutputBuilder(`Copying folder ${uriSrc} to ${uriDest}`);
     try {
       await workspace.fs.copy(uriSrc, uriDest, {
         overwrite: true,
@@ -332,6 +338,7 @@ export default {
       let lessFilesLibrary = await workspace.findFiles(patternLessLibrary);
       if (lessFilesLibrary.length) {
         for (let i = 0; i < lessFilesLibrary.length; i++) {
+          Utils.logOutputBuilder(`Compiling less theme ${lessFilesLibrary[i].fsPath}`);
           let output = await lessOpenUI5Builder.build({
             lessInputPath: lessFilesLibrary[i].fsPath,
             // @ts-ignore
@@ -364,6 +371,7 @@ export default {
 
       if (lessFilesComponent.length) {
         for (let i = 0; i < lessFilesComponent.length; i++) {
+          Utils.logOutputBuilder(`Compiling less file ${lessFilesComponent[i].fsPath}`);
           let lessFile = await workspace.fs.readFile(Uri.file(lessFilesComponent[i].fsPath));
           let output = await less.render(lessFile.toString(), {
             filename: lessFilesComponent[i].fsPath,
@@ -384,6 +392,7 @@ export default {
   async babelifyJSFiles(folderPath) {
     if (Config.builder('babelSources')) {
       try {
+        Utils.logOutputBuilder(`Babelify files ${folderPath}`);
         // Create -dbg files
         let patternJs = new RelativePattern(folderPath, `**/*.js`);
         let jsFiles = await workspace.findFiles(patternJs);
@@ -417,7 +426,7 @@ export default {
               ],
             ],
           });
-          var babelifiedCode = babelified.code.replace(/\r\n|\r|\n/g, os.EOL);
+          let babelifiedCode = babelified.code.replace(/\r\n|\r|\n/g, os.EOL);
 
           await workspace.fs.writeFile(uriOrigJs, Buffer.from(babelifiedCode));
           console.log(babelifiedCode);
@@ -436,6 +445,7 @@ export default {
   async createDebugFiles(folderPath) {
     if (Config.builder('debugSources')) {
       try {
+        Utils.logOutputBuilder(`Create dbg files ${folderPath}`);
         // Create -dbg files
         let patternJs = new RelativePattern(folderPath, `**/*.js`);
         let jsFiles = await workspace.findFiles(patternJs);
@@ -461,6 +471,7 @@ export default {
   async compressFiles(folderPath) {
     if (Config.builder('uglifySources')) {
       try {
+        Utils.logOutputBuilder(`Compres files to ${folderPath}`);
         // Compress js files
         let patternJs = new RelativePattern(folderPath, `**/*.js`);
         let jsFiles = await workspace.findFiles(patternJs, `**/*-dbg.js`);
@@ -523,6 +534,7 @@ export default {
    */
   async cleanFiles(folderPath) {
     try {
+      Utils.logOutputBuilder(`Clean files from ${folderPath}`);
       // delete .less
       let patternLess = new RelativePattern(folderPath, `**/*.less`);
       let lessFiles = await workspace.findFiles(patternLess);
@@ -550,6 +562,7 @@ export default {
     let idApp = await Utils.getManifestId(manifest);
     let isLibrary = await Utils.getManifestLibrary(manifest);
 
+    Utils.logOutputBuilder(`Create preload ${srcPath}`);
     return new Promise((resolv, reject) => {
       setTimeout(() => {
         try {

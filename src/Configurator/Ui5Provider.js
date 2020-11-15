@@ -10,8 +10,15 @@ export default {
       let ui5Provider = await this.quickPickUi5Provider();
       if (ui5Provider === 'Gateway') {
         let sGatewayUri = await this.inputBoxGatewayUri();
-        let gatewayVersion = await this.getGatewayVersion(sGatewayUri);
-        await Config.general().update('ui5Version', gatewayVersion.version, ConfigurationTarget.Workspace);
+        try {
+          Utils.logOutputConfigurator(`Fetching ui5Version from Gateway...`);
+          let gatewayVersion = await this.getGatewayVersion(sGatewayUri);
+          await Config.general().update('ui5Version', gatewayVersion.version, ConfigurationTarget.Workspace);
+          Utils.logOutputConfigurator(`Set ui5version value to ${gatewayVersion.version}`);
+        } catch (oError) {
+          Utils.logOutputConfigurator(oError);
+          await this.setUi5Version();
+        }
       }
       if (ui5Provider !== 'None' && ui5Provider !== 'Gateway') {
         await this.setUi5Version();
@@ -51,9 +58,12 @@ export default {
         if (quickpick.selectedItems.length) {
           let value = quickpick.selectedItems[0].label;
           await Config.server().update('resourcesProxy', value, ConfigurationTarget.Workspace);
+          Utils.logOutputConfigurator(`Set resourcesProxy value to ${value}`);
           resolv(value);
         } else {
-          reject('No ui5 provider configured');
+          let sMessage = 'No ui5 provider configured';
+          Utils.logOutputConfigurator(sMessage);
+          reject(sMessage);
         }
         quickpick.hide();
       });
@@ -74,9 +84,12 @@ export default {
       inputBox.onDidAccept(async () => {
         if (inputBox.value) {
           await Config.server().update('resourcesUri', inputBox.value, ConfigurationTarget.Workspace);
+          Utils.logOutputConfigurator(`Set resourcesUri value to ${inputBox.value}`);
           resolv(inputBox.value);
         } else {
-          reject('No gateway url configured');
+          let sMessage = 'No gateway url configured';
+          Utils.logOutputConfigurator(sMessage);
+          reject(sMessage);
         }
         inputBox.hide();
       });
@@ -101,9 +114,12 @@ export default {
           ui5Version = await this.inputBoxUi5Version();
         }
         await Config.general().update('ui5Version', ui5Version, ConfigurationTarget.Workspace);
+
+        Utils.logOutputConfigurator(`Set ui5Version value ${ui5Version}`);
         resolv(ui5Version);
-      } catch (error) {
-        reject(error);
+      } catch (sError) {
+        Utils.logOutputConfigurator(sError);
+        reject(sError);
       }
       resolv(ui5Version);
     });

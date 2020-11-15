@@ -11,6 +11,7 @@ const converter = new showdown.Converter();
 export default {
   // SERVER INDEX
   async set(serverApp) {
+    Utils.logOutputServer('Mounting ui5-tools root page');
     let ui5ToolsIndex = Utils.getUi5ToolsIndexFolder();
     let ui5Apps = await Utils.getAllUI5Apps();
     let existBasePathInApp = ui5Apps.find((ui5App) => {

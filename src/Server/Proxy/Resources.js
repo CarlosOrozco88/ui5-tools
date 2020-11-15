@@ -28,6 +28,7 @@ const onProxyRes = function (req, res, next) {
 export default {
   resetCache() {
     if (apicache.clear) {
+      Utils.logOutputServer(`Clear resources cache`);
       apicache.clear(null);
     }
   },
@@ -44,6 +45,7 @@ export default {
         targetUri = Config.server('resourcesUri');
 
         if (targetUri) {
+          Utils.logOutputServer(`Creating resourcesProxy with ui5Version ${ui5Version} to Gateway ${targetUri}`);
           proxy = createProxyMiddleware({
             pathRewrite(path, req) {
               let basePath = '/sap/public/bc/ui5_ui5/1';
@@ -51,9 +53,10 @@ export default {
               return `${basePath}${resourcesPath}`;
             },
             target: targetUri,
-            secure: false, //targetUri.indexOf('https') == 0,
+            secure: Config.server('resourcesSecure'),
             changeOrigin: true,
             logLevel: 'error',
+            logProvider: Utils.proxyLogProvider.bind(Utils)
           });
 
           serverApp.use(['/resources', '/**/resources'], onProxyRes, cacheResources, proxy);
@@ -65,15 +68,18 @@ export default {
         targetUri = `https://${framework}.hana.ondemand.com/${ui5Version}/`;
 
         if (ui5Version) {
+
+          Utils.logOutputServer(`Creating resourcesProxy with ui5Version ${ui5Version} to CDN ${targetUri}`);
           proxy = createProxyMiddleware({
             pathRewrite(path, req) {
               let resourcesPath = path.slice(path.indexOf('/resources/'), path.length);
               return resourcesPath;
             },
             target: targetUri,
-            secure: false, //targetUri.indexOf('https') == 0,
+            secure: Config.server('resourcesSecure'),
             changeOrigin: true,
             logLevel: 'error',
+            logProvider: Utils.proxyLogProvider.bind(Utils)
           });
 
           serverApp.use(['/resources', '/**/resources'], onProxyRes, cacheResources, proxy);
@@ -86,13 +92,15 @@ export default {
         https
           .get(testUrl, options, ({ statusCode }) => {
             if (statusCode !== 200) {
-              let error = `Error: Unable to get sap-ui-core.js, framework ${framework} does not have ${ui5Version} available at CDN.`;
+              let sError = `Error: Unable to get sap-ui-core.js, framework ${framework} does not have ${ui5Version} available at CDN.`;
 
-              window.showErrorMessage(error);
+              Utils.logOutputServer(sError);
+              window.showErrorMessage(sError);
             }
           })
-          .on('error', (error) => {
-            window.showErrorMessage(error.message);
+          .on('error', (oError) => {
+            window.showErrorMessage(oError.message);
+            Utils.logOutputServer(`${oError.message}`);
           });
 
       default:
@@ -103,17 +111,32 @@ export default {
 
   setTest(serverApp) {
     let ui5Version = Config.general('ui5Version');
-    let targetUri = `https://sapui5.hana.ondemand.com/${ui5Version}/`;
+    let resourcesProxy = Config.server('resourcesProxy');
+    let framework = Utils.getFramework();
+    let targetUri = ``;
 
-    if (ui5Version) {
+    switch (resourcesProxy) {
+      case 'Gateway':
+        targetUri = Config.server('resourcesUri');
+
+        break;
+      case 'CDN SAPUI5':
+        targetUri = `https://${framework}.hana.ondemand.com/${ui5Version}/`;
+        break;
+      default:
+        break;
+    }
+    if (targetUri) {
+      Utils.logOutputServer(`Creating testProxy with ui5Version ${ui5Version} to ${targetUri}`);
       let proxy = createProxyMiddleware({
         pathRewrite: {
           '^/flp/': '/',
         },
         target: targetUri,
-        secure: false, //targetUri.indexOf('https') == 0,
+        secure: Config.server('resourcesSecure'),
         changeOrigin: true,
         logLevel: 'error',
+        logProvider: Utils.proxyLogProvider.bind(Utils)
       });
 
       serverApp.use('/flp/test-resources/**', onProxyRes, cacheResources, proxy);

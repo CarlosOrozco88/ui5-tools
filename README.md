@@ -65,9 +65,11 @@ TBD
 - `ui5-tools.server.protocol`: Should use http or https | default: `http`
 - `ui5-tools.server.odataProxy`: Proxy all odata calls to a server | default: `None`
 - `ui5-tools.server.odataUri`: Your odata server uri url (example: `http://srvaspgwd.com:8080/`). odataProxy `Other` accepts multiple uris (example: `http://srvaspgwd.com:8080/, http://srvaspgwd.com:8080/`)
+- `ui5-tools.server.odataSecure`: Verify odataProxy SSL Certs | default: `false`
 - `ui5-tools.server.odataMountPath`: The mountpath for 'Other' odataProxy. Accepts multiple paths, respecting the same order that odataUri for odataProxy type `Other` | default: `/odata`
 - `ui5-tools.server.resourcesProxy`: Proxy all odata calls to a gateway, cdn or local folder (proxy all url begining with /resources) | default: `CDN SAPUI5`
 - `ui5-tools.server.resourcesUri`: Your resources server url (example: http://srvaspgwd.com:8080/)
+- `ui5-tools.server.resourcesSecure`: Verify resourcesProxy SSL Certs | default: `false`
 
 #### Builder Settings
 

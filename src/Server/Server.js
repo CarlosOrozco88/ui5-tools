@@ -80,6 +80,7 @@ export default {
   async start({ restarting = false } = {}) {
     let started = false;
     if (this.status === STATUSES.STOPPED) {
+      Utils.logOutputServer('Starting...');
       try {
         // Clean middlewares
         if (this.serverApp._router && this.serverApp._router.stack) {
@@ -95,7 +96,11 @@ export default {
 
         let watch = Config.server('watch');
         if (watch) {
-          await LiveServer.start(this.serverApp, ui5Apps);
+          try {
+            await LiveServer.start(this.serverApp, ui5Apps);
+          } catch (oError) {
+            Utils.logOutputServer(oError);
+          }
         }
 
         // Static serve all apps
@@ -107,11 +112,27 @@ export default {
           this.serverApp.use(ui5App.appServerPath, express.static(staticPath));
         });
 
-        await OdataProxy.set(this.serverApp);
-        await ResourcesProxy.set(this.serverApp);
+        try {
+          await OdataProxy.set(this.serverApp);
+        } catch(oError) {
+          Utils.logOutputServer(oError);
+        }
+        try {
+          await ResourcesProxy.set(this.serverApp);
+        } catch(oError) {
+          Utils.logOutputServer(oError);
+        }
 
-        await IndexUI5Tools.set(this.serverApp);
-        await IndexLaunchpad.set(this.serverApp);
+        try {
+          await IndexUI5Tools.set(this.serverApp);
+        } catch(oError) {
+          Utils.logOutputServer(oError);
+        }
+        try {
+          await IndexLaunchpad.set(this.serverApp);
+        } catch(oError) {
+          Utils.logOutputServer(oError);
+        }
 
         let protocol = Config.server('protocol');
         let port = await portfinder.getPortPromise({
@@ -127,6 +148,7 @@ export default {
           this.server.timeout = timeout;
         }
         this.server.listen(port, () => {
+          Utils.logOutputServer('Started!');
           let openBrowser = Config.server('openBrowser');
           let ui5ToolsIndex = Utils.getUi5ToolsIndexFolder();
 
@@ -143,7 +165,9 @@ export default {
         throw new Error(e);
       }
     } else {
-      throw new Error("Error during server startup");
+      let sMessage = 'Error during server startup';
+      Utils.logOutputServer(sMessage);
+      throw new Error(sMessage);
     }
     return started;
   },
@@ -151,7 +175,9 @@ export default {
   stopServer() {
     return new Promise((resolv, reject) => {
       if (this.server && this.server.listening) {
+        Utils.logOutputServer('Stopping...');
         this.server.close(() => {
+          Utils.logOutputServer('Stopped!');
           //server.unref();
           resolv();
         });
@@ -182,6 +208,7 @@ export default {
   async restart() {
     let restarted = false;
     if (this.status === STATUSES.STARTED) {
+      Utils.logOutputServer('Restarting...');
       await this.stop({ restarting: true });
       try {
         await this.startDevelopment({

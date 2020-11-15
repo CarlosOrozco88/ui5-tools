@@ -6,18 +6,19 @@ import Server from '../Server/Server';
 export default {
   serverNavBar: undefined,
 
-  init({ subscriptions }) {
-    if (!this.serverNavBar) {
+  async init(subscriptions) {
+    Utils.logOutputGeneral(`Checking for ui5 projects...`);
+    if (!this.serverNavBar && subscriptions) {
       this.serverNavBar = window.createStatusBarItem(StatusBarAlignment.Left, 100);
       this.serverNavBar.command = 'ui5-tools.server.toggle';
       subscriptions.push(this.serverNavBar);
       this.startText();
     }
-    this.checkVisibility();
+    await this.checkVisibility();
   },
 
   async checkVisibility() {
-    let ui5Apps = await Utils.getAllUI5Apps();
+    let ui5Apps = await Utils.refreshAllUI5Apps();
     if (ui5Apps.length) {
       this.show();
     } else {

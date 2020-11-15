@@ -13,15 +13,17 @@ import Builder from './Builder/Builder';
 import StatusBar from './StatusBar/StatusBar';
 // Utils
 import Config from './Utils/Config';
+import Utils from './Utils/Utils';
 
 export async function activate(context) {
-  StatusBar.init(context);
-  if (Config.server('startOnLaunch')) {
-    Server.start();
-  }
-
   const { registerCommand } = commands;
   const { subscriptions } = context;
+
+  StatusBar.init(subscriptions);
+  if (Config.server('startOnLaunch')) {
+    Utils.logOutputGeneral(`Start on launch`);
+    Server.start();
+  }
 
   // Configure commands
   subscriptions.push(registerCommand('ui5-tools.server.startDevelopment', () => Server.startDevelopment()));
@@ -49,6 +51,7 @@ export async function activate(context) {
 }
 
 async function onDidChangeConfiguration(event) {
+  await StatusBar.init();
   Server.restart();
 }
 
@@ -64,7 +67,7 @@ async function onDidSaveTextDocument(event) {
       Server.restart();
       break;
     case 'manifest.json':
-      StatusBar.init();
+      await StatusBar.init();
       Server.restart();
       break;
   }

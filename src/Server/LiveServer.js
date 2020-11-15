@@ -20,6 +20,7 @@ export default {
   async start(serverApp, ui5Apps) {
     return new Promise(async (resolv, reject) => {
       try {
+        Utils.logOutputServer('LiveServer > Starting...');
         let portLiveReload = await portfinder.getPortPromise({
           port: 35729,
         });
@@ -52,6 +53,7 @@ export default {
         this.liveServerWS.on('error', (error) => this.onError(error));
 
         this.liveServerWS.once('listening', () => {
+          Utils.logOutputServer('LiveServer > Started!');
           resolv();
         });
 
@@ -197,9 +199,11 @@ export default {
 
   sendAllClients(data) {
     if (this.liveServerWS) {
+      Utils.logOutputServer('Refreshing browser...');
       this.liveServerWS.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
           this.debug('Sending: ' + data);
+
           client.send(data, (error) => {
             if (error) {
               this.debug(error);
@@ -213,6 +217,7 @@ export default {
   async stop() {
     let stopped = false;
     if (this.liveServerWS) {
+      Utils.logOutputServer('LiveServer > Stopping...');
       this.watching.unwatch('*');
       this.watching = undefined;
       this.liveServer.close();
@@ -220,6 +225,7 @@ export default {
       this.liveServerWS.close();
       this.liveServerWS = undefined;
       stopped = true;
+      Utils.logOutputServer('LiveServer > Stopped!');
     }
     return stopped;
   },
