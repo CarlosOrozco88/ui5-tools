@@ -1,3 +1,8 @@
+## 0.4.3 (19-11-2020)
+
+- Server autostart bug solved
+- Gateway version fetching bug solved
+
 ## 0.4.2 (15-11-2020)
 
 - New options `ui5-tools.server.odataSecure` and `ui5-tools.server.resourcesSecure`

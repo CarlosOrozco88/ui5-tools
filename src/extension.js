@@ -19,11 +19,6 @@ export async function activate(context) {
   const { registerCommand } = commands;
   const { subscriptions } = context;
 
-  StatusBar.init(subscriptions);
-  if (Config.server('startOnLaunch')) {
-    Utils.logOutputGeneral(`Start on launch`);
-    Server.start();
-  }
 
   // Configure commands
   subscriptions.push(registerCommand('ui5-tools.server.startDevelopment', () => Server.startDevelopment()));
@@ -48,6 +43,12 @@ export async function activate(context) {
   // Configure listeners
   workspace.onDidChangeConfiguration((event) => onDidChangeConfiguration(event));
   workspace.onDidSaveTextDocument((event) => onDidSaveTextDocument(event));
+
+  await StatusBar.init(subscriptions);
+  if (Config.server('startOnLaunch')) {
+    Utils.logOutputGeneral(`Start on launch`);
+    Server.start();
+  }
 }
 
 async function onDidChangeConfiguration(event) {

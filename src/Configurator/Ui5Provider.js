@@ -1,5 +1,6 @@
 import { window, ConfigurationTarget } from 'vscode';
 import https from 'https';
+import http from 'http';
 
 import Config from '../Utils/Config';
 import Utils from '../Utils/Utils';
@@ -334,10 +335,18 @@ export default {
     return new Promise((resolv, reject) => {
       let url = `${sGatewayUri}/sap/public/bc/ui5_ui5/1/resources/sap-ui-version.json`;
       url = url.split('//').join('/');
+
       let options = {
         timeout: 5000,
       };
-      https
+
+      var httpModule;
+      if (url.indexOf('https') == 0) {
+        httpModule = https;
+      } else {
+        httpModule = http;
+      }
+      httpModule
         .get(url, options, (res) => {
           if (res.statusCode !== 200) {
             reject();
