@@ -1,3 +1,9 @@
+## 0.4.4/0.4.5 (14-12-2020)
+
+- Server startup vars changed
+- New <% LOCALESTRING %> key (replacestrings)LOCALEDATETIME
+- Upgrade dependencies version
+
 ## 0.4.3 (19-11-2020)
 
 - Server autostart bug solved

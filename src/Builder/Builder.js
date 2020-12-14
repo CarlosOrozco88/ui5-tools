@@ -294,6 +294,12 @@ export default {
           }
           value = calculedKeys[key];
           break;
+        case 'LOCALEDATETIME':
+          if (!calculedKeys[key]) {
+            calculedKeys[key] = new Date().toLocaleString();
+          }
+          value = calculedKeys[key];
+          break;
       }
     }
     return { key, value };

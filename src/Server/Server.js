@@ -14,12 +14,6 @@ import IndexUI5Tools from './Index/UI5Tools';
 import IndexLaunchpad from './Index/Launchpad';
 import ejs from 'ejs';
 
-const expressApp = express();
-expressApp.set('view engine', 'ejs');
-expressApp.disable('x-powered-by');
-// @ts-ignore
-expressApp.engine('ejs', ejs.__express);
-
 const STATUSES = {
   STOPPED: 0,
   STARTING: 1,
@@ -32,7 +26,7 @@ const SERVER_MODES = {
 };
 
 export default {
-  serverApp: expressApp,
+  serverApp: undefined,
   server: undefined,
   STATUSES: STATUSES,
   SERVER_MODES: SERVER_MODES,
@@ -82,10 +76,13 @@ export default {
     if (this.status === STATUSES.STOPPED) {
       Utils.logOutputServer('Starting...');
       try {
-        // Clean middlewares
-        if (this.serverApp._router && this.serverApp._router.stack) {
-          this.serverApp._router.stack.splice(2, this.serverApp._router.stack.length);
-        }
+
+        this.serverApp = express();
+        this.serverApp.set('view engine', 'ejs');
+        this.serverApp.disable('x-powered-by');
+        // @ts-ignore
+        this.serverApp.engine('ejs', ejs.__express);
+
         ResourcesProxy.resetCache();
 
         this.status = STATUSES.STARTING;
