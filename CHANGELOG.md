@@ -1,7 +1,7 @@
 ## 0.4.6 (14-12-2020)
 
 - Server startup vars changed
-- New <% ISODATE %> key (replacestrings)
+- New <% ISODATE %> key (Replacestrings)
 - Upgrade dependencies version
 
 ## 0.4.3 (19-11-2020)
