@@ -294,9 +294,9 @@ export default {
           }
           value = calculedKeys[key];
           break;
-        case 'LOCALEDATETIME':
+        case 'ISODATE':
           if (!calculedKeys[key]) {
-            calculedKeys[key] = new Date().toLocaleString();
+            calculedKeys[key] = new Date().toISOString();
           }
           value = calculedKeys[key];
           break;
