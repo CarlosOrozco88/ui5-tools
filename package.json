@@ -390,7 +390,7 @@
     "express": "^4.17.1",
     "http-proxy-middleware": "^1.0.6",
     "less": "^3.13.0",
-    "less-openui5": "^0.9.0",
+    "less-openui5": "^0.10.0",
     "livereload": "^0.9.1",
     "on-headers": "^1.0.2",
     "openui5-preload": "3.2.0",
