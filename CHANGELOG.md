@@ -1,9 +1,9 @@
-## 0.4.6 (01-02-2021)
+## 0.4.7 (01-02-2021)
 
 - Upgrade dependencies version
 - Corrected manifest.json discover function
 
-## 0.4.5 (14-12-2020)
+## 0.4.6 (14-12-2020)
 
 - Server startup vars changed
 - New <% ISODATE %> key (Replacestrings)
