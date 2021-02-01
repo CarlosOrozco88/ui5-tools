@@ -24,7 +24,7 @@ export default {
     for (let wsUri of workspace.workspaceFolders) {
       let manifestList = await workspace.findFiles(
         new RelativePattern(wsUri, `**/manifest.json`),
-        new RelativePattern(wsUri, `**/{${distFolder},node_modules}/manifest.json`)
+        new RelativePattern(wsUri, `**/{${distFolder},node_modules,.git}/`)
       );
 
       for (let i = 0; i < manifestList.length; i++) {

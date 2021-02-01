@@ -1,3 +1,8 @@
+## 0.4.7 (01-02-2021)
+
+- Upgrade dependencies version
+- Corrected manifest.json discover function
+
 ## 0.4.6 (14-12-2020)
 
 - Server startup vars changed
