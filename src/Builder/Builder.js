@@ -249,7 +249,7 @@ export default {
 
   /**
    * Replace all strings
-   * @param {string} folderPath uri folder
+   * @param {string} folderPath URI folder
    */
   async replaceStrings(folderPath) {
     let replaceExtensions = Config.builder('replaceExtensions');
