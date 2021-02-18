@@ -6,7 +6,7 @@ import preload from 'openui5-preload';
 import { minify } from 'terser';
 import { pd as prettyData } from 'pretty-data';
 import less from 'less';
-import lessOpenUI5 from 'less-openui5';
+import lessOpenUI5, { Builder } from 'less-openui5';
 import { setTimeout } from 'timers';
 const lessOpenUI5Builder = new lessOpenUI5.Builder({});
 const xmlHtmlPrePattern = /<(?:\w+:)?pre>/;
@@ -480,7 +480,12 @@ export default {
         Utils.logOutputBuilder(`Compres files to ${folderPath}`);
         // Compress js files
         let patternJs = new RelativePattern(folderPath, `**/*.js`);
-        let jsFiles = await workspace.findFiles(patternJs, `**/*-dbg.js`);
+        let uglifySourcesExclude = Config.builder(`uglifySourcesExclude`);
+        if (uglifySourcesExclude) {
+          uglifySourcesExclude += `,`;
+        }
+        uglifySourcesExclude = `{${uglifySourcesExclude}**/*-dbg.js}`;
+        let jsFiles = await workspace.findFiles(patternJs, uglifySourcesExclude);
 
         for (let i = 0; i < jsFiles.length; i++) {
           let uriOrigJs = Uri.file(jsFiles[i].fsPath);
@@ -574,14 +579,18 @@ export default {
         try {
           let { compatVersion } = Utils.getOptionsVersion();
           let namespace = idApp.split('.').join('/');
+          let preloadSrc = Config.builder('preloadSrc');
+          let uglifyPreload = Config.builder('uglifyPreload');
+
           preload({
             resources: {
               cwd: destPath,
               prefix: namespace,
+              src: preloadSrc
             },
             dest: destPath,
             compatVersion: compatVersion,
-            compress: true,
+            compress: uglifyPreload,
             log: false,
             components: !isLibrary ? namespace : false,
             libraries: isLibrary ? namespace : false,

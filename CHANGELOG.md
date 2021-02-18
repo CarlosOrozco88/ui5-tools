@@ -1,3 +1,9 @@
+## 0.5.0 (18-02-2021)
+
+- New builder options: `ui5-tools.builder.uglifyPreload`, `ui5-tools.builder.uglifySourcesExclude`, `ui5-tools.builder.preloadSrc`
+- readme: +credits section
+- Upgrade dependencies
+
 ## 0.4.8 (13-02-2021)
 
 - Upgrade dependencies

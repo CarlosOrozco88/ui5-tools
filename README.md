@@ -75,19 +75,14 @@ TBD
 
 - `ui5-tools.builder.babelSources`: Transform es6 to es5, internet explorer 11 compat | default: `false`
 - `ui5-tools.builder.debugSources`: Create debug js files when building | default: `true`
+- `ui5-tools.builder.uglifyPreload`: Uglify Component-preload.js when building. If uglifySources is activated, this flag is redundant | default: `false`
 - `ui5-tools.builder.uglifySources`: Uglify Component-preload.js and all js files when building | default: `true`
+- `ui5-tools.builder.uglifySourcesExclude`: Exclude uri for uglify, generate a RelativePattern to exclude, can be n separated by comma | default: ``
+- `ui5-tools.builder.preloadSrc`: Array with all patterns to include/exclude in Component-preload.js | default: `"**/*.js", "**/*.fragment.html", "**/*.fragment.json", "**/*.fragment.xml", "**/*.view.html", "**/*.view.json", "**/*.view.xml", "**/*.properties", "!**/*-dbg.js"`
 - `ui5-tools.builder.buildLess`: Auto build less files into css when saving changes | default: `true`
 - `ui5-tools.builder.replaceStrings`: Replace strings when building | default: `true`
 - `ui5-tools.builder.replaceExtensions`: File extensions to look for keys to replace | default: `xml,js,json,properties`
 - `ui5-tools.builder.replaceKeysValues`: Key/Value pair list. Replace <% key %> with 'value' while building the app | default: `[{'key':'TIMESTAMP','value':'COMPUTED_TIMESTAMP'}]`
-
-#### Deployer Settings
-
-- TBD
-
-#### Generator Settings
-
-- TBD
 
 ## Commands
 
@@ -110,3 +105,8 @@ TBD
 - `ui5-tools.configurator.odataProvider`: configure odata provider
 - `ui5-tools.configurator.ui5Provider`: configure ui5 provider
 - `ui5-tools.configurator.replaceStrings`: configure replace strings
+
+## Credits
+
+- Preload javascript builder: [openui5-preload](https://github.com/r-murphy/openui5-preload) - [Ryan Murphy](https://github.com/r-murphy)
+- Less library builder: [less-openui5](https://github.com/SAP/less-openui5) - [SAP](https://github.com/SAP)

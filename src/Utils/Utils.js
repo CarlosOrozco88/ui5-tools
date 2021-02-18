@@ -6,7 +6,7 @@ import url from 'url';
 
 import Config from './Config';
 
-let ui5toolsOutput = window.createOutputChannel("ui5-tools");
+let ui5toolsOutput = window.createOutputChannel(`ui5-tools`);
 let ui5Apps = [];
 
 export default {

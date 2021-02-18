@@ -340,7 +340,7 @@ export default {
         timeout: 5000,
       };
 
-      var httpModule;
+      let httpModule;
       if (url.indexOf('https') == 0) {
         httpModule = https;
       } else {
