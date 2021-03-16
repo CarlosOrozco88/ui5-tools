@@ -22,7 +22,12 @@ export default {
   server(property) {
     return this.property(property, 'server');
   },
+
   builder(property) {
     return this.property(property, 'builder');
+  },
+
+  deployer(property) {
+    return this.property(property, 'deployer');
   },
 };

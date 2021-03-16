@@ -1,3 +1,9 @@
+## 0.6.0 (16-03-2021)
+- New deployer! Gateway deployments
+- Right click in project folder in order to build or deploy ui5 project
+- Strings replaced updated with new format options (Date)
+- readme: updated credits section
+
 ## 0.5.0 (18-02-2021)
 
 - New builder options: `ui5-tools.builder.uglifyPreload`, `ui5-tools.builder.uglifySourcesExclude`, `ui5-tools.builder.preloadSrc`

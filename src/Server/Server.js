@@ -76,7 +76,6 @@ export default {
     if (this.status === STATUSES.STOPPED) {
       Utils.logOutputServer('Starting...');
       try {
-
         this.serverApp = express();
         this.serverApp.set('view engine', 'ejs');
         this.serverApp.disable('x-powered-by');
@@ -104,30 +103,30 @@ export default {
         ui5Apps.forEach((ui5App) => {
           let staticPath = ui5App.srcFsPath;
           if (this.serverMode === SERVER_MODES.PROD) {
-              staticPath = ui5App.distFsPath;
+            staticPath = ui5App.distFsPath;
           }
           this.serverApp.use(ui5App.appServerPath, express.static(staticPath));
         });
 
         try {
           await OdataProxy.set(this.serverApp);
-        } catch(oError) {
+        } catch (oError) {
           Utils.logOutputServer(oError);
         }
         try {
           await ResourcesProxy.set(this.serverApp);
-        } catch(oError) {
+        } catch (oError) {
           Utils.logOutputServer(oError);
         }
 
         try {
           await IndexUI5Tools.set(this.serverApp);
-        } catch(oError) {
+        } catch (oError) {
           Utils.logOutputServer(oError);
         }
         try {
           await IndexLaunchpad.set(this.serverApp);
-        } catch(oError) {
+        } catch (oError) {
           Utils.logOutputServer(oError);
         }
 

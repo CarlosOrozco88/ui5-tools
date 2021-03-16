@@ -9,6 +9,8 @@ import Ui5Provider from './Configurator/Ui5Provider';
 import ReplaceStrings from './Configurator/ReplaceStrings';
 // Builder
 import Builder from './Builder/Builder';
+// Menu
+import Menu from './Menu/Menu';
 // StatusBar
 import StatusBar from './StatusBar/StatusBar';
 // Utils
@@ -18,7 +20,6 @@ import Utils from './Utils/Utils';
 export async function activate(context) {
   const { registerCommand } = commands;
   const { subscriptions } = context;
-
 
   // Configure commands
   subscriptions.push(registerCommand('ui5-tools.server.startDevelopment', () => Server.startDevelopment()));
@@ -36,9 +37,14 @@ export async function activate(context) {
   subscriptions.push(registerCommand('ui5-tools.builder.build', () => Builder.askProjectToBuild()));
   subscriptions.push(registerCommand('ui5-tools.builder.buildAll', () => Builder.buildAllProjects()));
 
+  subscriptions.push(registerCommand('ui5-tools.deployer.deploy', () => Builder.askProjectToDeploy()));
+
   subscriptions.push(registerCommand('ui5-tools.configurator.odataProvider', () => OdataProvider.wizard()));
   subscriptions.push(registerCommand('ui5-tools.configurator.ui5Provider', () => Ui5Provider.wizard()));
   subscriptions.push(registerCommand('ui5-tools.configurator.replaceStrings', () => ReplaceStrings.wizard()));
+
+  subscriptions.push(registerCommand('ui5-tools.menu.builder.build', (oResource) => Menu.build(oResource)));
+  subscriptions.push(registerCommand('ui5-tools.menu.deployer.deploy', (oResource) => Menu.deploy(oResource)));
 
   // Configure listeners
   workspace.onDidChangeConfiguration((event) => onDidChangeConfiguration(event));

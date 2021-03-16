@@ -102,6 +102,7 @@ export default {
 
           try {
             await this.build(ui5App, progress);
+            window.showInformationMessage(`Project ${ui5App.folderName} builded!`);
           } catch (error) {
             throw new Error(error);
           }
@@ -187,15 +188,6 @@ export default {
         await this.babelifyJSFiles(destPath);
       }
 
-      // create dbg files
-      let bDebugSources = Config.builder('debugSources');
-      message = bDebugSources && diferentSrcDestFolders ? `Creating dbg files` : message;
-
-      progress?.report({ increment: 5 * multiplier, message: `${folderName}${message}` });
-      if (bDebugSources && diferentSrcDestFolders) {
-        await this.createDebugFiles(destPath);
-      }
-
       // compress files
       let bUglifySources = Config.builder('uglifySources');
       message = bUglifySources && diferentSrcDestFolders ? `Compress files` : message;
@@ -203,6 +195,15 @@ export default {
       progress?.report({ increment: 10 * multiplier, message: `${folderName}${message}` });
       if (bUglifySources && diferentSrcDestFolders) {
         await this.compressFiles(destPath);
+      }
+
+      // create dbg files
+      let bDebugSources = Config.builder('debugSources');
+      message = bDebugSources && diferentSrcDestFolders ? `Creating dbg files` : message;
+
+      progress?.report({ increment: 5 * multiplier, message: `${folderName}${message}` });
+      if (bDebugSources && diferentSrcDestFolders) {
+        await this.createDebugFiles(srcPath, destPath);
       }
 
       // clean files
@@ -256,12 +257,14 @@ export default {
     let pattern = new RelativePattern(folderPath, `**/*.{${replaceExtensions}}`);
     let files = await workspace.findFiles(pattern);
 
-    let calculedKeys = {};
+    const calculedKeys = this.replaceStringsValue();
+    const aCalculedKeys = Object.entries(calculedKeys);
+
     if (files.length) {
       Utils.logOutputBuilder(`Replacing strings to folder ${folderPath}`);
       try {
         for (let i = 0; i < files.length; i++) {
-          await this.replaceStringsFile(files[i], calculedKeys);
+          await this.replaceStringsFile(files[i], aCalculedKeys);
         }
       } catch (error) {
         throw new Error(error);
@@ -270,39 +273,47 @@ export default {
     return true;
   },
 
-  async replaceStringsFile(file, calculedKeys = {}) {
-    let keysValues = Config.builder('replaceKeysValues');
+  async replaceStringsFile(file, aCalculedKeys = []) {
+    if (file) {
+      let rawFile = await workspace.fs.readFile(file);
+      let stringfile = rawFile.toString();
 
-    let rawFile = await workspace.fs.readFile(file);
-    let stringfile = rawFile.toString();
-    keysValues.forEach((replacement) => {
-      let { key, value } = this.replaceStringsValue(replacement, calculedKeys);
+      for (const [key, value] of aCalculedKeys) {
+        stringfile = stringfile.replace(new RegExp('(<%){1}[\\s]*(' + key + '){1}[\\s]*(%>){1}', 'g'), value);
+      }
 
-      stringfile = stringfile.replace(new RegExp('(<%){1}[\\s]*(' + key + '){1}[\\s]*(%>){1}', 'g'), value.toString());
-    });
-
-    await workspace.fs.writeFile(file, Buffer.from(stringfile));
+      await workspace.fs.writeFile(file, Buffer.from(stringfile));
+    }
     return true;
   },
 
-  replaceStringsValue({ key, value = '' }, calculedKeys) {
-    if (value.indexOf('COMPUTED_') === 0) {
-      switch (key.replace('COMPUTED_', '')) {
-        case 'TIMESTAMP':
+  replaceStringsValue() {
+    let keysValues = Config.builder('replaceKeysValues');
+    let calculedKeys = {};
+
+    let oDate = new Date();
+    let sComputedDateKeyBegin = 'COMPUTED_Date_';
+    let aDateMethods = Utils.getMethods(oDate);
+    let aDateValues = aDateMethods.map((sMethod) => {
+      let sKey = `${sComputedDateKeyBegin}${sMethod}`;
+      let sValue = '' + oDate[sMethod]().toString();
+      return { key: sKey, value: sValue };
+    });
+    keysValues = keysValues.concat(aDateValues);
+
+    keysValues.forEach(({ key, value }) => {
+      if (value.indexOf(sComputedDateKeyBegin) === 0) {
+        let sFn = value.replace(sComputedDateKeyBegin, '');
+        if (typeof oDate[sFn] == 'function') {
           if (!calculedKeys[key]) {
-            calculedKeys[key] = new Date().getTime();
+            calculedKeys[key] = oDate[sFn]();
           }
-          value = calculedKeys[key];
-          break;
-        case 'ISODATE':
-          if (!calculedKeys[key]) {
-            calculedKeys[key] = new Date().toISOString();
-          }
-          value = calculedKeys[key];
-          break;
+        }
+      } else {
+        calculedKeys[key] = value;
       }
-    }
-    return { key, value };
+    });
+    return calculedKeys;
   },
 
   /**
@@ -396,37 +407,41 @@ export default {
    * @param {string} folderPath folder uri
    */
   async babelifyJSFiles(folderPath) {
-    if (Config.builder('babelSources')) {
+    if (Config.builder('babelSources') || true) {
       try {
         Utils.logOutputBuilder(`Babelify files ${folderPath}`);
         // Create -dbg files
         let patternJs = new RelativePattern(folderPath, `**/*.js`);
         let jsFiles = await workspace.findFiles(patternJs);
+        //@ts-ignore
+        let babelCore = require('@babel/core');
+        //@ts-ignore
+        let transformAsyncToPromises = require('babel-plugin-transform-async-to-promises');
+        //@ts-ignore
+        let transformRemoveConsole = require('babel-plugin-transform-remove-console');
+        //@ts-ignore
+        let presetEnv = require('@babel/preset-env');
 
         for (let i = 0; i < jsFiles.length; i++) {
           let uriOrigJs = Uri.file(jsFiles[i].fsPath);
           let jsFileRaw = await workspace.fs.readFile(uriOrigJs);
 
-          //@ts-ignore
-          let babelified = await require('@babel/core').transformAsync(jsFileRaw.toString(), {
+          let babelified = await babelCore.transformAsync(jsFileRaw.toString(), {
             plugins: [
               [
-                //@ts-ignore
-                require('babel-plugin-transform-async-to-promises'),
+                transformAsyncToPromises,
                 {
                   inlineHelpers: true,
                 },
               ],
-              //@ts-ignore
-              [require('babel-plugin-transform-remove-console')],
+              [transformRemoveConsole],
             ],
             presets: [
               [
-                //@ts-ignore
-                require('@babel/preset-env'),
+                presetEnv,
                 {
                   targets: {
-                    browsers: ['>0.25%', 'ie 11', 'not op_mini all'],
+                    browsers: 'last 2 versions, ie 11',
                   },
                 },
               ],
@@ -435,7 +450,6 @@ export default {
           let babelifiedCode = babelified.code.replace(/\r\n|\r|\n/g, os.EOL);
 
           await workspace.fs.writeFile(uriOrigJs, Buffer.from(babelifiedCode));
-          console.log(babelifiedCode);
         }
       } catch (error) {
         throw new Error(error);
@@ -446,19 +460,20 @@ export default {
 
   /**
    * Create -dbg.js files
+   * @param {string} srcPath uri source path
    * @param {string} folderPath folder uri
    */
-  async createDebugFiles(folderPath) {
+  async createDebugFiles(srcPath, folderPath) {
     if (Config.builder('debugSources')) {
       try {
         Utils.logOutputBuilder(`Create dbg files ${folderPath}`);
         // Create -dbg files
-        let patternJs = new RelativePattern(folderPath, `**/*.js`);
+        let patternJs = new RelativePattern(srcPath, `**/*.js`);
         let jsFiles = await workspace.findFiles(patternJs);
 
         for (let i = 0; i < jsFiles.length; i++) {
           let uriOrigJs = Uri.file(jsFiles[i].fsPath);
-          let uriDestJs = Uri.file(jsFiles[i].fsPath.replace('.js', '-dbg.js'));
+          let uriDestJs = Uri.file(jsFiles[i].fsPath.replace(srcPath, folderPath).replace('.js', '-dbg.js'));
           await workspace.fs.copy(uriOrigJs, uriDestJs, {
             overwrite: true,
           });
@@ -480,11 +495,7 @@ export default {
         Utils.logOutputBuilder(`Compres files to ${folderPath}`);
         // Compress js files
         let patternJs = new RelativePattern(folderPath, `**/*.js`);
-        let uglifySourcesExclude = Config.builder(`uglifySourcesExclude`);
-        if (uglifySourcesExclude) {
-          uglifySourcesExclude += `,`;
-        }
-        uglifySourcesExclude = `{${uglifySourcesExclude}**/*-dbg.js}`;
+        let uglifySourcesExclude = Config.builder(`uglifySourcesExclude`) || '';
         let jsFiles = await workspace.findFiles(patternJs, uglifySourcesExclude);
 
         for (let i = 0; i < jsFiles.length; i++) {
@@ -586,7 +597,7 @@ export default {
             resources: {
               cwd: destPath,
               prefix: namespace,
-              src: preloadSrc
+              src: preloadSrc,
             },
             dest: destPath,
             compatVersion: compatVersion,

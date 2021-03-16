@@ -1,8 +1,8 @@
-import { window, workspace, RelativePattern, Uri, extensions } from 'vscode';
+import { window, workspace, RelativePattern, Uri, extensions, commands } from 'vscode';
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
-import url from 'url';
+import { URL } from 'url';
 
 import Config from './Config';
 
@@ -45,7 +45,10 @@ export default {
             if (!alreadyInList) {
               let manifestInnerPath = path.join(appSrcFolder, 'manifest.json');
               let appFsPath = manifestUri.fsPath.replace(manifestInnerPath, '');
-              let appServerPath = url.parse(appFsPath.replace(workspaceRootPath, '')).path;
+              let appResourceDirname = manifestUri.fsPath.replace(path.sep + manifestInnerPath, '');
+              let appServerPath = appFsPath.replace(workspaceRootPath, '').split(path.sep).join('/');
+
+              let appConfigPath = path.join(appResourceDirname, 'ui5-tools.json');
               // clean all srcFolders/libraryFolders/distFolders if has any parent app
               appServerPath = appServerPath
                 .replace(`/${libraryFolder}/`, '/')
@@ -57,6 +60,8 @@ export default {
 
               ui5Apps.push({
                 appFsPath: appFsPath,
+                appConfigPath: appConfigPath,
+                appResourceDirname: appResourceDirname,
                 appServerPath: appServerPath,
                 isLibrary: isLibrary,
                 srcFsPath: srcFsPath,
@@ -87,6 +92,8 @@ export default {
       return sort;
     });
     this.logOutputGeneral(`${ui5Apps.length} ui5 projects detected`);
+    let aResourcesDirname = ui5Apps.map((app) => app.appResourceDirname);
+    commands.executeCommand('setContext', 'ui5-tools:resourcesPath', aResourcesDirname);
     return ui5Apps;
   },
 
@@ -137,13 +144,40 @@ export default {
     return framework;
   },
 
+  async getUi5ToolsFile(ui5App) {
+    let ui5AppConfig = undefined;
+    if (ui5App) {
+      try {
+        let appConfigFile = await workspace.fs.readFile(Uri.parse(ui5App.appConfigPath));
+        ui5AppConfig = JSON.parse(appConfigFile.toString());
+      } catch (oError) {
+        ui5AppConfig = undefined;
+      }
+    }
+    return ui5AppConfig;
+  },
+
+  async setUi5ToolsFile(ui5App, oConfigFile) {
+    if (ui5App && typeof oConfigFile === 'object') {
+      try {
+        let sConfigFile = JSON.stringify(oConfigFile, undefined, 2);
+        await workspace.fs.writeFile(Uri.parse(ui5App.appConfigPath), Buffer.from(sConfigFile));
+      } catch (oError) {
+        throw oError;
+      }
+    }
+    return oConfigFile;
+  },
+
   async getManifest(uriOrManifest) {
     let manifest = undefined;
     if (uriOrManifest) {
       if (typeof uriOrManifest === 'string') {
+        let libraryFolder = Config.general('libraryFolder');
+        let distFolder = Config.general('distFolder');
         let manifestString = await workspace.findFiles(
           new RelativePattern(uriOrManifest, `**/manifest.json`),
-          `**/{dist,node_modules}/**`,
+          `**/{${distFolder},${libraryFolder},node_modules}/**`,
           1
         );
         if (manifestString.length) {
@@ -224,16 +258,20 @@ export default {
     return console.log(sText);
   },
 
-  logOutputGeneral (sText) {
+  logOutputGeneral(sText) {
     return this.logOutput(`General: ${sText}`);
   },
 
-  logOutputConfigurator (sText) {
+  logOutputConfigurator(sText) {
     return this.logOutput(`Configurator: ${sText}`);
   },
 
   logOutputBuilder(sText) {
     return this.logOutput(`Builder: ${sText}`);
+  },
+
+  logOutputDeployer(sText) {
+    return this.logOutput(`Deployer: ${sText}`);
   },
 
   logOutputServer(sText) {
@@ -244,13 +282,41 @@ export default {
     return this.logOutput(`Server > Proxy: ${sText}`);
   },
 
-  proxyLogProvider() {
+  newLogProviderDeployer() {
+    return this.newLogProvider(this.logOutputDeployer);
+  },
+
+  newLogProvider(fnLogger = this.logOutputGeneral) {
     return {
-      log: this.logOutputProxy.bind(this),
-      debug: this.logOutputProxy.bind(this),
-      info: this.logOutputProxy.bind(this),
-      warn: this.logOutputProxy.bind(this),
-      error: this.logOutputProxy.bind(this)
+      log: fnLogger.bind(this),
+      logVerbose: (oParam) => {
+        // console.log(oParam)
+      },
+      debug: fnLogger.bind(this),
+      info: fnLogger.bind(this),
+      warn: fnLogger.bind(this),
+      error: fnLogger.bind(this),
     };
-  }
+  },
+
+  getMethods(obj) {
+    let properties = new Set();
+    let currentObj = obj;
+    let aExclude = [
+      'constructor',
+      '__defineGetter__',
+      '__defineSetter__',
+      'hasOwnProperty',
+      '__lookupGetter__',
+      '__lookupSetter__',
+      'isPrototypeOf',
+      'propertyIsEnumerable',
+    ];
+    do {
+      Object.getOwnPropertyNames(currentObj).map((item) => properties.add(item));
+    } while ((currentObj = Object.getPrototypeOf(currentObj)));
+    return [...properties.keys()].filter((item) => {
+      return typeof obj[item] === 'function' && item.indexOf('set') !== 0 && aExclude.indexOf(item) === -1;
+    });
+  },
 };

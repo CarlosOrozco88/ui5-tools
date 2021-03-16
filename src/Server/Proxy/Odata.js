@@ -24,7 +24,7 @@ export default {
             changeOrigin: true,
             auth: oAuth,
             logLevel: 'error',
-            logProvider: Utils.proxyLogProvider.bind(Utils)
+            logProvider: Utils.proxyLogProvider.bind(Utils),
           });
           serverApp.use('/sap', proxy);
         }
@@ -48,7 +48,7 @@ export default {
                 changeOrigin: true,
                 auth: this.getODATAAuth(i),
                 logLevel: 'error',
-                logProvider: Utils.proxyLogProvider.bind(Utils)
+                logProvider: Utils.proxyLogProvider.bind(Utils),
               });
               serverApp.use(mpaths[i], proxy);
             }

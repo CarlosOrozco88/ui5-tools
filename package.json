@@ -2,7 +2,7 @@
   "name": "ui5-tools",
   "displayName": "UI5 Tools",
   "description": "Local development tools for UI5",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
@@ -19,7 +19,7 @@
   "license": "Apache-2.0",
   "icon": "static/images/logo_blue.png",
   "engines": {
-    "vscode": "^1.53.0"
+    "vscode": "^1.54.0"
   },
   "categories": [
     "Other"
@@ -34,76 +34,96 @@
     "ui5"
   ],
   "activationEvents": [
-    "*"
+    "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "ui5-tools.menu.builder.build",
+          "group": "ui5-tools",
+          "when": "explorerResourceIsFolder && resourcePath in ui5-tools:resourcesPath"
+        },
+        {
+          "command": "ui5-tools.menu.deployer.deploy",
+          "group": "ui5-tools",
+          "when": "explorerResourceIsFolder && resourcePath in ui5-tools:resourcesPath"
+        }
+      ]
+    },
     "keybindings": [
       {
         "command": "ui5-tools.server.startDevelopment",
         "key": "alt+s alt+s",
         "mac": "alt+s alt+s",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
       },
       {
         "command": "ui5-tools.server.startProduction",
         "key": "alt+s alt+p",
         "mac": "alt+s alt+p",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
       },
       {
         "command": "ui5-tools.server.startBuildProduction",
         "key": "alt+s alt+b",
         "mac": "alt+s alt+b",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
       },
       {
         "command": "ui5-tools.server.stop",
         "key": "alt+s alt+x",
         "mac": "alt+s alt+x",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
       },
       {
         "command": "ui5-tools.server.restart",
         "key": "alt+s alt+r",
         "mac": "alt+s alt+r",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
       },
       {
         "command": "ui5-tools.server.toggle",
         "key": "alt+s alt+t",
         "mac": "alt+s alt+t",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
       },
       {
         "command": "ui5-tools.configurator.odataProvider",
         "key": "alt+c alt+o",
         "mac": "alt+c alt+o",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
       },
       {
         "command": "ui5-tools.configurator.ui5Provider",
         "key": "alt+c alt+u",
         "mac": "alt+c alt+u",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
       },
       {
         "command": "ui5-tools.configurator.replaceStrings",
         "key": "alt+c alt+r",
         "mac": "alt+c alt+r",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
       },
       {
         "command": "ui5-tools.builder.build",
         "key": "alt+b alt+b",
         "mac": "alt+b alt+b",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
       },
       {
         "command": "ui5-tools.builder.buildAll",
         "key": "alt+b alt+a",
         "mac": "alt+b alt+a",
-        "when": "editorTextFocus"
+        "when": "editorFocus"
+      },
+      {
+        "command": "ui5-tools.deployer.deploy",
+        "key": "alt+d alt+d",
+        "mac": "alt+d alt+d",
+        "when": "editorFocus"
       }
     ],
     "commands": [
@@ -150,6 +170,14 @@
       {
         "command": "ui5-tools.builder.buildAll",
         "title": "UI5 Tools: Builder > Build all UI5 projects"
+      },
+      {
+        "command": "ui5-tools.menu.builder.build",
+        "title": "Build UI5 project"
+      },
+      {
+        "command": "ui5-tools.menu.deployer.deploy",
+        "title": "Deploy UI5 project"
       }
     ],
     "configuration": {
@@ -358,14 +386,24 @@
           "default": [
             {
               "key": "TIMESTAMP",
-              "value": "COMPUTED_TIMESTAMP"
+              "value": "COMPUTED_Date_getTime"
             },
             {
               "key": "ISODATE",
-              "value": "COMPUTED_ISODATE"
+              "value": "COMPUTED_Date_toISOString"
             }
           ],
           "description": "Key/Value pair list. Replace <% key %> with 'value' while building the app"
+        },
+        "ui5-tools.deployer.autoSaveOrder": {
+          "type": "boolean",
+          "default": true,
+          "description": "Saves de transport number in ui5-tools.json file"
+        },
+        "ui5-tools.deployer.autoPrefixBSP": {
+          "type": "boolean",
+          "default": false,
+          "description": "Auto prefix BSP name in all transport texts"
         }
       }
     }
@@ -381,42 +419,45 @@
     "test": "node ./test/runTest.js"
   },
   "devDependencies": {
+    "@types/apicache": "^1.2.2",
     "@types/express": "^4.17.11",
     "@types/glob": "^7.1.3",
     "@types/mocha": "^8.2.1",
-    "@types/node": "^14.14.28",
+    "@types/node": "^14.14.35",
     "@types/terser": "^3.12.0",
-    "@types/vscode": "^1.53.0",
-    "@types/apicache": "^1.2.2",
+    "@types/vscode": "^1.54.0",
     "babel-loader": "^8.2.2",
-    "eslint": "^7.20.0",
+    "eslint": "^7.22.0",
+    "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-prettier": "^3.3.1",
     "glob": "^7.1.6",
-    "mocha": "^8.3.0",
+    "mocha": "^8.3.2",
     "node-loader": "^1.0.2",
     "prettier": "^2.2.1",
     "tslint": "^6.1.3",
-    "typescript": "^4.1.5",
+    "typescript": "^4.2.3",
     "vscode-test": "^1.5.1",
-    "webpack": "^5.22.0",
+    "webpack": "^5.26.1",
     "webpack-cli": "^4.5.0"
   },
   "dependencies": {
-    "@babel/core": "^7.12.16",
-    "@babel/plugin-transform-modules-commonjs": "7.12.13",
-    "@babel/preset-env": "^7.12.16",
-    "apicache": "^1.5.3",
+    "@babel/core": "^7.13.10",
+    "@babel/plugin-transform-modules-commonjs": "7.13.8",
+    "@babel/preset-env": "^7.13.10",
+    "abap-adt-api": "^2.5.1",
+    "apicache": "^1.6.2",
     "babel-plugin-transform-async-to-promises": "^0.8.15",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "chokidar": "^3.5.1",
     "connect-livereload": "^0.6.1",
+    "deepmerge": "^4.2.2",
     "dotenv": "^8.2.0",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
     "http-proxy-middleware": "^1.0.6",
     "less": "^4.1.1",
-    "less-openui5": "^0.10.0",
-    "livereload": "^0.9.1",
+    "less-openui5": "^0.11.0",
+    "livereload": "^0.9.2",
     "on-headers": "^1.0.2",
     "openui5-preload": "3.2.0",
     "opn": "^6.0.0",
@@ -424,6 +465,8 @@
     "pretty-data": "^0.40.0",
     "showdown": "^1.9.1",
     "terser": "^5.6.0",
-    "ws": "^7.4.3"
+    "ui5-nwabap-deployer-core": "^1.0.11",
+    "ws": "^7.4.4",
+    "xmldoc": "^1.1.2"
   }
 }

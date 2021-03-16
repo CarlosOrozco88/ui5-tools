@@ -15,6 +15,7 @@ const cacheResources = apicache
     headers: {
       'cache-control': 'no-cache',
     },
+    //respectCacheControl: true,
   })
   .middleware();
 
@@ -56,7 +57,7 @@ export default {
             secure: Config.server('resourcesSecure'),
             changeOrigin: true,
             logLevel: 'error',
-            logProvider: Utils.proxyLogProvider.bind(Utils)
+            logProvider: Utils.proxyLogProvider.bind(Utils),
           });
 
           serverApp.use(['/resources', '/**/resources'], onProxyRes, cacheResources, proxy);
@@ -68,7 +69,6 @@ export default {
         targetUri = `https://${framework}.hana.ondemand.com/${ui5Version}/`;
 
         if (ui5Version) {
-
           Utils.logOutputServer(`Creating resourcesProxy with ui5Version ${ui5Version} to CDN ${targetUri}`);
           proxy = createProxyMiddleware({
             pathRewrite(path, req) {
@@ -79,7 +79,7 @@ export default {
             secure: Config.server('resourcesSecure'),
             changeOrigin: true,
             logLevel: 'error',
-            logProvider: Utils.proxyLogProvider.bind(Utils)
+            logProvider: Utils.proxyLogProvider.bind(Utils),
           });
 
           serverApp.use(['/resources', '/**/resources'], onProxyRes, cacheResources, proxy);
@@ -136,7 +136,7 @@ export default {
         secure: Config.server('resourcesSecure'),
         changeOrigin: true,
         logLevel: 'error',
-        logProvider: Utils.proxyLogProvider.bind(Utils)
+        logProvider: Utils.proxyLogProvider.bind(Utils),
       });
 
       serverApp.use('/flp/test-resources/**', onProxyRes, cacheResources, proxy);
