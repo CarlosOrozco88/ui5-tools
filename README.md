@@ -43,11 +43,11 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 #### Deployer
 
 - **Gateway deploy**, process includes previous build. Deploy your project doing right click in project folder or `alt+d alt+d` and select project
-- **ui5-tools.json** file located at project folder, with deployment configuration: [workspaceExample/Z_APP1/ui5-tools.json]-(ui5-tools.json example)
+- **ui5-tools.json** file located at project folder, with deployment configuration: [ui5-tools.json example](workspaceExample/Z_APP1/ui5-tools.json)
 - **Create, update and save** last order in ui5-tools.json file (configurable)
 - **Autoprefix** BSP name in order text while creation (optional)
 - Supports `.env` file for gateway authentication. `UI5TOOLS_DEPLOY_USER - UI5TOOLS_DEPLOY_PASSWORD`
-- Deply process uses [ui5-nwabap-deployer-core
+- Deploy process uses [ui5-nwabap-deployer-core
   ](https://github.com/pfefferf/ui5-nwabap-deployer/blob/master/packages/ui5-nwabap-deployer-core), so the extension uses the same configuration in file ui5-tools.json (property deployer.options)
 
 ### String replacer
