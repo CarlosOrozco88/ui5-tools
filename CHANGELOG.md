@@ -1,3 +1,8 @@
+## 0.6.2 (17-03-2021)
+
+- Output ui5-tools extension log: bug corrected
+- Updated default UI5 to version from 1.71.20 to 1.71.35
+
 ## 0.6.1 (17-03-2021)
 
 - Readme updated
