@@ -11,22 +11,23 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 
 ### ui5-tools
 
-- **Automatic less builder**. Looks for styles.less and {appFolderName}.less
-- **Automatic themes builder**
+- **Automatic less builder**. Looks for `styles.less` and `PROJECTFOLDER.less`
+- **Automatic themes builder**. Build `library.source.less` themes
 - **Configurator** commands for odata proxy, resources proxy and replace strings
 
 #### Server
 
-- Configurable **proxy** to one o multiple **odata service** (Gateway, Other, None)
+- Multiple comands: start `alt+s alt+s`, restart `alt+s alt+r`... (check commands secction)
+- Configurable **proxy** to one o multiple **odata service** (Gateway, Other, None). Command `alt+c alt+o`
 - Supports `.env` file for odata service authentication. `UI5TOOLS_ODATA_USER - UI5TOOLS_ODATA_PASSWORD`, `UI5TOOLS_ODATA_USER_2 - UI5TOOLS_ODATA_PASSWORD_2`, etc.
-- Configurable **proxy** to **resources** (Gateway, CDN SAPUI5, CDN OpenUI5, None)
-- Resources proxy has **built in server cache**
-- Configurable UI5 version
+- Configurable **proxy** to **resources** (Gateway, CDN SAPUI5, CDN OpenUI5, None). Command `alt+c alt+u`
+- Resources proxy has **built in server cache**, only cleaned at server start/restart.
+- Configurable UI5 version (when using gateway proxy, extension will detect sapui5 version automatically)
 - **Live reload browser**, css and images hot reload
 - **Built in localhost home** page server, with apps launchpad, readme.md, docs (md files), links, server info...
 - **Built in launchpad** for resources: Gateway and CDN SAPUI5. Configurable with file `fioriSandboxConfig.json`
 - Server uses **folder hierarchy**. For product apps and Z apps, is possible to emulate gateway bsp paths
-- Start server in **development mode** or **production mode** (launches `srcFolder` or `distFolder` folder of each project)
+- Start server in **development mode** `alt+s alt+s` or **production mode** `alt+s alt+p` (launches `srcFolder` or `distFolder` folder of each project)
 
 #### Builder
 
@@ -35,7 +36,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - **Build less** files (looks for styles.css, PROJECTNAME.less or library.source.less)
 - **Uglify** files
 - **Replace strings**
-- Build one app or all apps in one command
+- Build one app `alt+b alt+b` or all apps `alt+b alt+a` in one command
 - Building preload (Component-preload and library-preload) process uses [openui5-preload](https://github.com/r-murphy/openui5-preload)
 - Building theme (library.source.less) process uses [less-openui5](https://github.com/SAP/less-openui5)
 - Building styles (styles.less and PROJECTFOLDER.less) process uses [less](https://github.com/less/less.js)
@@ -53,7 +54,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 ### String replacer
 
 - **Replace pattern** `<% TIMESTAMP %>`, `<% ISODATE %>`
-- **Create custom replacements** in workspace (configurable)
+- **Create custom replacements** like `<% CUSTOMKEY %>` in workspace environment (configurable with command `alt+c alt+r`)
 - **Suports computed date functions**, replacements during the build process `<% COMPUTED_Date_toLocaleString %>`, `<% COMPUTED_Date_toLocaleDateString %>`, `<% COMPUTED_Date_fnDate %>`
 
 ## Settings
