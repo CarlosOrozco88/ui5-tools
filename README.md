@@ -38,7 +38,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - Build one app or all apps in one command
 - Building preload (Component-preload and library-preload) process uses [openui5-preload](https://github.com/r-murphy/openui5-preload)
 - Building theme (library.source.less) process uses [less-openui5](https://github.com/SAP/less-openui5)
-- Building styles (styles.less and PROJECTFOLDER.less) process uses [less-openui5](https://github.com/SAP/less-openui5)
+- Building styles (styles.less and PROJECTFOLDER.less) process uses [less](https://github.com/less/less.js)
 
 #### Deployer
 
