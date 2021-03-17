@@ -120,9 +120,10 @@ export default {
 
   loadEnv() {
     let baseDir = this.getWorkspaceRootPath();
-    dotenv.config({
+    let oDotEnv = dotenv.config({
       path: path.join(baseDir, '.env'),
     });
+    return oDotEnv.parsed || {};
   },
 
   getHttpsCert() {

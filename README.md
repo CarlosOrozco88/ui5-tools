@@ -5,7 +5,7 @@
 
 VSCode extension for ui5 developers. This extension is not intended to replace ui5 cli, its main objective is to provide a fast and global workspace configuration to work with multi root workspaces and projects deployed to on premise systems (Gateway).
 
-You can find examples of vscode workspace configuration in [examples](examples) folder.
+You can find examples of vscode workspace configuration in [workspaceExample](workspaceExample) folder.
 
 ## Features
 
@@ -18,7 +18,7 @@ You can find examples of vscode workspace configuration in [examples](examples) 
 #### Server
 
 - Configurable **proxy** to one o multiple **odata service** (Gateway, Other, None)
-- Supports .env file for odata service authentication. `UI5TOOLS_ODATA_USER - UI5TOOLS_ODATA_PASSWORD`, `UI5TOOLS_ODATA_USER_2 - UI5TOOLS_ODATA_PASSWORD_2`, etc.
+- Supports `.env` file for odata service authentication. `UI5TOOLS_ODATA_USER - UI5TOOLS_ODATA_PASSWORD`, `UI5TOOLS_ODATA_USER_2 - UI5TOOLS_ODATA_PASSWORD_2`, etc.
 - Configurable **proxy** to **resources** (Gateway, CDN SAPUI5, CDN OpenUI5, None)
 - Resources proxy has **built in server cache**
 - Configurable UI5 version
@@ -30,20 +30,31 @@ You can find examples of vscode workspace configuration in [examples](examples) 
 
 #### Builder
 
-- **Component-preload.js**, checking configured ui5 version for correct build.
+- **Component-preload.js**, checking configured ui5 version for correct build. Build your project by doing right click in project folder or `alt+b alt+b` and select project
 - **Dbg** files creation
 - **Build less** files (looks for styles.css, PROJECTNAME.less or library.source.less)
 - **Uglify** files
 - **Replace strings**
 - Build one app or all apps in one command
+- Building preload (Component-preload and library-preload) process uses [openui5-preload](https://github.com/r-murphy/openui5-preload)
+- Building theme (library.source.less) process uses [less-openui5](https://github.com/SAP/less-openui5)
+- Building styles (styles.less and PROJECTFOLDER.less) process uses [less-openui5](https://github.com/SAP/less-openui5)
 
 #### Deployer
 
-TBD
+- **Gateway deploy**, process includes previous build. Deploy your project doing right click in project folder or `alt+d alt+d` and select project
+- **ui5-tools.json** file located at project folder, with deployment configuration: [workspaceExample/Z_APP1/ui5-tools.json]-(ui5-tools.json example)
+- **Create, update and save** last order in ui5-tools.json file (configurable)
+- **Autoprefix** BSP name in order text while creation (optional)
+- Supports `.env` file for gateway authentication. `UI5TOOLS_DEPLOY_USER - UI5TOOLS_DEPLOY_PASSWORD`
+- Deply process uses [ui5-nwabap-deployer-core
+  ](https://github.com/pfefferf/ui5-nwabap-deployer/blob/master/packages/ui5-nwabap-deployer-core), so the extension uses the same configuration in file ui5-tools.json (property deployer.options)
 
-#### Generator
+### String replacer
 
-TBD
+- **Replace pattern** `<% TIMESTAMP %>`, `<% ISODATE %>`
+- **Create custom replacements** in workspace (configurable)
+- **Suports computed date functions**, replacements during the build process `<% COMPUTED_Date_toLocaleString %>`, `<% COMPUTED_Date_toLocaleDateString %>`, `<% COMPUTED_Date_fnDate %>`
 
 ## Settings
 
@@ -82,31 +93,46 @@ TBD
 - `ui5-tools.builder.buildLess`: Auto build less files into css when saving changes | default: `true`
 - `ui5-tools.builder.replaceStrings`: Replace strings when building | default: `true`
 - `ui5-tools.builder.replaceExtensions`: File extensions to look for keys to replace | default: `xml,js,json,properties`
-- `ui5-tools.builder.replaceKeysValues`: Key/Value pair list. Replace <% key %> with 'value' while building the app | default: `[{'key':'TIMESTAMP','value':'COMPUTED_TIMESTAMP'}]`
+- `ui5-tools.builder.replaceKeysValues`: Key/Value pair list. Replace <% key %> with 'value' while building the app | default: `[{'key':'TIMESTAMP','value':'ISODATE'}]`
+
+#### Deployer Settings
+
+- `ui5-tools.deployer.autoSaveOrder`: Saves de transport number in ui5-tools.json file | default: `true`
+- `ui5-tools.deployer.autoPrefixBSP`: Auto prefix BSP name in all transport texts while creation | default: `false`
 
 ## Commands
 
 #### Server Commands
 
-- `ui5-tools.server.startDevelopment`: Start server in development mode (srcFolder)
-- `ui5-tools.server.startProduction`: Start server in production mode (distFolder)
-- `ui5-tools.server.startBuildProduction`: Build workspace and start server in production mode
-- `ui5-tools.server.stop`: Stop server
-- `ui5-tools.server.restart`: Restart server
-- `ui5-tools.server.toggle`: Toggle server
+- `ui5-tools.server.startDevelopment`: Start server in development mode (srcFolder) | Shortcut: `alt+s alt+s`
+- `ui5-tools.server.startProduction`: Start server in production mode (distFolder) | Shortcut: `alt+s alt+p`
+- `ui5-tools.server.startBuildProduction`: Build workspace and start server in production mode | Shortcut: `alt+s alt+b`
+- `ui5-tools.server.stop`: Stop server | Shortcut: `alt+s alt+x`
+- `ui5-tools.server.restart`: Restart server | Shortcut: `alt+s alt+r`
+- `ui5-tools.server.toggle`: Toggle server | Shortcut: `alt+s alt+t`
 
 #### Builder Commands
 
-- `ui5-tools.builder.build`: Build ui5 app
-- `ui5-tools.builder.buildAll`: Build workspace
+- `ui5-tools.builder.build`: Build ui5 app | Shortcut: `alt+b alt+b`
+- `ui5-tools.builder.buildAll`: Build workspace | Shortcut: `alt+b alt+a`
+
+#### Deployer Commands
+
+- `ui5-tools.menu.deployer.deploy`: Build and deploy app | Shortcut: `alt+d alt+d`
 
 #### Configurator Commands
 
-- `ui5-tools.configurator.odataProvider`: configure odata provider
-- `ui5-tools.configurator.ui5Provider`: configure ui5 provider
-- `ui5-tools.configurator.replaceStrings`: configure replace strings
+- `ui5-tools.configurator.odataProvider`: Configure odata provider | Shortcut: `alt+c alt+o`
+- `ui5-tools.configurator.ui5Provider`: Configure ui5 provider | Shortcut: `alt+c alt+u`
+- `ui5-tools.configurator.replaceStrings`: Configure replace strings | Shortcut: `alt+c alt+r`
+
+## Menus
+
+- `ui5-tools.menu.builder.build`: Build option in project folder menu (right click)
+- `ui5-tools.menu.deployer.deploy`: Build and deploy option in project folder menu (right click)
 
 ## Credits
 
 - Preload javascript builder: [openui5-preload](https://github.com/r-murphy/openui5-preload) - [Ryan Murphy](https://github.com/r-murphy)
+- Deployer: [ui5-nwabap-deployer-core](https://github.com/pfefferf/ui5-nwabap-deployer/blob/master/packages/ui5-nwabap-deployer-core) - [Florian Pfeffer](https://github.com/pfefferf)
 - Less library builder: [less-openui5](https://github.com/SAP/less-openui5) - [SAP](https://github.com/SAP)

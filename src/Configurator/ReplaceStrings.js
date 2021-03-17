@@ -17,7 +17,7 @@ export default {
   },
 
   async quickPickAddRemoveStrings() {
-    return new Promise((resolv, reject) => {
+    return new Promise((resolve, reject) => {
       let replaceKeysValues = Config.builder('replaceKeysValues');
 
       let options = replaceKeysValues.map((keyValue) => {
@@ -48,7 +48,7 @@ export default {
           });
           await Config.builder().update('replaceKeysValues', newKeyValues, ConfigurationTarget.Workspace);
           quickPickValueKey.hide();
-          resolv(true);
+          resolve(true);
         }
       });
       quickPickValueKey.onDidAccept(async () => {
@@ -61,7 +61,11 @@ export default {
             if (mapKeys.includes(keyValue.groups.key)) {
               window.showErrorMessage(`${keyValue.groups.key} already exists`);
               quickPickValueKey.hide();
-              resolv(true);
+              resolve(true);
+            } else if (keyValue.groups.key.indexOf('COMPUTED_') === 0) {
+              window.showErrorMessage(`The key should not start with COMPUTED_`);
+              quickPickValueKey.hide();
+              resolve(true);
             } else {
               newReplaceKeysValues.push({
                 key: keyValue.groups.key,
@@ -69,15 +73,15 @@ export default {
               });
               await Config.builder().update('replaceKeysValues', newReplaceKeysValues, ConfigurationTarget.Workspace);
               quickPickValueKey.hide();
-              resolv(true);
+              resolve(true);
             }
           } else {
             quickPickValueKey.hide();
-            resolv(false);
+            resolve(false);
           }
         } else {
           quickPickValueKey.hide();
-          resolv(false);
+          resolve(false);
         }
       });
     });

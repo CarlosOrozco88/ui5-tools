@@ -2,7 +2,7 @@
   "name": "ui5-tools",
   "displayName": "UI5 Tools",
   "description": "Local development tools for UI5",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
@@ -26,12 +26,18 @@
   ],
   "keywords": [
     "live reload",
-    "open in browser",
     "multi-root ready",
     "Component-preload",
+    "library-preload",
     "sapui5",
     "openui5",
-    "ui5"
+    "ui5",
+    "builder",
+    "deployer",
+    "string replacer",
+    "less",
+    "theme",
+    "Gateway"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -403,7 +409,7 @@
         "ui5-tools.deployer.autoPrefixBSP": {
           "type": "boolean",
           "default": false,
-          "description": "Auto prefix BSP name in all transport texts"
+          "description": "Auto prefix BSP name in all transport texts while creation"
         }
       }
     }
@@ -444,7 +450,6 @@
     "@babel/core": "^7.13.10",
     "@babel/plugin-transform-modules-commonjs": "7.13.8",
     "@babel/preset-env": "^7.13.10",
-    "abap-adt-api": "^2.5.1",
     "apicache": "^1.6.2",
     "babel-plugin-transform-async-to-promises": "^0.8.15",
     "babel-plugin-transform-remove-console": "^6.9.4",

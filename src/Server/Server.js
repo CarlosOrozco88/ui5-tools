@@ -169,16 +169,16 @@ export default {
   },
 
   stopServer() {
-    return new Promise((resolv, reject) => {
+    return new Promise((resolve, reject) => {
       if (this.server && this.server.listening) {
         Utils.logOutputServer('Stopping...');
         this.server.close(() => {
           Utils.logOutputServer('Stopped!');
           //server.unref();
-          resolv();
+          resolve();
         });
       } else {
-        resolv();
+        resolve();
       }
     });
   },

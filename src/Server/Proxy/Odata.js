@@ -64,7 +64,7 @@ export default {
   },
 
   getODATAAuth(index) {
-    Utils.loadEnv();
+    const oEnv = Utils.loadEnv();
     let auth = undefined;
 
     let userKey = 'UI5TOOLS_ODATA_USER';
@@ -73,8 +73,8 @@ export default {
       userKey += `_${index + 1}`;
       passKey += `_${index + 1}`;
     }
-    if (process.env[userKey] && process.env[passKey]) {
-      auth = `${process.env[userKey]}:${process.env[passKey]}`;
+    if (oEnv[userKey] && oEnv[passKey]) {
+      auth = `${oEnv[userKey]}:${oEnv[passKey]}`;
     }
 
     return auth;

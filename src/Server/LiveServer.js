@@ -18,7 +18,7 @@ export default {
   watching: undefined,
 
   async start(serverApp, ui5Apps) {
-    return new Promise(async (resolv, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         Utils.logOutputServer('LiveServer > Starting...');
         let portLiveReload = await portfinder.getPortPromise({
@@ -26,7 +26,7 @@ export default {
         });
         this.middleware({ serverApp, portLiveReload, ui5Apps });
         await this.createServer(portLiveReload);
-        resolv();
+        resolve();
       } catch (error) {
         reject(error);
       }
@@ -34,7 +34,7 @@ export default {
   },
 
   async createServer(portLiveReload) {
-    return new Promise((resolv, reject) => {
+    return new Promise((resolve, reject) => {
       try {
         let protocol = Config.server('protocol');
 
@@ -54,7 +54,7 @@ export default {
 
         this.liveServerWS.once('listening', () => {
           Utils.logOutputServer('LiveServer > Started!');
-          resolv();
+          resolve();
         });
 
         this.watch();

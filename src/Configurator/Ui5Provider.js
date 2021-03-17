@@ -30,7 +30,7 @@ export default {
   },
 
   async quickPickUi5Provider() {
-    return new Promise(async (resolv, reject) => {
+    return new Promise(async (resolve, reject) => {
       let ui5ProviderValue = Config.server('resourcesProxy');
 
       let quickpick = await window.createQuickPick();
@@ -60,7 +60,7 @@ export default {
           let value = quickpick.selectedItems[0].label;
           await Config.server().update('resourcesProxy', value, ConfigurationTarget.Workspace);
           Utils.logOutputConfigurator(`Set resourcesProxy value to ${value}`);
-          resolv(value);
+          resolve(value);
         } else {
           let sMessage = 'No ui5 provider configured';
           Utils.logOutputConfigurator(sMessage);
@@ -73,7 +73,7 @@ export default {
   },
 
   async inputBoxGatewayUri() {
-    return new Promise(async (resolv, reject) => {
+    return new Promise(async (resolve, reject) => {
       let gatewayUri = Config.server('resourcesUri');
       let inputBox = await window.createInputBox();
       inputBox.title = 'ui5-tools > Configurator > Ui5Provider: Enter gateway url';
@@ -86,7 +86,7 @@ export default {
         if (inputBox.value) {
           await Config.server().update('resourcesUri', inputBox.value, ConfigurationTarget.Workspace);
           Utils.logOutputConfigurator(`Set resourcesUri value to ${inputBox.value}`);
-          resolv(inputBox.value);
+          resolve(inputBox.value);
         } else {
           let sMessage = 'No gateway url configured';
           Utils.logOutputConfigurator(sMessage);
@@ -105,7 +105,7 @@ export default {
     } catch (error) {
       throw new Error(error);
     }
-    return new Promise(async (resolv, reject) => {
+    return new Promise(async (resolve, reject) => {
       let ui5Version;
       try {
         let ui5Version;
@@ -117,17 +117,17 @@ export default {
         await Config.general().update('ui5Version', ui5Version, ConfigurationTarget.Workspace);
 
         Utils.logOutputConfigurator(`Set ui5Version value ${ui5Version}`);
-        resolv(ui5Version);
+        resolve(ui5Version);
       } catch (sError) {
         Utils.logOutputConfigurator(sError);
         reject(sError);
       }
-      resolv(ui5Version);
+      resolve(ui5Version);
     });
   },
 
   async quickPickUi5Version(versionsMajor) {
-    return new Promise(async (resolv, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         let major = await this.quickPickUi5VersionMajor(versionsMajor);
         let versionsMinor = versionsMajor.find((versionData) => {
@@ -135,7 +135,7 @@ export default {
         });
         let version = await this.quickPickUi5VersionMinor(versionsMinor.patches);
 
-        resolv(version);
+        resolve(version);
       } catch (error) {
         reject(error);
       }
@@ -143,7 +143,7 @@ export default {
   },
 
   async quickPickUi5VersionMajor(versionsMajor) {
-    return new Promise(async (resolv, reject) => {
+    return new Promise(async (resolve, reject) => {
       let ui5Version = Config.general('ui5Version');
 
       let quickpick = await window.createQuickPick();
@@ -156,7 +156,7 @@ export default {
       quickpick.onDidAccept(async () => {
         if (quickpick.selectedItems.length) {
           let value = quickpick.selectedItems[0].label;
-          resolv(value);
+          resolve(value);
         } else {
           reject('No major version selected');
         }
@@ -167,7 +167,7 @@ export default {
   },
 
   async quickPickUi5VersionMinor(versionsMinor) {
-    return new Promise(async (resolv, reject) => {
+    return new Promise(async (resolve, reject) => {
       let ui5Version = Config.general('ui5Version');
 
       let quickpick = await window.createQuickPick();
@@ -180,7 +180,7 @@ export default {
       quickpick.onDidAccept(async () => {
         if (quickpick.selectedItems.length) {
           let value = quickpick.selectedItems[0].label;
-          resolv(value);
+          resolve(value);
         } else {
           reject('No minor version selected');
         }
@@ -191,7 +191,7 @@ export default {
   },
 
   async inputBoxUi5Version() {
-    return new Promise(async (resolv, reject) => {
+    return new Promise(async (resolve, reject) => {
       let framework = Utils.getFramework();
       let ui5Version = Config.general('ui5Version');
 
@@ -204,7 +204,7 @@ export default {
       inputBox.ignoreFocusOut = true;
       inputBox.onDidAccept(async () => {
         if (inputBox.value) {
-          resolv(inputBox.value);
+          resolve(inputBox.value);
         } else {
           reject('No version configured');
         }
@@ -272,7 +272,7 @@ export default {
   },
 
   async getVersionOverview(framework = 'sapui5') {
-    return new Promise((resolv, reject) => {
+    return new Promise((resolve, reject) => {
       let url = `https://${framework}.hana.ondemand.com/versionoverview.json`;
       let options = {
         timeout: 5000,
@@ -288,7 +288,7 @@ export default {
             });
             res.on('end', () => {
               try {
-                resolv(JSON.parse(rawData));
+                resolve(JSON.parse(rawData));
               } catch (e) {
                 reject(e.message);
               }
@@ -302,7 +302,7 @@ export default {
   },
 
   async getNeoApp(framework = 'sapui5') {
-    return new Promise((resolv, reject) => {
+    return new Promise((resolve, reject) => {
       let url = `https://${framework}.hana.ondemand.com/neo-app.json`;
       let options = {
         timeout: 5000,
@@ -318,7 +318,7 @@ export default {
             });
             res.on('end', () => {
               try {
-                resolv(JSON.parse(rawData));
+                resolve(JSON.parse(rawData));
               } catch (e) {
                 reject(e.message);
               }
@@ -332,7 +332,7 @@ export default {
   },
 
   async getGatewayVersion(sGatewayUri) {
-    return new Promise((resolv, reject) => {
+    return new Promise((resolve, reject) => {
       let url = `${sGatewayUri}/sap/public/bc/ui5_ui5/1/resources/sap-ui-version.json`;
       url = url.split('//').join('/');
 
@@ -357,7 +357,7 @@ export default {
             });
             res.on('end', () => {
               try {
-                resolv(JSON.parse(rawData));
+                resolve(JSON.parse(rawData));
               } catch (e) {
                 reject(e.message);
               }

@@ -1,4 +1,11 @@
+## 0.6.1 (17-03-2021)
+
+- Readme updated
+- Credits section updated
+- .env file changes does not require restart vscode or extension now
+
 ## 0.6.0 (16-03-2021)
+
 - New deployer! Gateway deployments
 - Right click in project folder in order to build or deploy ui5 project
 - Strings replaced updated with new format options (Date)

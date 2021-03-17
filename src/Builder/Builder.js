@@ -32,9 +32,21 @@ export default {
           });
         });
         // ask for a project
-        let ui5ProjectToBuild = await window.showQuickPick(qpOptions, {
-          placeHolder: 'Select UI5 project to build',
-          canPickMany: false,
+        let ui5ProjectToBuild = await new Promise(async (resolve, reject) => {
+          let ui5ProjectToBuildQp = await window.createQuickPick();
+          ui5ProjectToBuildQp.title = 'ui5-tools > Builder > Select UI5 project';
+          ui5ProjectToBuildQp.items = qpOptions;
+          ui5ProjectToBuildQp.placeholder = 'Select UI5 project to build';
+          ui5ProjectToBuildQp.canSelectMany = false;
+          ui5ProjectToBuildQp.onDidAccept(async (args) => {
+            if (ui5ProjectToBuildQp.selectedItems.length) {
+              resolve(ui5ProjectToBuildQp.selectedItems[0]);
+            } else {
+              reject('No UI5 project selected');
+            }
+            ui5ProjectToBuildQp.hide();
+          });
+          ui5ProjectToBuildQp.show();
         });
 
         // fspath from selected project
@@ -45,8 +57,9 @@ export default {
         // only one project
         ui5App = ui5Apps[0];
       }
-    } catch (e) {
+    } catch (oError) {
       ui5App = undefined;
+      throw oError;
     }
     await this.buildProject(ui5App);
   },
@@ -585,7 +598,7 @@ export default {
     let isLibrary = await Utils.getManifestLibrary(manifest);
 
     Utils.logOutputBuilder(`Create preload ${srcPath}`);
-    return new Promise((resolv, reject) => {
+    return new Promise((resolve, reject) => {
       setTimeout(() => {
         try {
           let { compatVersion } = Utils.getOptionsVersion();
@@ -609,7 +622,7 @@ export default {
         } catch (error) {
           reject(error);
         }
-        resolv(true);
+        resolve(true);
       }, 1);
     });
   },

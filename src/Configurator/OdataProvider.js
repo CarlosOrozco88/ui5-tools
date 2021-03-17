@@ -20,7 +20,7 @@ export default {
   },
 
   async quickPickOdataProxy() {
-    return new Promise(async (resolv, reject) => {
+    return new Promise(async (resolve, reject) => {
       let odataProviderValue = Config.server('odataProxy');
       let quickpick = await window.createQuickPick();
       quickpick.title = 'ui5-tools > Configurator > oDataProvider: Select odata provider';
@@ -46,7 +46,7 @@ export default {
           await Config.server().update('odataProxy', value, ConfigurationTarget.Workspace);
 
           Utils.logOutputConfigurator(`Set odataProxy value to ${value}`);
-          resolv(value);
+          resolve(value);
         } else {
           let sMessage = 'No odata proxy configured';
           Utils.logOutputConfigurator(sMessage);
@@ -59,7 +59,7 @@ export default {
   },
 
   async inputBoxGatewayUri() {
-    return new Promise(async (resolv, reject) => {
+    return new Promise(async (resolve, reject) => {
       let odataUri = Config.server('odataUri');
       let inputBox = await window.createInputBox();
       inputBox.title = 'ui5-tools > Configurator > oDataProvider: Enter gateway url';
@@ -72,7 +72,7 @@ export default {
         if (inputBox.value) {
           await Config.server().update('odataUri', inputBox.value, ConfigurationTarget.Workspace);
           Utils.logOutputConfigurator(`Set odataUri value to ${inputBox.value}`);
-          resolv(inputBox.value);
+          resolve(inputBox.value);
         } else {
           let sMessage = 'No gateway url configured';
           Utils.logOutputConfigurator(sMessage);
@@ -85,7 +85,7 @@ export default {
   },
 
   async inputBoxOtherUri() {
-    return new Promise(async (resolv, reject) => {
+    return new Promise(async (resolve, reject) => {
       let odataUri = Config.server('odataUri');
       let inputBox = await window.createInputBox();
       inputBox.title = 'ui5-tools > Configurator > oDataProvider: Enter destination url/s separated by comma';
@@ -98,7 +98,7 @@ export default {
         if (inputBox.value) {
           await Config.server().update('odataUri', inputBox.value, ConfigurationTarget.Workspace);
           Utils.logOutputConfigurator(`Set odataUri value to ${inputBox.value}`);
-          resolv(inputBox.value);
+          resolve(inputBox.value);
         } else {
           let sMessage = 'No destination url configured';
           Utils.logOutputConfigurator(sMessage);
@@ -111,7 +111,7 @@ export default {
   },
 
   async inputBoxOdataMountPath() {
-    return new Promise(async (resolv, reject) => {
+    return new Promise(async (resolve, reject) => {
       let odataMountPath = Config.server('odataMountPath');
       let inputBox = await window.createInputBox();
       inputBox.title = 'ui5-tools > Configurator > oDataProvider: Enter mountpath/s separated by comma';
@@ -124,7 +124,7 @@ export default {
         if (inputBox.value) {
           await Config.server().update('odataMountPath', inputBox.value, ConfigurationTarget.Workspace);
           Utils.logOutputConfigurator(`Set odataMountPath to ${inputBox.value}`);
-          resolv(inputBox.value);
+          resolve(inputBox.value);
         } else {
           let sMessage = 'No mountpath url configured';
           Utils.logOutputConfigurator(sMessage);

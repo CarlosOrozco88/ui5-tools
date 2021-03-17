@@ -1,7 +1,6 @@
 import { workspace, window, RelativePattern, ProgressLocation, Progress, Uri, TextDocument } from 'vscode';
 import ui5DeployerCore from 'ui5-nwabap-deployer-core';
 import TransportManager from 'ui5-nwabap-deployer-core/lib/TransportManager';
-import { ADTClient } from 'abap-adt-api';
 import deepmerge from 'deepmerge';
 
 import Builder from '../Builder/Builder';
@@ -25,9 +24,22 @@ export default {
           });
         });
         // ask for a project
-        let ui5ProjectToDeploy = await window.showQuickPick(qpOptions, {
-          placeHolder: 'Select UI5 project to deploy',
-          canPickMany: false,
+
+        let ui5ProjectToDeploy = await new Promise(async (resolve, reject) => {
+          let ui5ProjectToDeployQp = await window.createQuickPick();
+          ui5ProjectToDeployQp.title = 'ui5-tools > Deployer > Select UI5 project';
+          ui5ProjectToDeployQp.items = qpOptions;
+          ui5ProjectToDeployQp.placeholder = 'Select UI5 project to deploy';
+          ui5ProjectToDeployQp.canSelectMany = false;
+          ui5ProjectToDeployQp.onDidAccept(async () => {
+            if (ui5ProjectToDeployQp.selectedItems.length) {
+              resolve(ui5ProjectToDeployQp.selectedItems[0]);
+            } else {
+              reject('No UI5 project selected');
+            }
+            ui5ProjectToDeployQp.hide();
+          });
+          ui5ProjectToDeployQp.show();
         });
 
         // fspath from selected project
@@ -81,16 +93,30 @@ export default {
           });
         }
 
-        let selTransportOption = await window.showQuickPick(qpOptions, {
-          placeHolder: `Create or ${ui5AppConfig.folderName} project`,
-          canPickMany: false,
+        let selTransportOption = await new Promise(async (resolve, reject) => {
+          let selTransportOptionQp = await window.createQuickPick();
+          selTransportOptionQp.title = 'ui5-tools > Deployer > Update or create transport';
+          selTransportOptionQp.items = qpOptions;
+          selTransportOptionQp.placeholder = `Create or update transport for ${ui5App.folderName} project`;
+          selTransportOptionQp.canSelectMany = false;
+          selTransportOptionQp.onDidAccept(async () => {
+            if (selTransportOptionQp.selectedItems.length) {
+              resolve(selTransportOptionQp.selectedItems[0]);
+            } else {
+              reject('No UI5 project selected');
+            }
+            selTransportOptionQp.hide();
+          });
+          selTransportOptionQp.show();
         });
+        let sOption = selTransportOption.description;
 
         oDeployOptions = deepmerge(oDeployOptions, oDeployOptionsFs);
 
         await this.getUserPass(oDeployOptions);
 
-        switch (selTransportOption.description) {
+        switch (sOption) {
+          case undefined:
           case '':
             throw new Error('Deploy canceled');
             break;
@@ -104,12 +130,13 @@ export default {
             Utils.logOutputDeployer(`Using ui5tools.json file`);
             break;
           default:
-            await this.updateTransport(ui5App, oDeployOptions, selTransportOption.description);
+            await this.updateTransport(ui5App, oDeployOptions, sOption);
             break;
         }
         await this.deployProject(ui5App, oDeployOptions);
       }
     } catch (oError) {
+      window.showErrorMessage(oError.message);
       throw oError;
     }
   },
@@ -118,12 +145,22 @@ export default {
     let sDate = new Date().toLocaleString();
     let sDefaultText = `${ui5App.folderName}: ${sDate}`;
 
-    let transport_text = await window.showInputBox({
-      value: '',
-      placeHolder: sDefaultText,
-      prompt: `Enter transport text`,
-      ignoreFocusOut: true,
-    });
+    let transport_text = undefined;
+    try {
+      transport_text = await new Promise(async (resolve, reject) => {
+        let inputBox = await window.createInputBox();
+        inputBox.title = 'ui5-tools > Deployer > Create transport > Enter transport text';
+        inputBox.placeholder = 'Enter transport text';
+        inputBox.ignoreFocusOut = true;
+        inputBox.onDidAccept(async () => {
+          resolve(inputBox.value);
+          inputBox.hide();
+        });
+        inputBox.show();
+      });
+    } catch (oError) {
+      transport_text = undefined;
+    }
     if (transport_text === undefined) {
       throw new Error('Create transport canceled');
     }
@@ -133,7 +170,7 @@ export default {
       transport_text = `${ui5App.folderName}: ${transport_text}`;
     }
     oDeployOptions.ui5.transport_text = transport_text;
-    oDeployOptions.ui5.create_transport = true;
+    oDeployOptions.ui5.create_transport = false;
     oDeployOptions.ui5.transportno = '';
     oDeployOptions.ui5.transport_use_user_match = false;
 
@@ -159,12 +196,21 @@ export default {
 
   async updateTransport(ui5App, oDeployOptions, transportno) {
     if (!transportno) {
-      transportno = await window.showInputBox({
-        value: '',
-        placeHolder: '',
-        prompt: 'Enter the transport number',
-        ignoreFocusOut: true,
-      });
+      try {
+        transportno = await new Promise(async (resolve, reject) => {
+          let inputBox = await window.createInputBox();
+          inputBox.title = 'ui5-tools > Deployer > Update transport > Enter transport number';
+          inputBox.placeholder = 'Enter the transport number';
+          inputBox.ignoreFocusOut = true;
+          inputBox.onDidAccept(async () => {
+            resolve(inputBox.value);
+            inputBox.hide();
+          });
+          inputBox.show();
+        });
+      } catch (oError) {
+        transportno = undefined;
+      }
     }
 
     if (!transportno) {
@@ -179,16 +225,6 @@ export default {
 
   getTransportManager(oDeployOptions) {
     return new TransportManager(oDeployOptions, oLogger);
-  },
-
-  getAdtClient(oDeployOptions) {
-    return new ADTClient(
-      oDeployOptions.conn.server,
-      oDeployOptions.auth.user,
-      oDeployOptions.auth.pwd,
-      oDeployOptions.conn.client,
-      oDeployOptions.ui5.language
-    );
   },
 
   async deployProject(ui5App, oParamOptions) {
@@ -210,7 +246,7 @@ export default {
             await this.deploy(ui5App, oParamOptions, progress, 0.5);
             window.showInformationMessage(`Project ${ui5App.folderName} deployed!`);
           } catch (oError) {
-            window.showErrorMessage(oError.message);
+            throw oError;
           }
         }
       );
@@ -287,15 +323,26 @@ export default {
         label: `No`,
       },
     ];
-    let selTransportOption = await window.showQuickPick(qpOptions, {
-      placeHolder: `Project ${ui5App.folderName} does not have a ui5-tools.json file, create it now?`,
-      canPickMany: false,
+
+    let selTransportOption = await new Promise(async (resolve, reject) => {
+      let selTransportOptionQp = await window.createQuickPick();
+      selTransportOptionQp.title = 'ui5-tools > Deployer > Create ui5-tools.json file?';
+      selTransportOptionQp.items = qpOptions;
+      selTransportOptionQp.placeholder = `Project ${ui5App.folderName} does not have a ui5-tools.json file, create it now?`;
+      selTransportOptionQp.canSelectMany = false;
+      selTransportOptionQp.onDidAccept(async () => {
+        if (selTransportOptionQp.selectedItems.length) {
+          resolve(selTransportOptionQp.selectedItems[0]);
+        } else {
+          reject('No UI5 project selected');
+        }
+        selTransportOptionQp.hide();
+      });
+      selTransportOptionQp.show();
     });
     if (!selTransportOption || selTransportOption.label !== 'Yes') {
       Utils.logOutputDeployer(`Abort creation`);
-      let oError = new Error(`File ui5tools.json not found for project ${ui5App.folderName}`);
-      window.showErrorMessage(oError.message);
-      throw oError;
+      throw new Error(`File ui5tools.json not found for project ${ui5App.folderName}`);
     }
     Utils.logOutputDeployer(`Collecting data...`);
 
@@ -309,83 +356,125 @@ export default {
       },
     };
 
-    let sServer = await window.showInputBox({
-      value: '',
-      placeHolder: 'protocol://host:port',
-      prompt: `Enter server url (Gateway)`,
-      ignoreFocusOut: true,
+    let sServer = await new Promise(async (resolve, reject) => {
+      let inputBox = await window.createInputBox();
+      inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Server Url';
+      inputBox.step = 1;
+      inputBox.totalSteps = 6;
+      inputBox.placeholder = `protocol://host:port`;
+      inputBox.ignoreFocusOut = true;
+      inputBox.onDidAccept(async () => {
+        resolve(inputBox.value);
+        inputBox.hide();
+      });
+      inputBox.show();
     });
     if (!sServer) {
-      let oError = new Error(`No server url found`);
-      window.showErrorMessage(oError.message);
-      throw oError;
+      throw new Error(`No server url found`);
     }
     Utils.logOutputDeployer(`ui5-tools.json: Server ${sServer}`);
     oConfigFile.deployer.options.conn.server = sServer;
 
-    let sClient = await window.showInputBox({
-      value: '',
-      placeHolder: '',
-      prompt: `Enter client (optional)`,
-      ignoreFocusOut: true,
-    });
+    let sClient;
+    try {
+      sClient = await new Promise(async (resolve, reject) => {
+        let inputBox = await window.createInputBox();
+        inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Client';
+        inputBox.step = 2;
+        inputBox.totalSteps = 6;
+        inputBox.placeholder = 'Enter client number';
+        inputBox.ignoreFocusOut = true;
+        inputBox.onDidAccept(async () => {
+          resolve(inputBox.value);
+          inputBox.hide();
+        });
+        inputBox.show();
+      });
+    } catch (oError) {
+      sClient = undefined;
+    }
     if (sClient && !isNaN(Number(sClient))) {
       Utils.logOutputDeployer(`ui5-tools.json: Client ${sClient}`);
       oConfigFile.deployer.options.conn.client = Number(sClient);
     }
 
-    let sLanguage = await window.showInputBox({
-      value: '',
-      placeHolder: 'EN',
-      prompt: `Language for deployment`,
-      ignoreFocusOut: true,
+    let sLanguage = await new Promise(async (resolve, reject) => {
+      let inputBox = await window.createInputBox();
+      inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Language';
+      inputBox.step = 3;
+      inputBox.totalSteps = 6;
+      inputBox.placeholder = `EN`;
+      inputBox.ignoreFocusOut = true;
+      inputBox.onDidAccept(async () => {
+        resolve(inputBox.value);
+        inputBox.hide();
+      });
+      inputBox.show();
     });
     if (!sLanguage) {
-      let oError = new Error(`No language configured`);
-      window.showErrorMessage(oError.message);
-      throw oError;
+      throw new Error(`No language configured`);
     }
     Utils.logOutputDeployer(`ui5-tools.json: Language ${sLanguage}`);
     oConfigFile.deployer.options.ui5.language = sLanguage;
 
-    let sPackage = await window.showInputBox({
-      value: '',
-      placeHolder: 'ZPACKAGE',
-      prompt: `Development package for de BSP`,
-      ignoreFocusOut: true,
+    let sPackage = await new Promise(async (resolve, reject) => {
+      let inputBox = await window.createInputBox();
+      inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Package for the BSP';
+      inputBox.step = 4;
+      inputBox.totalSteps = 6;
+      inputBox.placeholder = `ZPACKAGE`;
+      inputBox.ignoreFocusOut = true;
+      inputBox.onDidAccept(async () => {
+        resolve(inputBox.value);
+        inputBox.hide();
+      });
+      inputBox.show();
     });
     if (!sPackage) {
-      let oError = new Error(`No package configured`);
-      window.showErrorMessage(oError.message);
-      throw oError;
+      throw new Error(`No package configured`);
     }
     Utils.logOutputDeployer(`ui5-tools.json: Package ${sPackage}`);
     oConfigFile.deployer.options.ui5.package = sPackage;
 
-    let sBspContainer = await window.showInputBox({
-      value: '',
-      placeHolder: 'ZBSPCONTAINER',
-      prompt: `The name of the BSP container (restricted to 15 chars)`,
-      ignoreFocusOut: true,
+    let sBspContainer = await new Promise(async (resolve, reject) => {
+      let inputBox = await window.createInputBox();
+      inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Package for the BSP (max 15 chars)';
+      inputBox.step = 5;
+      inputBox.totalSteps = 6;
+      inputBox.placeholder = `ZBSPCONTAINER`;
+      inputBox.ignoreFocusOut = true;
+      inputBox.onDidChangeValue(() => {
+        if (inputBox.value && inputBox.value.length > 15) {
+          inputBox.value = inputBox.value.slice(0, 15);
+        }
+      });
+      inputBox.onDidAccept(async () => {
+        resolve(inputBox.value);
+        inputBox.hide();
+      });
+      inputBox.show();
     });
     if (!sBspContainer) {
-      let oError = new Error(`No BSP container configured`);
-      window.showErrorMessage(oError.message);
-      throw oError;
+      throw new Error(`No BSP container configured`);
     }
     Utils.logOutputDeployer(`ui5-tools.json: BSP Container ${sBspContainer}`);
     oConfigFile.deployer.options.ui5.bspcontainer = sBspContainer;
 
-    let sBspContainerText = await window.showInputBox({
-      value: '',
-      placeHolder: '',
-      prompt: `The description of the BSP container`,
-      ignoreFocusOut: true,
+    let sBspContainerText = await new Promise(async (resolve, reject) => {
+      let inputBox = await window.createInputBox();
+      inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > BSP Description';
+      inputBox.step = 6;
+      inputBox.totalSteps = 6;
+      inputBox.placeholder = `The description of the BSP container`;
+      inputBox.ignoreFocusOut = true;
+      inputBox.onDidAccept(async () => {
+        resolve(inputBox.value);
+        inputBox.hide();
+      });
+      inputBox.show();
     });
     if (!sBspContainerText) {
-      let oError = new Error(`No BSP container text configured`);
-      window.showErrorMessage(oError.message);
-      throw oError;
+      throw new Error(`No BSP container text configured`);
     }
     Utils.logOutputDeployer(`ui5-tools.json: BSP Container Text ${sBspContainerText}`);
     oConfigFile.deployer.options.ui5.bspcontainer_text = sBspContainerText;
@@ -425,11 +514,11 @@ export default {
     //   },
     // };
 
-    Utils.loadEnv();
+    const oEnv = Utils.loadEnv();
     const oUserPassword = {
       auth: {
-        user: process.env.UI5TOOLS_DEPLOY_USER || '',
-        pwd: process.env.UI5TOOLS_DEPLOY_PASSWORD || '',
+        user: oEnv.UI5TOOLS_DEPLOY_USER || '',
+        pwd: oEnv.UI5TOOLS_DEPLOY_PASSWORD || '',
       },
     };
 
@@ -438,33 +527,40 @@ export default {
   },
 
   async getUserPass(oDeployOptions) {
-    if (!oDeployOptions?.auth?.user) {
-      let sUser = await window.showInputBox({
-        value: '',
-        placeHolder: 'Username',
-        prompt: `Enter username`,
-        ignoreFocusOut: true,
+    if (!oDeployOptions?.auth?.user || !oDeployOptions?.auth?.pwd) {
+      let sUser = await new Promise(async (resolve, reject) => {
+        let inputBox = await window.createInputBox();
+        inputBox.title = 'ui5-tools > Deployer > Server username';
+        inputBox.step = 1;
+        inputBox.totalSteps = 2;
+        inputBox.placeholder = `Username`;
+        inputBox.ignoreFocusOut = true;
+        inputBox.onDidAccept(async () => {
+          resolve(inputBox.value);
+          inputBox.hide();
+        });
+        inputBox.show();
       });
       if (!sUser) {
-        let oError = new Error(`No user configured`);
-        window.showErrorMessage(oError.message);
-        throw oError;
+        throw new Error(`No user configured`);
       }
       oDeployOptions.auth.user = sUser;
-    }
 
-    if (!oDeployOptions?.auth?.pwd) {
-      let sPwd = await window.showInputBox({
-        value: '',
-        placeHolder: 'Password',
-        prompt: `Enter password`,
-        ignoreFocusOut: true,
-        password: true,
+      let sPwd = await new Promise(async (resolve, reject) => {
+        let inputBox = await window.createInputBox();
+        inputBox.title = `ui5-tools > Deployer > Server password for ${sUser}`;
+        inputBox.step = 2;
+        inputBox.totalSteps = 2;
+        inputBox.placeholder = `Password`;
+        inputBox.ignoreFocusOut = true;
+        inputBox.onDidAccept(async () => {
+          resolve(inputBox.value);
+          inputBox.hide();
+        });
+        inputBox.show();
       });
       if (!sPwd) {
-        let oError = new Error(`No password configured`);
-        window.showErrorMessage(oError.message);
-        throw oError;
+        throw new Error(`No password configured`);
       }
       oDeployOptions.auth.pwd = sPwd;
     }
