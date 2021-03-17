@@ -17,7 +17,7 @@ export default {
           await Config.general().update('ui5Version', gatewayVersion.version, ConfigurationTarget.Workspace);
           Utils.logOutputConfigurator(`Set ui5version value to ${gatewayVersion.version}`);
         } catch (oError) {
-          Utils.logOutputConfigurator(oError);
+          Utils.logOutputConfigurator(oError, 'ERROR');
           await this.setUi5Version();
         }
       }
@@ -119,7 +119,7 @@ export default {
         Utils.logOutputConfigurator(`Set ui5Version value ${ui5Version}`);
         resolve(ui5Version);
       } catch (sError) {
-        Utils.logOutputConfigurator(sError);
+        Utils.logOutputConfigurator(sError, 'ERROR');
         reject(sError);
       }
       resolve(ui5Version);

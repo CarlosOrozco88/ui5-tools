@@ -63,7 +63,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 
 - `ui5-tools.srcFolder`: Source folder in your app | default: `webapp,src`
 - `ui5-tools.distFolder`: Source folder in your app | default: `dist`
-- `ui5-tools.ui5Version`: UI5 library version for CDN proxy in server and build correct preload files: `1.71.27`
+- `ui5-tools.ui5Version`: UI5 library version for CDN proxy in server and build correct preload files: `1.71.35`
 
 #### Server Settings
 

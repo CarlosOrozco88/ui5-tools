@@ -9,14 +9,14 @@ import Config from './Config';
 let ui5toolsOutput = window.createOutputChannel(`ui5-tools`);
 let ui5Apps = [];
 
-export default {
+const Utils = {
   async getAllUI5Apps() {
     return ui5Apps;
   },
 
   async refreshAllUI5Apps() {
     ui5Apps = [];
-    let workspaceRootPath = this.getWorkspaceRootPath();
+    let workspaceRootPath = Utils.getWorkspaceRootPath();
     let srcFolder = Config.general('srcFolder');
     let libraryFolder = Config.general('libraryFolder');
     let distFolder = Config.general('distFolder');
@@ -34,8 +34,8 @@ export default {
         try {
           let manifestString = await workspace.fs.readFile(manifestUri);
           let manifestJson = JSON.parse(manifestString.toString());
-          let isLibrary = await this.getManifestLibrary(manifestJson);
-          let namespace = await this.getManifestId(manifestJson);
+          let isLibrary = await Utils.getManifestLibrary(manifestJson);
+          let namespace = await Utils.getManifestId(manifestJson);
           let appSrcFolder = isLibrary ? libraryFolder : srcFolder;
 
           if (namespace) {
@@ -77,7 +77,7 @@ export default {
           let sMessage = `Please, verify ${manifestUri} project.
           It has some errors.
           Verify manifest.json is correct and has sap.app.type and sap.app.id`;
-          this.logOutputGeneral(sMessage);
+          Utils.logOutputGeneral(sMessage, 'ERROR');
           window.showErrorMessage(sMessage);
         }
       }
@@ -91,7 +91,7 @@ export default {
       }
       return sort;
     });
-    this.logOutputGeneral(`${ui5Apps.length} ui5 projects detected`);
+    Utils.logOutputGeneral(`${ui5Apps.length} ui5 projects detected`);
     let aResourcesDirname = ui5Apps.map((app) => app.appResourceDirname);
     commands.executeCommand('setContext', 'ui5-tools:resourcesPath', aResourcesDirname);
     return ui5Apps;
@@ -115,11 +115,11 @@ export default {
   },
 
   getUi5ToolsPath() {
-    return this.getUi5ToolsInfo().extensionUri.fsPath;
+    return Utils.getUi5ToolsInfo().extensionUri.fsPath;
   },
 
   loadEnv() {
-    let baseDir = this.getWorkspaceRootPath();
+    let baseDir = Utils.getWorkspaceRootPath();
     let oDotEnv = dotenv.config({
       path: path.join(baseDir, '.env'),
     });
@@ -127,7 +127,7 @@ export default {
   },
 
   getHttpsCert() {
-    let ui5ToolsPath = this.getUi5ToolsPath();
+    let ui5ToolsPath = Utils.getUi5ToolsPath();
     return {
       key: fs.readFileSync(path.join(ui5ToolsPath, 'static', 'cert', 'server.key')),
       cert: fs.readFileSync(path.join(ui5ToolsPath, 'static', 'cert', 'server.cert')),
@@ -195,7 +195,7 @@ export default {
 
   async getManifestLibrary(uriOrManifest) {
     let isLib = false;
-    let manifest = await this.getManifest(uriOrManifest);
+    let manifest = await Utils.getManifest(uriOrManifest);
     if (manifest && manifest['sap.app'].type === 'library') {
       isLib = true;
     }
@@ -204,7 +204,7 @@ export default {
 
   async getManifestId(uriOrManifest) {
     let manifestId = undefined;
-    let manifest = await this.getManifest(uriOrManifest);
+    let manifest = await Utils.getManifest(uriOrManifest);
     if (manifest && manifest['sap.app'].id) {
       manifestId = manifest['sap.app'].id;
     }
@@ -254,49 +254,66 @@ export default {
     return resourcesProxy === 'CDN SAPUI5' || resourcesProxy === 'Gateway';
   },
 
-  logOutput(sText) {
-    ui5toolsOutput.appendLine(sText);
-    return console.log(sText);
+  logOutput(sText, sLevel = 'LOG') {
+    let oDate = new Date();
+    let sDate = oDate.toLocaleTimeString();
+    let sNewLine = `[${sLevel} ${sDate}] ${sText}`;
+    ui5toolsOutput.appendLine(sNewLine);
+    return console.log(sNewLine);
   },
 
-  logOutputGeneral(sText) {
-    return this.logOutput(`General: ${sText}`);
+  logOutputGeneral(sText, sLevel) {
+    return Utils.logOutput(`General: ${sText}`, sLevel);
   },
 
-  logOutputConfigurator(sText) {
-    return this.logOutput(`Configurator: ${sText}`);
+  logOutputConfigurator(sText, sLevel) {
+    return Utils.logOutput(`Configurator: ${sText}`, sLevel);
   },
 
-  logOutputBuilder(sText) {
-    return this.logOutput(`Builder: ${sText}`);
+  logOutputBuilder(sText, sLevel) {
+    return Utils.logOutput(`Builder: ${sText}`, sLevel);
   },
 
-  logOutputDeployer(sText) {
-    return this.logOutput(`Deployer: ${sText}`);
+  logOutputDeployer(sText, sLevel) {
+    return Utils.logOutput(`Deployer: ${sText}`, sLevel);
   },
 
-  logOutputServer(sText) {
-    return this.logOutput(`Server: ${sText}`);
+  logOutputServer(sText, sLevel) {
+    return Utils.logOutput(`Server: ${sText}`, sLevel);
   },
 
-  logOutputProxy(sText) {
-    return this.logOutput(`Server > Proxy: ${sText}`);
+  logOutputProxy(sText, sLevel) {
+    return Utils.logOutput(`Server > Proxy: ${sText}`, sLevel);
+  },
+
+  newLogProviderProxy() {
+    return Utils.newLogProvider(Utils.logOutputProxy);
   },
 
   newLogProviderDeployer() {
-    return this.newLogProvider(this.logOutputDeployer);
+    return Utils.newLogProvider(Utils.logOutputDeployer);
   },
 
-  newLogProvider(fnLogger = this.logOutputGeneral) {
+  newLogProvider(fnLogger = Utils.logOutputGeneral) {
     return {
-      log: fnLogger.bind(this),
+      log: (sMessage) => {
+        fnLogger(sMessage, 'LOG');
+      },
       logVerbose: (oParam) => {
         // console.log(oParam)
       },
-      debug: fnLogger.bind(this),
-      info: fnLogger.bind(this),
-      warn: fnLogger.bind(this),
-      error: fnLogger.bind(this),
+      debug: (sMessage) => {
+        fnLogger(sMessage, 'DEBUG');
+      },
+      info: (sMessage) => {
+        fnLogger(sMessage, 'INFO');
+      },
+      warn: (sMessage) => {
+        fnLogger(sMessage, 'WARNING');
+      },
+      error: (sMessage) => {
+        fnLogger(sMessage, 'ERROR');
+      },
     };
   },
 
@@ -321,3 +338,5 @@ export default {
     });
   },
 };
+
+export default Utils;

@@ -57,7 +57,7 @@ export default {
             secure: Config.server('resourcesSecure'),
             changeOrigin: true,
             logLevel: 'error',
-            logProvider: Utils.proxyLogProvider.bind(Utils),
+            logProvider: Utils.newLogProviderProxy,
           });
 
           serverApp.use(['/resources', '/**/resources'], onProxyRes, cacheResources, proxy);
@@ -79,7 +79,7 @@ export default {
             secure: Config.server('resourcesSecure'),
             changeOrigin: true,
             logLevel: 'error',
-            logProvider: Utils.proxyLogProvider.bind(Utils),
+            logProvider: Utils.newLogProviderProxy,
           });
 
           serverApp.use(['/resources', '/**/resources'], onProxyRes, cacheResources, proxy);
@@ -94,13 +94,13 @@ export default {
             if (statusCode !== 200) {
               let sError = `Error: Unable to get sap-ui-core.js, framework ${framework} does not have ${ui5Version} available at CDN.`;
 
-              Utils.logOutputServer(sError);
+              Utils.logOutputServer(sError, 'ERROR');
               window.showErrorMessage(sError);
             }
           })
           .on('error', (oError) => {
             window.showErrorMessage(oError.message);
-            Utils.logOutputServer(`${oError.message}`);
+            Utils.logOutputServer(oError.message, 'ERROR');
           });
 
       default:
@@ -136,7 +136,7 @@ export default {
         secure: Config.server('resourcesSecure'),
         changeOrigin: true,
         logLevel: 'error',
-        logProvider: Utils.proxyLogProvider.bind(Utils),
+        logProvider: Utils.newLogProviderProxy,
       });
 
       serverApp.use('/flp/test-resources/**', onProxyRes, cacheResources, proxy);

@@ -56,7 +56,7 @@ export default {
     try {
       await this.askCreateReuseTransport(ui5App);
     } catch (oError) {
-      Utils.logOutputDeployer(oError.message);
+      Utils.logOutputDeployer(oError.message, 'ERROR');
     }
   },
 
@@ -136,6 +136,7 @@ export default {
         await this.deployProject(ui5App, oDeployOptions);
       }
     } catch (oError) {
+      Utils.logOutputDeployer(oError.message, 'ERROR');
       window.showErrorMessage(oError.message);
       throw oError;
     }

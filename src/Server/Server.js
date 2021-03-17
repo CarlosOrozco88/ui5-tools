@@ -95,7 +95,7 @@ export default {
           try {
             await LiveServer.start(this.serverApp, ui5Apps);
           } catch (oError) {
-            Utils.logOutputServer(oError);
+            Utils.logOutputServer(oError, 'ERROR');
           }
         }
 
@@ -111,23 +111,23 @@ export default {
         try {
           await OdataProxy.set(this.serverApp);
         } catch (oError) {
-          Utils.logOutputServer(oError);
+          Utils.logOutputServer(oError, 'ERROR');
         }
         try {
           await ResourcesProxy.set(this.serverApp);
         } catch (oError) {
-          Utils.logOutputServer(oError);
+          Utils.logOutputServer(oError, 'ERROR');
         }
 
         try {
           await IndexUI5Tools.set(this.serverApp);
         } catch (oError) {
-          Utils.logOutputServer(oError);
+          Utils.logOutputServer(oError, 'ERROR');
         }
         try {
           await IndexLaunchpad.set(this.serverApp);
         } catch (oError) {
-          Utils.logOutputServer(oError);
+          Utils.logOutputServer(oError, 'ERROR');
         }
 
         let protocol = Config.server('protocol');
