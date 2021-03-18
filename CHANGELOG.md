@@ -1,3 +1,7 @@
+## 0.6.3 (18-03-2021)
+
+- Livereload bug solved
+
 ## 0.6.2 (17-03-2021)
 
 - Output ui5-tools extension log: bug corrected

@@ -2,7 +2,6 @@ import { window, workspace, RelativePattern, Uri, extensions, commands } from 'v
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
-import { URL } from 'url';
 
 import Config from './Config';
 

@@ -1,6 +1,5 @@
 import connectLiveReload from 'connect-livereload';
 import fs from 'fs';
-import { URL } from 'url';
 import http from 'http';
 import https from 'https';
 import path from 'path';
@@ -110,8 +109,7 @@ export default {
   },
 
   serveLiveReloadScript(req, res) {
-    let url = new URL(req.url);
-    if (url.pathname === '/livereload.js') {
+    if (req.url.indexOf('/livereload.js') === 0) {
       res.writeHead(200, {
         'Content-Type': 'text/javascript',
       });
