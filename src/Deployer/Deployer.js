@@ -168,7 +168,7 @@ export default {
     if (!transport_text) {
       transport_text = sDefaultText;
     } else if (Config.deployer('autoPrefixBSP')) {
-      transport_text = `${ui5App.folderName}: ${transport_text}`;
+      transport_text = `${oDeployOptions.ui5.bspcontainer}: ${transport_text}`;
     }
     oDeployOptions.ui5.transport_text = transport_text;
     oDeployOptions.ui5.create_transport = false;

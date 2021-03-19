@@ -8,7 +8,7 @@ export default {
     let ui5Apps = await Utils.getAllUI5Apps();
     // fspath from selected project
     let ui5App = ui5Apps.find((app) => {
-      return app.appResourceDirname == oResource.path;
+      return app.appResourceDirname == oResource.fsPath;
     });
     try {
       await Builder.buildProject(ui5App);
@@ -21,7 +21,7 @@ export default {
     let ui5Apps = await Utils.getAllUI5Apps();
     // fspath from selected project
     let ui5App = ui5Apps.find((app) => {
-      return app.appResourceDirname == oResource.path;
+      return app.appResourceDirname == oResource.fsPath;
     });
     if (ui5App) {
       try {

@@ -4,8 +4,6 @@ import Config from '../Utils/Config';
 export default {
   async wizard() {
     try {
-      // let replaceStrings = Config.builder('replaceStrings');
-      // let replaceExtensions = Config.builder('replaceExtensions');
       let askMore = true;
       while (askMore) {
         askMore = await this.quickPickAddRemoveStrings();

@@ -1,3 +1,7 @@
+## 0.6.4 (19-03-2021)
+
+- Windows systems build/menu bug solved
+
 ## 0.6.3 (18-03-2021)
 
 - Livereload bug solved

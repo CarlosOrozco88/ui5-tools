@@ -1,12 +1,6 @@
-<mvc:View xmlns:mvc="sap.ui.core.mvc"
-  xmlns="sap.m"
-  xmlns:core="sap.ui.core"
-  xmlns:f="sap.ui.layout.form"
-  displayBlock="true"
-  width="100%"
-  height="100%">
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="ui5tools.controller.info" xmlns:f="sap.ui.layout.form" displayBlock="true" width="100%" height="100%">
   <Page title="Info">
-    <f:SimpleForm columnsXL="3" columnsL="2" columnsM="1" layout="ColumnLayout">
+    <f:SimpleForm columnsXL="4" columnsL="4" columnsM="2" layout="ColumnLayout">
       <f:content>
         <core:Title text="General" />
         <Label text="Source folder" />
@@ -18,19 +12,43 @@
         <Label text="UI5 Version" />
         <Text text="{ui5tools>/config/ui5Version}" />
 
+        <core:Title text="Deployer" />
+        <Label text="Autosave Order" />
+        <Text text="{ui5tools>/config/deployer/autoSaveOrder}" />
+        <Label text="Autoprefix BSP" />
+        <Text text="{ui5tools>/config/deployer/autoPrefixBSP}" />
+
         <core:Title text="Server" />
+        <Label text="Server name" />
+        <Text text="{ui5tools>/config/server/name}" />
+        <Label text="Serve folder" />
+        <Text text="{ui5tools>/config/server/serveFolder}" />
         <Label text="Resources proxy" />
         <Text text="{ui5tools>/config/server/resourcesProxy}" />
         <Label text="Resources URL" />
         <Text text="{ui5tools>/config/server/resourcesUri}" />
+        <Label text="Resources Secure" />
+        <Text text="{ui5tools>/config/server/resourcesSecure}" />
         <Label text="OData proxy" />
         <Text text="{ui5tools>/config/server/odataProxy}" />
-        <Label text="Gateway URL" />
+        <Label text="OData URL" />
         <Text text="{ui5tools>/config/server/odataUri}" />
+        <Label text="OData Secure" />
+        <Text text="{ui5tools>/config/server/odataSecure}" />
+        <Label text="OData mountpath" />
+        <Text text="{ui5tools>/config/server/odataSecure}" />
         <Label text="Watch" />
         <Text text="{ui5tools>/config/server/watch}" />
         <Label text="Watch extensions" />
         <Text text="{ui5tools>/config/server/watchExtensions}" />
+        <Label text="Port" />
+        <Text text="{ui5tools>/config/server/port}" />
+        <Label text="Start on launch" />
+        <Text text="{ui5tools>/config/server/startOnLaunch}" />
+        <Label text="Server timeout (ms)" />
+        <Text text="{ui5tools>/config/server/timeout}" />
+        <Label text="Server protocol" />
+        <Text text="{ui5tools>/config/server/protocol}" />
 
         <core:Title text="Builder" />
         <Label text="Debug resources" />
@@ -39,6 +57,23 @@
         <Text text="{ui5tools>/config/builder/uglifySources}" />
         <Label text="Auto build less" />
         <Text text="{ui5tools>/config/builder/buildLess}" />
+        <Label text="Babel sources" />
+        <Text text="{ui5tools>/config/builder/babelSources}" />
+        <Label text="Uglify preload" />
+        <Text text="{ui5tools>/config/builder/uglifyPreload}" />
+        <Label text="Uglify sources" />
+        <Text text="{ui5tools>/config/builder/uglifySources}" />
+        <Label text="Uglify sources exclude" />
+        <Text text="{ui5tools>/config/builder/uglifySourcesExclude}" />
+        <Label text="Preload sources" />
+        <FormattedText htmlText="{path:'ui5tools>/config/builder/preloadSrc',formatter:'.formatPreloadSrc'}" />
+        <Label text="Replace Strings" />
+        <Text text="{ui5tools>/config/builder/replaceStrings}" />
+        <Label text="Replace Extensions" />
+        <Text text="{ui5tools>/config/builder/replaceExtensions}" />
+        <Label text="Replace Key/Values" />
+        <FormattedText htmlText="{path:'ui5tools>/config/builder/replaceKeysValues',formatter:'.formatReplaceKeyValue'}" />
+
       </f:content>
     </f:SimpleForm>
   </Page>

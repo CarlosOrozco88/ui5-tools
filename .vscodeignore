@@ -3,6 +3,7 @@
 .git
 .gitignore
 .prettierrc.json
+.prettierignore
 babel.config.json
 jsconfig.json
 node_modules
@@ -10,6 +11,7 @@ test/**
 webpack.config.js
 workspaceExample
 src
+.github
 .vscode
 
 .DS_Store
