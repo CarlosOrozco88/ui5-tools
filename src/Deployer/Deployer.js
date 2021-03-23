@@ -553,6 +553,7 @@ export default {
         inputBox.step = 2;
         inputBox.totalSteps = 2;
         inputBox.placeholder = `Password`;
+        inputBox.password = true;
         inputBox.ignoreFocusOut = true;
         inputBox.onDidAccept(async () => {
           resolve(inputBox.value);
