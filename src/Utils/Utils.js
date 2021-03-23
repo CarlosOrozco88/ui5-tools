@@ -161,7 +161,7 @@ const Utils = {
     if (ui5App && typeof oConfigFile === 'object') {
       try {
         let sConfigFile = JSON.stringify(oConfigFile, undefined, 2);
-        await workspace.fs.writeFile(Uri.parse(ui5App.appConfigPath), Buffer.from(sConfigFile));
+        await workspace.fs.writeFile(Uri.file(ui5App.appConfigPath), Buffer.from(sConfigFile));
       } catch (oError) {
         throw oError;
       }
