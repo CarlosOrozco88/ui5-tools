@@ -274,7 +274,7 @@ export default {
         let aProjectResources = await Promise.all(
           aProjectFiles.map(async (file) => {
             return {
-              path: file.fsPath.replace(ui5App.distFsPath, ''),
+              path: file.fsPath.replace(ui5App.distFsPath, '').split('\\').join('/'),
               content: await workspace.fs.readFile(Uri.file(file.fsPath)),
             };
           })
