@@ -275,7 +275,7 @@ export default {
           aProjectFiles.map(async (file) => {
             return {
               path: file.fsPath.replace(ui5App.distFsPath, '').split('\\').join('/'),
-              content: await workspace.fs.readFile(Uri.file(file.fsPath)),
+              content: Buffer.from(await workspace.fs.readFile(Uri.file(file.fsPath))),
             };
           })
         );
