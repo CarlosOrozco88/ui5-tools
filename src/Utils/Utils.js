@@ -148,7 +148,7 @@ const Utils = {
     let ui5AppConfig = undefined;
     if (ui5App) {
       try {
-        let appConfigFile = await workspace.fs.readFile(Uri.parse(ui5App.appConfigPath));
+        let appConfigFile = await workspace.fs.readFile(Uri.file(ui5App.appConfigPath));
         ui5AppConfig = JSON.parse(appConfigFile.toString());
       } catch (oError) {
         ui5AppConfig = undefined;
