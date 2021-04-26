@@ -1,3 +1,9 @@
+## 0.6.8 (26-04-2021)
+
+- New options: `ui5-tools.builder.buildPreload` and `ui5-tools.deployer.deployFolder`
+- Dependencies upgrade
+- Corrected bugs
+
 ## 0.6.4 to 0.6.7 (19-03-2021 / 23-03-2021)
 
 - Windows systems build/menu bug solved

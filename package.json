@@ -2,7 +2,7 @@
   "name": "ui5-tools",
   "displayName": "UI5 Tools",
   "description": "Local development tools for UI5",
-  "version": "0.6.7",
+  "version": "0.6.8",
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
@@ -19,7 +19,7 @@
   "license": "Apache-2.0",
   "icon": "static/images/logo_blue.png",
   "engines": {
-    "vscode": "^1.54.0"
+    "vscode": "^1.55.0"
   },
   "categories": [
     "Other"
@@ -62,74 +62,67 @@
       {
         "command": "ui5-tools.server.startDevelopment",
         "key": "alt+s alt+s",
-        "mac": "alt+s alt+s",
-        "when": "editorFocus"
+        "mac": "alt+s alt+s"
       },
       {
         "command": "ui5-tools.server.startProduction",
         "key": "alt+s alt+p",
-        "mac": "alt+s alt+p",
-        "when": "editorFocus"
+        "mac": "alt+s alt+p"
       },
       {
         "command": "ui5-tools.server.startBuildProduction",
         "key": "alt+s alt+b",
-        "mac": "alt+s alt+b",
-        "when": "editorFocus"
+        "mac": "alt+s alt+b"
       },
       {
         "command": "ui5-tools.server.stop",
         "key": "alt+s alt+x",
-        "mac": "alt+s alt+x",
-        "when": "editorFocus"
+        "mac": "alt+s alt+x"
       },
       {
         "command": "ui5-tools.server.restart",
         "key": "alt+s alt+r",
-        "mac": "alt+s alt+r",
-        "when": "editorFocus"
+        "mac": "alt+s alt+r"
       },
       {
         "command": "ui5-tools.server.toggle",
         "key": "alt+s alt+t",
-        "mac": "alt+s alt+t",
-        "when": "editorFocus"
+        "mac": "alt+s alt+t"
       },
       {
         "command": "ui5-tools.configurator.odataProvider",
         "key": "alt+c alt+o",
-        "mac": "alt+c alt+o",
-        "when": "editorFocus"
+        "mac": "alt+c alt+o"
       },
       {
         "command": "ui5-tools.configurator.ui5Provider",
         "key": "alt+c alt+u",
-        "mac": "alt+c alt+u",
-        "when": "editorFocus"
+        "mac": "alt+c alt+u"
       },
       {
         "command": "ui5-tools.configurator.replaceStrings",
         "key": "alt+c alt+r",
-        "mac": "alt+c alt+r",
-        "when": "editorFocus"
+        "mac": "alt+c alt+r"
       },
       {
         "command": "ui5-tools.builder.build",
         "key": "alt+b alt+b",
-        "mac": "alt+b alt+b",
-        "when": "editorFocus"
+        "mac": "alt+b alt+b"
       },
       {
         "command": "ui5-tools.builder.buildAll",
         "key": "alt+b alt+a",
-        "mac": "alt+b alt+a",
-        "when": "editorFocus"
+        "mac": "alt+b alt+a"
       },
       {
         "command": "ui5-tools.deployer.deploy",
         "key": "alt+d alt+d",
-        "mac": "alt+d alt+d",
-        "when": "editorFocus"
+        "mac": "alt+d alt+d"
+      },
+      {
+        "command": "ui5-tools.showOutput",
+        "key": "alt+v alt+o",
+        "mac": "alt+v alt+o"
       }
     ],
     "commands": [
@@ -179,11 +172,15 @@
       },
       {
         "command": "ui5-tools.menu.builder.build",
-        "title": "Build UI5 project"
+        "title": "UI5 Tools: Build UI5 project"
       },
       {
         "command": "ui5-tools.menu.deployer.deploy",
-        "title": "Deploy UI5 project"
+        "title": "UI5 Tools: Deploy UI5 project"
+      },
+      {
+        "command": "ui5-tools.showOutput",
+        "title": "UI5 Tools: Show Output"
       }
     ],
     "configuration": {
@@ -331,11 +328,6 @@
           "default": true,
           "description": "Create debug js files when building"
         },
-        "ui5-tools.builder.uglifyPreload": {
-          "type": "boolean",
-          "default": false,
-          "description": "Uglify Component-preload.js when building. If uglifySources is activated, this flag is redundant"
-        },
         "ui5-tools.builder.uglifySources": {
           "type": "boolean",
           "default": true,
@@ -345,6 +337,16 @@
           "type": "string",
           "default": "",
           "description": "Exclude uri for uglify, generate a RelativePattern to exclude, can be n separated by comma"
+        },
+        "ui5-tools.builder.uglifyPreload": {
+          "type": "boolean",
+          "default": false,
+          "description": "Uglify Component-preload.js when building. If uglifySources is activated, this flag is redundant"
+        },
+        "ui5-tools.builder.buildPreload": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Activate or deactivate building Component-preload and library-preload in build process"
         },
         "ui5-tools.builder.preloadSrc": {
           "type": "array",
@@ -410,6 +412,15 @@
           "type": "boolean",
           "default": false,
           "description": "Auto prefix BSP name in all transport texts while creation"
+        },
+        "ui5-tools.deployer.deployFolder": {
+          "type": "string",
+          "enum": [
+            "Dist Folder",
+            "Project Folder"
+          ],
+          "default": "Dist Folder",
+          "description": "Deploy folder"
         }
       }
     }
@@ -429,37 +440,38 @@
     "@types/express": "^4.17.11",
     "@types/glob": "^7.1.3",
     "@types/mocha": "^8.2.2",
-    "@types/node": "^14.14.35",
+    "@types/node": "^14.14.41",
     "@types/terser": "^3.12.0",
-    "@types/vscode": "^1.54.0",
+    "@types/vscode": "^1.55.0",
     "babel-loader": "^8.2.2",
-    "eslint": "^7.22.0",
-    "eslint-config-prettier": "^8.1.0",
-    "eslint-plugin-prettier": "^3.3.1",
+    "eslint": "^7.25.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
     "glob": "^7.1.6",
     "mocha": "^8.3.2",
-    "node-loader": "^1.0.2",
+    "node-loader": "^2.0.0",
     "prettier": "^2.2.1",
     "tslint": "^6.1.3",
-    "typescript": "^4.2.3",
-    "vscode-test": "^1.5.1",
-    "webpack": "^5.27.2",
-    "webpack-cli": "^4.5.0"
+    "typescript": "^4.2.4",
+    "vscode-test": "^1.5.2",
+    "webpack": "^5.35.1",
+    "webpack-cli": "^4.6.0"
   },
   "dependencies": {
-    "@babel/core": "^7.13.10",
+    "@babel/core": "^7.13.16",
     "@babel/plugin-transform-modules-commonjs": "7.13.8",
-    "@babel/preset-env": "^7.13.12",
+    "@babel/preset-env": "^7.13.15",
     "apicache": "^1.6.2",
     "babel-plugin-transform-async-to-promises": "^0.8.15",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "chokidar": "^3.5.1",
     "connect-livereload": "^0.6.1",
+    "core-js": "^3.11.0",
     "deepmerge": "^4.2.2",
     "dotenv": "^8.2.0",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
-    "http-proxy-middleware": "^1.0.6",
+    "http-proxy-middleware": "^1.3.0",
     "less": "^4.1.1",
     "less-openui5": "^0.11.1",
     "livereload": "^0.9.3",
@@ -469,8 +481,8 @@
     "portfinder": "^1.0.28",
     "pretty-data": "^0.40.0",
     "showdown": "^1.9.1",
-    "terser": "^5.6.1",
-    "ui5-nwabap-deployer-core": "^1.0.13",
+    "terser": "^5.7.0",
+    "ui5-nwabap-deployer-core": "^1.0.15",
     "utf-8-validate": "^5.0.4",
     "ws": "^7.4.4",
     "xmldoc": "^1.1.2"

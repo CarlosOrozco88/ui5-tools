@@ -115,27 +115,16 @@ export default {
 
           try {
             await this.build(ui5App, progress);
-            window.showInformationMessage(`Project ${ui5App.folderName} builded!`);
+
+            let sMessage = `Project ${ui5App.folderName} builded!`;
+            Utils.logOutputBuilder(sMessage);
+            window.showInformationMessage(sMessage);
           } catch (error) {
             throw new Error(error);
           }
         }
       );
     }
-  },
-
-  /**
-   * Checks valid configuration
-   */
-  checkValidSrcLibraryDistConfig() {
-    let srcFolder = Config.general('srcFolder');
-    let libraryFolder = Config.general('libraryFolder');
-    let distFolder = Config.general('distFolder');
-    let valid = true;
-    if (!srcFolder || !libraryFolder || !distFolder || srcFolder === distFolder || libraryFolder === distFolder) {
-      valid = false;
-    }
-    return valid;
   },
 
   /**
@@ -148,8 +137,12 @@ export default {
     progress?.report({ increment: 0 });
 
     try {
-      if (!this.checkValidSrcLibraryDistConfig()) {
-        throw new Error('Invalid srcFolder, libraryFolder or distFolder');
+      let srcFolder = Config.general('srcFolder');
+      let libraryFolder = Config.general('libraryFolder');
+      let distFolder = Config.general('distFolder');
+
+      if (!srcFolder || !libraryFolder || !distFolder) {
+        throw new Error('Invalid srcFolder or libraryFolder');
       }
 
       let message = `Reading manifest`;
@@ -160,30 +153,30 @@ export default {
       let srcPath = ui5App.srcFsPath;
       let destPath = ui5App.distFsPath;
 
-      let diferentSrcDestFolders = srcPath != destPath;
+      let doBuildProcess = srcPath != destPath;
 
       // clean dist folder
-      message = diferentSrcDestFolders ? `Cleaning dist folder` : message;
+      message = doBuildProcess ? `Cleaning dist folder` : message;
       progress?.report({ increment: 10 * multiplier, message: `${folderName}${message}` });
 
-      if (diferentSrcDestFolders) {
+      if (doBuildProcess) {
         await this.cleanFolder(destPath);
       }
 
       // copy files
-      message = diferentSrcDestFolders ? `Copying files` : message;
+      message = doBuildProcess ? `Copying files` : message;
       progress?.report({ increment: 10 * multiplier, message: `${folderName}${message}` });
 
-      if (diferentSrcDestFolders) {
+      if (doBuildProcess) {
         await this.copyFolder(srcPath, destPath);
       }
 
       // replace strings
       let bReplaceStrings = Config.builder('replaceStrings');
-      message = bReplaceStrings && diferentSrcDestFolders ? `Replacing strings` : message;
+      message = bReplaceStrings && doBuildProcess ? `Replacing strings` : message;
 
       progress?.report({ increment: 10 * multiplier, message: `${folderName}${message}` });
-      if (bReplaceStrings && diferentSrcDestFolders) {
+      if (bReplaceStrings && doBuildProcess) {
         await this.replaceStrings(destPath);
       }
 
@@ -194,43 +187,46 @@ export default {
 
       // babel js files
       let bBabelSources = Config.builder('babelSources');
-      message = bBabelSources && diferentSrcDestFolders ? `Babelify js files` : message;
+      message = bBabelSources && doBuildProcess ? `Babelify js files` : message;
 
       progress?.report({ increment: 5 * multiplier, message: `${folderName}${message}` });
-      if (bBabelSources && diferentSrcDestFolders) {
+      if (bBabelSources && doBuildProcess) {
         await this.babelifyJSFiles(destPath);
       }
 
       // compress files
       let bUglifySources = Config.builder('uglifySources');
-      message = bUglifySources && diferentSrcDestFolders ? `Compress files` : message;
+      message = bUglifySources && doBuildProcess ? `Compress files` : message;
 
       progress?.report({ increment: 10 * multiplier, message: `${folderName}${message}` });
-      if (bUglifySources && diferentSrcDestFolders) {
+      if (bUglifySources && doBuildProcess) {
         await this.compressFiles(destPath);
       }
 
       // create dbg files
       let bDebugSources = Config.builder('debugSources');
-      message = bDebugSources && diferentSrcDestFolders ? `Creating dbg files` : message;
+      message = bDebugSources && doBuildProcess ? `Creating dbg files` : message;
 
       progress?.report({ increment: 5 * multiplier, message: `${folderName}${message}` });
-      if (bDebugSources && diferentSrcDestFolders) {
+      if (bDebugSources && doBuildProcess) {
         await this.createDebugFiles(srcPath, destPath);
       }
 
       // clean files
-      message = diferentSrcDestFolders ? `Cleaning files` : message;
+      message = doBuildProcess ? `Cleaning files` : message;
 
       progress?.report({ increment: 10 * multiplier, message: `${folderName}${message}` });
-      if (diferentSrcDestFolders) {
+      if (doBuildProcess) {
         await this.cleanFiles(destPath);
       }
 
       // create preload
-      message = `Building preload`;
+      let bDoPreload = Config.builder('buildPreload');
+      message = bDoPreload ? `Building preload` : message;
       progress?.report({ increment: 20 * multiplier, message: `${folderName}${message}` });
-      await this.createPreload(srcPath, destPath, manifest);
+      if (bDoPreload) {
+        await this.createPreload(srcPath, destPath, manifest);
+      }
 
       // End build
     } catch (error) {
@@ -434,6 +430,8 @@ export default {
         let transformRemoveConsole = require('babel-plugin-transform-remove-console');
         //@ts-ignore
         let presetEnv = require('@babel/preset-env');
+        //@ts-ignore
+        //require('core-js');
 
         for (let i = 0; i < jsFiles.length; i++) {
           let uriOrigJs = Uri.file(jsFiles[i].fsPath);

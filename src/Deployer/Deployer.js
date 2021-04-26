@@ -2,6 +2,7 @@ import { workspace, window, RelativePattern, ProgressLocation, Progress, Uri, Te
 import ui5DeployerCore from 'ui5-nwabap-deployer-core';
 import TransportManager from 'ui5-nwabap-deployer-core/lib/TransportManager';
 import deepmerge from 'deepmerge';
+import fs from 'fs';
 
 import Builder from '../Builder/Builder';
 import Utils from '../Utils/Utils';
@@ -269,13 +270,13 @@ export default {
       this.autoSaveOrder(ui5App, oDeployOptions);
 
       try {
-        let patternFiles = new RelativePattern(ui5App.distFsPath, `**/*`);
+        let patternFiles = new RelativePattern(ui5App.deployFsPath, `**/*`);
         let aProjectFiles = await workspace.findFiles(patternFiles);
         let aProjectResources = await Promise.all(
           aProjectFiles.map(async (file) => {
             return {
-              path: file.fsPath.replace(ui5App.distFsPath, '').split('\\').join('/'),
-              content: await workspace.fs.readFile(Uri.file(file.fsPath)),
+              path: file.fsPath.replace(ui5App.deployFsPath, '').split('\\').join('/'),
+              content: fs.readFileSync(file.fsPath, { encoding: null }),
             };
           })
         );

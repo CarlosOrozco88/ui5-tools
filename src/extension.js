@@ -48,6 +48,8 @@ export async function activate(context) {
   subscriptions.push(registerCommand('ui5-tools.menu.builder.build', (oResource) => Menu.build(oResource)));
   subscriptions.push(registerCommand('ui5-tools.menu.deployer.deploy', (oResource) => Menu.deploy(oResource)));
 
+  subscriptions.push(registerCommand('ui5-tools.showOutput', () => Utils.showOutput()));
+
   // Configure listeners
   workspace.onDidChangeConfiguration((event) => onDidChangeConfiguration(event));
   workspace.onDidSaveTextDocument((event) => onDidSaveTextDocument(event));

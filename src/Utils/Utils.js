@@ -22,8 +22,8 @@ const Utils = {
 
     for (let wsUri of workspace.workspaceFolders) {
       let manifestList = await workspace.findFiles(
-        new RelativePattern(wsUri, `**/manifest.json`),
-        new RelativePattern(wsUri, `**/{${distFolder},node_modules,.git}/`)
+        new RelativePattern(wsUri, `**/{${srcFolder},${libraryFolder}}/**/manifest.json`),
+        new RelativePattern(wsUri, `**/{node_modules,.git}/`)
       );
 
       for (let i = 0; i < manifestList.length; i++) {
@@ -33,51 +33,64 @@ const Utils = {
         try {
           let manifestString = await workspace.fs.readFile(manifestUri);
           let manifestJson = JSON.parse(manifestString.toString());
-          let isLibrary = await Utils.getManifestLibrary(manifestJson);
-          let namespace = await Utils.getManifestId(manifestJson);
-          let appSrcFolder = isLibrary ? libraryFolder : srcFolder;
 
-          if (namespace) {
-            let alreadyInList = ui5Apps.find((app) => {
-              return app.namespace === namespace;
-            });
-            if (!alreadyInList) {
-              let manifestInnerPath = path.join(appSrcFolder, 'manifest.json');
-              let appFsPath = manifestUri.fsPath.replace(manifestInnerPath, '');
-              let appResourceDirname = manifestUri.fsPath.replace(path.sep + manifestInnerPath, '');
-              let appServerPath = appFsPath.replace(workspaceRootPath, '').split(path.sep).join('/');
+          if (manifestJson?.['sap.app']?.id && manifestJson?.['sap.app'].type) {
+            let isLibrary = await Utils.getManifestLibrary(manifestJson);
+            let namespace = await Utils.getManifestId(manifestJson);
+            let appSrcFolder = isLibrary ? libraryFolder : srcFolder;
 
-              let appConfigPath = path.join(appResourceDirname, 'ui5-tools.json');
-              // clean all srcFolders/libraryFolders/distFolders if has any parent app
-              appServerPath = appServerPath
-                .replace(`/${libraryFolder}/`, '/')
-                .replace(`/${srcFolder}/`, '/')
-                .replace(`/${distFolder}/`, '/');
-              let srcFsPath = path.join(appFsPath, appSrcFolder);
-              let distFsPath = path.join(appFsPath, distFolder);
-              let folderName = path.basename(appFsPath);
-
-              ui5Apps.push({
-                appFsPath: appFsPath,
-                appConfigPath: appConfigPath,
-                appResourceDirname: appResourceDirname,
-                appServerPath: appServerPath,
-                isLibrary: isLibrary,
-                srcFsPath: srcFsPath,
-                distFsPath: distFsPath,
-                manifestUri: manifestUri,
-                manifest: manifestJson,
-                folderName: folderName,
-                namespace: manifestJson['sap.app']['id'],
-              });
+            if (appSrcFolder !== distFolder) {
+              manifest.fsPath;
             }
+
+            if (namespace) {
+              let alreadyInList = ui5Apps.find((app) => {
+                return app.namespace === namespace;
+              });
+              if (!alreadyInList) {
+                let manifestInnerPath = path.join(appSrcFolder, 'manifest.json');
+                let appFsPath = manifestUri.fsPath.replace(manifestInnerPath, '');
+                let appResourceDirname = manifestUri.fsPath.replace(path.sep + manifestInnerPath, '');
+                let appServerPath = appFsPath.replace(workspaceRootPath, '').split(path.sep).join('/');
+
+                let appConfigPath = path.join(appResourceDirname, 'ui5-tools.json');
+                // clean all srcFolders/libraryFolders/distFolders if has any parent app
+                appServerPath = appServerPath
+                  .replace(`/${libraryFolder}/`, '/')
+                  .replace(`/${srcFolder}/`, '/')
+                  .replace(`/${distFolder}/`, '/');
+                let srcFsPath = path.join(appFsPath, appSrcFolder);
+                let distFsPath = path.join(appFsPath, distFolder);
+
+                let sDeployFolder = Config.deployer('deployFolder');
+                let deployFsPath = sDeployFolder == 'Dist Folder' ? distFsPath : appFsPath;
+
+                let folderName = path.basename(appFsPath);
+
+                ui5Apps.push({
+                  appFsPath: appFsPath,
+                  appConfigPath: appConfigPath,
+                  appResourceDirname: appResourceDirname,
+                  appServerPath: appServerPath,
+                  isLibrary: isLibrary,
+                  srcFsPath: srcFsPath,
+                  distFsPath: distFsPath,
+                  deployFsPath: deployFsPath,
+                  manifestUri: manifestUri,
+                  manifest: manifestJson,
+                  folderName: folderName,
+                  namespace: manifestJson['sap.app'].id,
+                });
+              }
+            }
+          } else {
+            throw new Error(
+              `Manifest found in ${manifestUri} path. If this manifest refers to an ui5 app, ` +
+                `check if it well formatted and has sap.app.type and sap.app.id properties filled`
+            );
           }
         } catch (oError) {
-          let sMessage = `Please, verify ${manifestUri} project.
-          It has some errors.
-          Verify manifest.json is correct and has sap.app.type and sap.app.id`;
-          Utils.logOutputGeneral(sMessage, 'ERROR');
-          window.showErrorMessage(sMessage);
+          Utils.logOutputGeneral(oError.message, 'ERROR');
         }
       }
     }
@@ -195,7 +208,7 @@ const Utils = {
   async getManifestLibrary(uriOrManifest) {
     let isLib = false;
     let manifest = await Utils.getManifest(uriOrManifest);
-    if (manifest && manifest['sap.app'].type === 'library') {
+    if (manifest?.['sap.app']?.type === 'library') {
       isLib = true;
     }
     return isLib;
@@ -204,7 +217,7 @@ const Utils = {
   async getManifestId(uriOrManifest) {
     let manifestId = undefined;
     let manifest = await Utils.getManifest(uriOrManifest);
-    if (manifest && manifest['sap.app'].id) {
+    if (manifest?.['sap.app']?.id) {
       manifestId = manifest['sap.app'].id;
     }
     return manifestId;
@@ -251,6 +264,10 @@ const Utils = {
   isLaunchpadMounted() {
     let resourcesProxy = Config.server('resourcesProxy');
     return resourcesProxy === 'CDN SAPUI5' || resourcesProxy === 'Gateway';
+  },
+
+  showOutput() {
+    ui5toolsOutput.show();
   },
 
   logOutput(sText, sLevel = 'LOG') {
