@@ -484,7 +484,7 @@
     "terser": "^5.7.0",
     "ui5-nwabap-deployer-core": "^1.0.15",
     "utf-8-validate": "^5.0.4",
-    "ws": "^7.4.4",
+    "ws": "^7.4.6",
     "xmldoc": "^1.1.2"
   }
 }
