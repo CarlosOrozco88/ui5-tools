@@ -11,6 +11,8 @@ import Utils from '../Utils/Utils';
 import Config from '../Utils/Config';
 import Server from './Server';
 
+const DELAY_REFRESH = 500;
+
 export default {
   liveServerWS: undefined,
   liveServer: undefined,
@@ -198,18 +200,21 @@ export default {
 
   sendAllClients(data) {
     if (this.liveServerWS) {
-      Utils.logOutputServer('Refreshing browser...');
-      this.liveServerWS.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          this.debug('Sending: ' + data);
+      clearTimeout(this._sendAllClientsTimeout);
+      this._sendAllClientsTimeout = setTimeout(() => {
+        Utils.logOutputServer('Refreshing browser...');
+        this.liveServerWS.clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            this.debug('Sending: ' + data);
 
-          client.send(data, (error) => {
-            if (error) {
-              this.debug(error);
-            }
-          });
-        }
-      });
+            client.send(data, (error) => {
+              if (error) {
+                this.debug(error);
+              }
+            });
+          }
+        });
+      }, DELAY_REFRESH);
     }
   },
 

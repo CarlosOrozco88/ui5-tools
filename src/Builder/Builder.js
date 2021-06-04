@@ -6,8 +6,9 @@ import preload from 'openui5-preload';
 import { minify } from 'terser';
 import { pd as prettyData } from 'pretty-data';
 import less from 'less';
-import lessOpenUI5, { Builder } from 'less-openui5';
-import { setTimeout } from 'timers';
+import lessOpenUI5 from 'less-openui5';
+
+const DELAY_LESS = 500;
 const lessOpenUI5Builder = new lessOpenUI5.Builder({});
 const xmlHtmlPrePattern = /<(?:\w+:)?pre>/;
 
@@ -84,7 +85,7 @@ export default {
           }
           progress.report({
             increment: 100 / ui5Apps.length,
-            message: `${ui5Apps[i].folderName}`,
+            message: `${ui5Apps[i].folderName} (${i + 1}/${ui5Apps.length})`,
           });
           await this.build(ui5Apps[i], progress, 0);
         }
@@ -421,7 +422,8 @@ export default {
         Utils.logOutputBuilder(`Babelify files ${folderPath}`);
         // Create -dbg files
         let patternJs = new RelativePattern(folderPath, `**/*.js`);
-        let jsFiles = await workspace.findFiles(patternJs);
+        let babelSourcesExclude = Config.builder(`babelSourcesExclude`) || '';
+        let jsFiles = await workspace.findFiles(patternJs, babelSourcesExclude);
         //@ts-ignore
         let babelCore = require('@babel/core');
         //@ts-ignore
@@ -596,6 +598,15 @@ export default {
     let isLibrary = await Utils.getManifestLibrary(manifest);
 
     Utils.logOutputBuilder(`Create preload ${srcPath}`);
+    let sComponentPath = Uri.file(path.join(srcPath, 'Component.js'));
+
+    try {
+      await workspace.fs.readFile(sComponentPath);
+    } catch (oError) {
+      Utils.logOutputBuilder(`Component.js not found in path ${srcPath}, skiping preload creation...`);
+      return;
+    }
+
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         try {
@@ -643,17 +654,21 @@ export default {
         });
 
         if (ui5App) {
-          await window.withProgress(
-            {
-              location: ProgressLocation.Notification,
-              title: `ui5-tools > Building css files for`,
-              cancellable: true,
-            },
-            async (progress, token) => {
-              progress.report({ message: ui5App.folderName });
-              await this.compileLess(ui5App.srcFsPath, ui5App.srcFsPath, ui5App.manifest);
-            }
-          );
+          let sTimeoutKey = `_liveCompileTimeout${ui5App.folderName}`;
+          clearTimeout(this[sTimeoutKey]);
+          this[sTimeoutKey] = setTimeout(async () => {
+            await window.withProgress(
+              {
+                location: ProgressLocation.Notification,
+                title: `ui5-tools > Building css files for`,
+                cancellable: true,
+              },
+              async (progress, token) => {
+                progress.report({ message: ui5App.folderName });
+                await this.compileLess(ui5App.srcFsPath, ui5App.srcFsPath, ui5App.manifest);
+              }
+            );
+          }, DELAY_LESS);
         }
       }
     }

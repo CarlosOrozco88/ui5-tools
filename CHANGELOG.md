@@ -1,3 +1,12 @@
+## 0.6.9 (04-06-2021)
+
+- Dependencies upgrade
+- New deploy commands `ui5-tools.deployer.deployAll`
+- New comands: `ui5-tools.fonts.generate` and `ui5-tools.fonts.generateAll`. Compatible with a folder containing svg files and importing font awesome from github
+- New option: `ui5-tools.builder.babelSourcesExclude`
+- Look for all \*.md files in workspace to show in `localhost/ui5tools/#/docs` route
+- Can build app without Component.js
+
 ## 0.6.8 (26-04-2021)
 
 - New options: `ui5-tools.builder.buildPreload` and `ui5-tools.deployer.deployFolder`

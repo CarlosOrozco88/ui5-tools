@@ -10,7 +10,7 @@
     <% if(showTree) { %>
     <Tree
       id="docsTree"
-      items="{path:'ui5tools>/docs',sorter:{path:'folder',descending:true},parameters:{numberOfExpandedLevels: 2}}"
+      items="{path:'ui5tools>/docs',sorter:{path:'folder',descending:true},parameters:{numberOfExpandedLevels: 1}}"
       itemPress="itemPressDocs"
       noDataText="Workspace without docs folder"
       showSeparators="Inner"
@@ -25,14 +25,14 @@
     <% } else { %>
     <List
       id="docsList"
-      items="{path:'ui5tools>/docs'}"
+      items="{path:'ui5tools>/docs',sorter:{path:'path'}}"
       itemPress="itemPressDocs"
       noDataText="Workspace without docs folder"
       showSeparators="Inner"
       mode="SingleSelectMaster"
     >
       <StandardListItem
-        title="{ui5tools>name}"
+        title="{ui5tools>path}"
         icon="{= ${ui5tools>folder} ? 'sap-icon://folder-full' : 'sap-icon://document-text' }"
         type="{= ${ui5tools>folder} ? 'Inactive' : 'Navigation' }"
       />

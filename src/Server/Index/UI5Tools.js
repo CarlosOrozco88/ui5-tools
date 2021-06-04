@@ -1,6 +1,6 @@
+import { workspace, RelativePattern, Uri } from 'vscode';
 import express from 'express';
 import path from 'path';
-import fs from 'fs';
 import showdown from 'showdown';
 
 import Utils from '../../Utils/Utils';
@@ -63,56 +63,74 @@ export default {
     );
 
     // Serve app data
-    serverApp.get(`/${ui5ToolsIndex}/ui5tools.json`, (req, res) => {
-      ui5toolsData.readme = '';
-      if (fs.existsSync(path.join(baseDir, 'README.md'))) {
-        let readmeMD = fs.readFileSync(path.join(baseDir, 'README.md'), 'utf8');
-        ui5toolsData.readme = converter.makeHtml(readmeMD);
-      }
+    serverApp.get(`/${ui5ToolsIndex}/ui5tools.json`, async (req, res) => {
+      ui5toolsData.readme = await this.readFile(path.join(baseDir, 'README.md'), '');
+      ui5toolsData.links = JSON.parse(await this.readFile(path.join(baseDir, 'links.json'), '[]'));
+      ui5toolsData.docs = await this.findDocs(baseDir, ui5toolsData.showTree);
 
-      ui5toolsData.links = [];
-      if (fs.existsSync(path.join(baseDir, 'links.json'))) {
-        let linksJSON = fs.readFileSync(path.join(baseDir, 'links.json'), 'utf8');
-        ui5toolsData.links = JSON.parse(linksJSON);
-      }
-
-      ui5toolsData.docs = [];
-      if (fs.existsSync(path.join(baseDir, 'docs'))) {
-        this.createDocsTree(path.join(baseDir, 'docs'), ui5toolsData.docs, baseDir, ui5toolsData.showTree);
-      }
       res.json(ui5toolsData);
     });
     return;
   },
 
-  createDocsTree(folderOrFilePath, nodes, baseDir, tree) {
-    let isDirectory = fs.statSync(folderOrFilePath).isDirectory();
-    if (isDirectory) {
-      let newNode = {};
-      if (tree) {
-        newNode = {
-          folder: true,
-          name: path.basename(folderOrFilePath),
-          nodes: [],
-        };
-        nodes.push(newNode);
-      }
-      fs.readdirSync(folderOrFilePath).forEach((subFolderPath) => {
-        this.createDocsTree(path.join(folderOrFilePath, subFolderPath), tree ? newNode.nodes : nodes, baseDir, tree);
-      });
-    } else {
-      switch (path.extname(folderOrFilePath)) {
-        case '.md':
-        case '.MD':
-          nodes.push({
-            folder: false,
-            markdown: '<div>' + converter.makeHtml(fs.readFileSync(folderOrFilePath, 'utf8')) + '</div>',
-            name: tree ? path.basename(folderOrFilePath) : folderOrFilePath.replace(baseDir, ''),
-            path: folderOrFilePath.replace(baseDir, ''),
-            nodes: [],
-          });
-          break;
-      }
+  async readFile(sPath, defaultValue = undefined) {
+    let oFile = defaultValue;
+    try {
+      let oFileBuffer = await workspace.fs.readFile(Uri.file(sPath));
+      oFile = oFileBuffer.toString();
+    } catch (oError) {
+      oFile = defaultValue;
     }
+    return oFile;
+  },
+
+  async findDocs(sBaseDirPath, bTree) {
+    let aMDFilesPaths = await workspace.findFiles(
+      new RelativePattern(sBaseDirPath, `**/*.{md,MD}`),
+      new RelativePattern(sBaseDirPath, `**/{node_modules,.git}/`)
+    );
+    let aMDFilesPromises = [];
+    aMDFilesPaths.forEach((oManifest) => {
+      let oMDFile = workspace.fs.readFile(Uri.file(oManifest.fsPath));
+      aMDFilesPromises.push(oMDFile);
+    });
+    let aMDFilesBuffers = await Promise.all(aMDFilesPromises);
+    let aMDFiles = aMDFilesBuffers.map((oBuffer) => oBuffer.toString());
+
+    let oFolders = {};
+    let aTree = [];
+    aMDFiles.forEach((sFile, i) => {
+      var oPath = aMDFilesPaths[i];
+      var sPath = oPath.fsPath.replace(sBaseDirPath, '');
+      var aPaths = sPath.split(path.sep);
+      let iLength = aPaths.length - 1;
+      let sFolderPath = '';
+      aPaths.forEach((sFolderFile, j) => {
+        if (sFolderFile) {
+          let sHash = sFolderPath + path.sep + sFolderFile;
+
+          if (!oFolders[sHash]) {
+            let bIsFolder = j != iLength;
+            oFolders[sHash] = {
+              folder: bIsFolder,
+              name: sFolderFile,
+              markdown: bIsFolder ? undefined : '<div>' + converter.makeHtml(sFile) + '</div>',
+              path: sHash,
+              nodes: [],
+            };
+
+            if (bTree && sFolderPath) {
+              oFolders[sFolderPath].nodes.push(oFolders[sHash]);
+            } else if (bTree || !bIsFolder) {
+              aTree.push(oFolders[sHash]);
+            }
+          }
+
+          sFolderPath = sHash;
+        }
+      });
+    });
+
+    return aTree;
   },
 };

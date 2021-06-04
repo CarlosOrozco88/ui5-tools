@@ -1,4 +1,3 @@
-import { window, ProgressLocation } from 'vscode';
 import Builder from '../Builder/Builder';
 import Deployer from '../Deployer/Deployer';
 import Utils from '../Utils/Utils';

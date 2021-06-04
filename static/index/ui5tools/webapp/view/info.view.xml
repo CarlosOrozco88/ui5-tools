@@ -1,6 +1,6 @@
 <mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="ui5tools.controller.info" xmlns:f="sap.ui.layout.form" displayBlock="true" width="100%" height="100%">
   <Page title="Info">
-    <f:SimpleForm columnsXL="4" columnsL="4" columnsM="2" layout="ColumnLayout">
+    <f:SimpleForm columnsXL="4" columnsL="2" columnsM="2" layout="ResponsiveGridLayout">
       <f:content>
         <core:Title text="General" />
         <Label text="Source folder" />
@@ -32,10 +32,10 @@
         <Label text="OData proxy" />
         <Text text="{ui5tools>/config/server/odataProxy}" />
         <Label text="OData URL" />
-        <Text text="{ui5tools>/config/server/odataUri}" />
-        <Label text="OData Secure" />
-        <Text text="{ui5tools>/config/server/odataSecure}" />
+        <FormattedText htmlText="{path:'ui5tools>/config/server/odataUri',formatter:'.splitComma'}" />
         <Label text="OData mountpath" />
+        <FormattedText htmlText="{path:'ui5tools>/config/server/odataMountPath',formatter:'.splitComma'}" />
+        <Label text="OData Secure" />
         <Text text="{ui5tools>/config/server/odataSecure}" />
         <Label text="Watch" />
         <Text text="{ui5tools>/config/server/watch}" />
@@ -67,12 +67,15 @@
         <Text text="{ui5tools>/config/builder/uglifySourcesExclude}" />
         <Label text="Preload sources" />
         <FormattedText htmlText="{path:'ui5tools>/config/builder/preloadSrc',formatter:'.formatPreloadSrc'}" />
+
         <Label text="Replace Strings" />
         <Text text="{ui5tools>/config/builder/replaceStrings}" />
         <Label text="Replace Extensions" />
         <Text text="{ui5tools>/config/builder/replaceExtensions}" />
         <Label text="Replace Key/Values" />
+
         <FormattedText htmlText="{path:'ui5tools>/config/builder/replaceKeysValues',formatter:'.formatReplaceKeyValue'}" />
+
 
       </f:content>
     </f:SimpleForm>

@@ -302,6 +302,10 @@ const Utils = {
     return Utils.logOutput(`Server > Proxy: ${sText}`, sLevel);
   },
 
+  logOutputFont(sText, sLevel) {
+    return Utils.logOutput(`Server > Font: ${sText}`, sLevel);
+  },
+
   newLogProviderProxy() {
     return Utils.newLogProvider(Utils.logOutputProxy);
   },

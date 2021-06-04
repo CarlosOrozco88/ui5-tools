@@ -9,6 +9,11 @@ import Utils from '../Utils/Utils';
 import Config from '../Utils/Config';
 
 const oLogger = Utils.newLogProviderDeployer();
+const ODEPLOYSTATUS = {
+  ERROR: 0,
+  SKIPPED: 1,
+  SUCCES: 2,
+};
 
 export default {
   async askProjectToDeploy() {
@@ -61,68 +66,134 @@ export default {
     }
   },
 
-  async askCreateReuseTransport(ui5App) {
+  async deployAllProjects() {
+    Utils.logOutputDeployer(`Deploy all ui5 projects`);
+    let ui5Apps = await Utils.getAllUI5Apps();
+    await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: `ui5-tools > Deploying all`,
+        cancellable: true,
+      },
+      async (progress, token) => {
+        let oOptions = {};
+        let oResults = {
+          [ODEPLOYSTATUS.SUCCESS]: 0,
+          [ODEPLOYSTATUS.ERROR]: 0,
+          [ODEPLOYSTATUS.SKIPPED]: 0,
+        };
+        progress.report({ increment: 0 });
+        for (let i = 0; i < ui5Apps.length; i++) {
+          if (token.isCancellationRequested) {
+            return;
+          }
+          progress.report({
+            increment: 100 / ui5Apps.length,
+            message: `${ui5Apps[i].folderName} (${i + 1}/${ui5Apps.length})`,
+          });
+          try {
+            oOptions = await this.askCreateReuseTransport(ui5Apps[i], {
+              deployWorkspace: true,
+              transportno: oOptions?.transportno,
+              globalDeploy: true,
+            });
+            oResults[oOptions.deployed]++;
+          } catch (oError) {
+            oResults[ODEPLOYSTATUS.ERROR]++;
+            let sMessage = `Project ${ui5Apps[i].folderName} not deployed`;
+            Utils.logOutputDeployer(sMessage, 'ERROR');
+            window.showErrorMessage(sMessage);
+          }
+        }
+        let sMessage = `Deploy finished with ${oResults[ODEPLOYSTATUS.SUCCESS]} projects deployed,
+        ${oResults[ODEPLOYSTATUS.SKIPPED]} skipped and
+        ${oResults[ODEPLOYSTATUS.ERROR]} not deployed`;
+        Utils.logOutputDeployer(sMessage, 'SUCCESS');
+        window.showInformationMessage(sMessage);
+        return;
+      }
+    );
+    return;
+  },
+
+  async askCreateReuseTransport(ui5App, oOptions = {}) {
     let oDeployOptions = {};
     try {
+      oOptions.deployed = ODEPLOYSTATUS.ERROR;
+
       if (ui5App) {
         let ui5AppConfig = await Utils.getUi5ToolsFile(ui5App);
+
+        if (oOptions.globalDeploy && ui5AppConfig?.deployer?.globalDeploy === false) {
+          oOptions.deployed = ODEPLOYSTATUS.SKIPPED;
+          return oOptions;
+        }
+
         if (!ui5AppConfig) {
           ui5AppConfig = await this.createConfigFile(ui5App);
         }
+
         let oDeployOptionsFs = await this.getDeployOptions(ui5AppConfig);
-        Utils.logOutputDeployer(`Asking create or update transportno...`);
+        let sOption;
 
-        let qpOptions = [
-          {
-            label: `Update existing transport`,
-            description: 'Update',
-          },
-          {
-            label: `Create new transport`,
-            description: 'Create',
-          },
-          {
-            label: `Use ui5tools.json config file`,
-            description: 'Read',
-          },
-        ];
+        if (oOptions.transportno) {
+          Utils.logOutputDeployer(`Using transportno ${oOptions.transportno}...`);
+          oDeployOptions = deepmerge(oDeployOptions, oDeployOptionsFs);
+          sOption = oOptions.transportno;
+        } else {
+          Utils.logOutputDeployer(`Asking create or update transportno...`);
 
-        if (oDeployOptionsFs.ui5.transportno) {
-          qpOptions.unshift({
-            label: `Update transportno ${oDeployOptionsFs.ui5.transportno}`,
-            description: oDeployOptionsFs.ui5.transportno,
+          let qpOptions = [
+            {
+              label: `Update existing transport`,
+              description: 'Update',
+            },
+            {
+              label: `Create new transport`,
+              description: 'Create',
+            },
+            {
+              label: `Use ui5tools.json config file`,
+              description: 'Read',
+            },
+          ];
+
+          if (oDeployOptionsFs?.ui5?.transportno) {
+            qpOptions.unshift({
+              label: `Update transportno ${oDeployOptionsFs.ui5.transportno}`,
+              description: oDeployOptionsFs.ui5.transportno,
+            });
+          }
+
+          let selTransportOption = await new Promise(async (resolve, reject) => {
+            let selTransportOptionQp = await window.createQuickPick();
+            selTransportOptionQp.title = 'ui5-tools > Deployer > Update or create transport';
+            selTransportOptionQp.items = qpOptions;
+            selTransportOptionQp.placeholder = `Create or update transport for ${ui5App.folderName} project`;
+            selTransportOptionQp.canSelectMany = false;
+            selTransportOptionQp.onDidAccept(async () => {
+              if (selTransportOptionQp.selectedItems.length) {
+                resolve(selTransportOptionQp.selectedItems[0]);
+              } else {
+                reject('No UI5 project selected');
+              }
+              selTransportOptionQp.hide();
+            });
+            selTransportOptionQp.show();
           });
+          sOption = selTransportOption.description;
+
+          oDeployOptions = deepmerge(oDeployOptions, oDeployOptionsFs);
+
+          await this.getUserPass(oDeployOptions);
         }
-
-        let selTransportOption = await new Promise(async (resolve, reject) => {
-          let selTransportOptionQp = await window.createQuickPick();
-          selTransportOptionQp.title = 'ui5-tools > Deployer > Update or create transport';
-          selTransportOptionQp.items = qpOptions;
-          selTransportOptionQp.placeholder = `Create or update transport for ${ui5App.folderName} project`;
-          selTransportOptionQp.canSelectMany = false;
-          selTransportOptionQp.onDidAccept(async () => {
-            if (selTransportOptionQp.selectedItems.length) {
-              resolve(selTransportOptionQp.selectedItems[0]);
-            } else {
-              reject('No UI5 project selected');
-            }
-            selTransportOptionQp.hide();
-          });
-          selTransportOptionQp.show();
-        });
-        let sOption = selTransportOption.description;
-
-        oDeployOptions = deepmerge(oDeployOptions, oDeployOptionsFs);
-
-        await this.getUserPass(oDeployOptions);
-
         switch (sOption) {
           case undefined:
           case '':
             throw new Error('Deploy canceled');
             break;
           case 'Create':
-            await this.createTransport(ui5App, oDeployOptions);
+            await this.createTransport(ui5App, oDeployOptions, oOptions);
             break;
           case 'Update':
             await this.updateTransport(ui5App, oDeployOptions);
@@ -134,16 +205,20 @@ export default {
             await this.updateTransport(ui5App, oDeployOptions, sOption);
             break;
         }
-        await this.deployProject(ui5App, oDeployOptions);
+        oOptions.transportno = oDeployOptions.ui5.transportno;
+        await this.deployProject(ui5App, oDeployOptions, oOptions);
+        oOptions.deployed = ODEPLOYSTATUS.SUCCESS;
       }
     } catch (oError) {
       Utils.logOutputDeployer(oError.message, 'ERROR');
       window.showErrorMessage(oError.message);
+      oOptions.deployed = ODEPLOYSTATUS.ERROR;
       throw oError;
     }
+    return oOptions;
   },
 
-  async createTransport(ui5App, oDeployOptions) {
+  async createTransport(ui5App, oDeployOptions, oOptions = {}) {
     let sDate = new Date().toLocaleString();
     let sDefaultText = `${ui5App.folderName}: ${sDate}`;
 
@@ -168,7 +243,7 @@ export default {
     }
     if (!transport_text) {
       transport_text = sDefaultText;
-    } else if (Config.deployer('autoPrefixBSP')) {
+    } else if (Config.deployer('autoPrefixBSP') && !oOptions.deployWorkspace) {
       transport_text = `${oDeployOptions.ui5.bspcontainer}: ${transport_text}`;
     }
     oDeployOptions.ui5.transport_text = transport_text;
@@ -229,7 +304,7 @@ export default {
     return new TransportManager(oDeployOptions, oLogger);
   },
 
-  async deployProject(ui5App, oParamOptions) {
+  async deployProject(ui5App, oParamOptions, oOptions = {}) {
     if (ui5App) {
       let folderName = ui5App.folderName;
       Utils.logOutputDeployer(`Deploying ${folderName}`);
@@ -246,7 +321,13 @@ export default {
           try {
             await Builder.build(ui5App, progress, 0.5);
             await this.deploy(ui5App, oParamOptions, progress, 0.5);
-            window.showInformationMessage(`Project ${ui5App.folderName} deployed!`);
+
+            let sMessage = `Project ${ui5App.folderName} deployed!`;
+            Utils.logOutputDeployer(sMessage);
+
+            if (!oOptions.globalDeploy) {
+              window.showInformationMessage(sMessage);
+            }
           } catch (oError) {
             throw oError;
           }

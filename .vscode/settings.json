@@ -1,4 +1,3 @@
 {
-  "editor.formatOnSave": true,
-  "ui5-tools.server.resourcesProxy": "CDN SAPUI5"
+  "editor.formatOnSave": true
 }

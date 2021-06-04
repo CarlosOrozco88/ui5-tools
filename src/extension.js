@@ -11,6 +11,8 @@ import ReplaceStrings from './Configurator/ReplaceStrings';
 import Builder from './Builder/Builder';
 // Deployer
 import Deployer from './Deployer/Deployer';
+// Fonts
+import Fonts from './Fonts/Fonts';
 // Menu
 import Menu from './Menu/Menu';
 // StatusBar
@@ -40,6 +42,10 @@ export async function activate(context) {
   subscriptions.push(registerCommand('ui5-tools.builder.buildAll', () => Builder.buildAllProjects()));
 
   subscriptions.push(registerCommand('ui5-tools.deployer.deploy', () => Deployer.askProjectToDeploy()));
+  subscriptions.push(registerCommand('ui5-tools.deployer.deployAll', () => Deployer.deployAllProjects()));
+
+  subscriptions.push(registerCommand('ui5-tools.fonts.generate', () => Fonts.askFontToGenerate()));
+  subscriptions.push(registerCommand('ui5-tools.fonts.generateAll', () => Fonts.generateAllFonts()));
 
   subscriptions.push(registerCommand('ui5-tools.configurator.odataProvider', () => OdataProvider.wizard()));
   subscriptions.push(registerCommand('ui5-tools.configurator.ui5Provider', () => Ui5Provider.wizard()));
