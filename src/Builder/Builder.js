@@ -598,12 +598,13 @@ export default {
     let isLibrary = await Utils.getManifestLibrary(manifest);
 
     Utils.logOutputBuilder(`Create preload ${srcPath}`);
-    let sComponentPath = Uri.file(path.join(srcPath, 'Component.js'));
+    let sFile = isLibrary ? 'library.js' : 'Component.js';
+    let sComponentPath = Uri.file(path.join(srcPath, sFile));
 
     try {
       await workspace.fs.readFile(sComponentPath);
     } catch (oError) {
-      Utils.logOutputBuilder(`Component.js not found in path ${srcPath}, skiping preload creation...`);
+      Utils.logOutputBuilder(`${sFile} not found in path ${srcPath}, skiping preload creation...`);
       return;
     }
 

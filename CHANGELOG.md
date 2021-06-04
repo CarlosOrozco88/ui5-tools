@@ -1,3 +1,7 @@
+## 0.6.10 (04-06-2021)
+
+- Library preload bundle bug solved
+
 ## 0.6.9 (04-06-2021)
 
 - Dependencies upgrade
