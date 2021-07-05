@@ -64,7 +64,7 @@ export default {
 
     // Serve app data
     serverApp.get(`/${ui5ToolsIndex}/ui5tools.json`, async (req, res) => {
-      ui5toolsData.readme = await this.readFile(path.join(baseDir, 'README.md'), '');
+      ui5toolsData.readme = converter.makeHtml(await this.readFile(path.join(baseDir, 'README.md'), ''));
       ui5toolsData.links = JSON.parse(await this.readFile(path.join(baseDir, 'links.json'), '[]'));
       ui5toolsData.docs = await this.findDocs(baseDir, ui5toolsData.showTree);
 

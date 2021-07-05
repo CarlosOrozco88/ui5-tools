@@ -1,3 +1,9 @@
+## 0.6.11 (05-07-2021)
+
+- Dependencies upgrade
+- Readme bug solved
+- New option `ui5-tools.deployer.rejectUnauthorized`
+
 ## 0.6.10 (04-06-2021)
 
 - Library preload bundle bug solved

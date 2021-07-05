@@ -350,6 +350,7 @@ export default {
 
       this.autoSaveOrder(ui5App, oDeployOptions);
 
+      let processReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
       try {
         let patternFiles = new RelativePattern(ui5App.deployFsPath, `**/*`);
         let aProjectFiles = await workspace.findFiles(patternFiles);
@@ -373,9 +374,15 @@ export default {
           },
         });
 
+        if (oDeployOptions.conn.useStrictSSL === false && !Config.deployer('rejectUnauthorized')) {
+          process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+        }
+
         await ui5DeployerCore.deployUI5toNWABAP(oDeployOptions, aProjectResources, oLoggerProgress);
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = processReject;
       } catch (oError) {
         progress?.report({ increment: 100 * multiplier, message: oError.message });
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = processReject;
         throw new Error(oError);
       }
     } else {

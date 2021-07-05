@@ -51,7 +51,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - Deploy process uses [ui5-nwabap-deployer-core
   ](https://github.com/pfefferf/ui5-nwabap-deployer/blob/master/packages/ui5-nwabap-deployer-core), so the extension uses the same configuration in file ui5-tools.json (property deployer.options)
 
-### Font builder replacer
+### IconFont generator
 
 - **Custom fonts** from a svg set with fantasticon
 - **FontAwesome** import from github
@@ -106,6 +106,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 
 - `ui5-tools.deployer.autoSaveOrder`: Saves de transport number in ui5-tools.json file | default: `true`
 - `ui5-tools.deployer.autoPrefixBSP`: Auto prefix BSP name in all transport texts while creation | default: `false`
+- `ui5-tools.deployer.rejectUnauthorized`: Reject deployments in servers with misconfigured certificates
 
 ## Commands
 
