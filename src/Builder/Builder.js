@@ -608,32 +608,23 @@ export default {
       return;
     }
 
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        try {
-          let { compatVersion } = Utils.getOptionsVersion();
-          let namespace = idApp.split('.').join('/');
-          let preloadSrc = Config.builder('preloadSrc');
-          let uglifyPreload = Config.builder('uglifyPreload');
+    let { compatVersion } = Utils.getOptionsVersion();
+    let namespace = idApp.split('.').join('/');
+    let preloadSrc = Config.builder('preloadSrc');
+    let uglifyPreload = Config.builder('uglifyPreload');
 
-          preload({
-            resources: {
-              cwd: destPath,
-              prefix: namespace,
-              src: preloadSrc,
-            },
-            dest: destPath,
-            compatVersion: compatVersion,
-            compress: uglifyPreload,
-            log: false,
-            components: !isLibrary ? namespace : false,
-            libraries: isLibrary ? namespace : false,
-          });
-        } catch (error) {
-          reject(error);
-        }
-        resolve(true);
-      }, 1);
+    await preload({
+      resources: {
+        cwd: destPath,
+        prefix: namespace,
+        src: preloadSrc,
+      },
+      dest: destPath,
+      compatVersion: compatVersion,
+      compress: uglifyPreload,
+      log: false,
+      components: !isLibrary ? namespace : false,
+      libraries: isLibrary ? namespace : false,
     });
   },
 

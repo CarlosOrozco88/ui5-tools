@@ -1,3 +1,8 @@
+## 0.6.12 (06-07-2021)
+
+- Dependencies upgrade
+- Async preload creation thanks to [openui5-preload](https://github.com/r-murphy/openui5-preload) - [Ryan Murphy](https://github.com/r-murphy)
+
 ## 0.6.11 (05-07-2021)
 
 - Dependencies upgrade
