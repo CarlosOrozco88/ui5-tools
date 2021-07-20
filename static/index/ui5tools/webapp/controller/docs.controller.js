@@ -5,9 +5,9 @@ sap.ui.define(['sap/ui/core/mvc/Controller'], function (Controller) {
     itemPressDocs: function (oEvt) {
       var oSrc = oEvt.getParameter('listItem');
       var oCtx = oSrc.getBindingContext('ui5tools');
-      var oPath = oCtx.getPath().split('/').join('-');
+      var oObject = oCtx.getObject();
       this.getRouter().navTo('docsDetail', {
-        hash: oPath,
+        hash: oObject.hash,
       });
     },
 

@@ -7,8 +7,8 @@ sap.ui.define(['sap/ui/core/mvc/Controller'], function (Controller) {
     },
 
     refreshDoc: function (oEvt) {
-      var path = oEvt.getParameter('arguments').hash.split('-').join('/');
-      this.getView().bindElement('ui5tools>' + path);
+      var hash = oEvt.getParameter('arguments').hash;
+      this.getView().bindElement('ui5tools>/docs/oHashes/' + hash);
     },
 
     navDocs: function () {

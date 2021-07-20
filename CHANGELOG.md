@@ -1,3 +1,8 @@
+## 0.6.13 (20-07-2021)
+
+- Dependencies upgrade
+- Markdown docs improvements
+
 ## 0.6.12 (06-07-2021)
 
 - Dependencies upgrade

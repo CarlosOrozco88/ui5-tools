@@ -99,6 +99,7 @@ export default {
 
     let oFolders = {};
     let aTree = [];
+    let oHashes = {};
     aMDFiles.forEach((sFile, i) => {
       var oPath = aMDFilesPaths[i];
       var sPath = oPath.fsPath.replace(sBaseDirPath, '');
@@ -107,30 +108,36 @@ export default {
       let sFolderPath = '';
       aPaths.forEach((sFolderFile, j) => {
         if (sFolderFile) {
-          let sHash = sFolderPath + path.sep + sFolderFile;
+          let sPath = sFolderPath + path.sep + sFolderFile;
+          let sHash = sPath.split(path.sep).join('-');
 
-          if (!oFolders[sHash]) {
+          if (!oFolders[sPath]) {
             let bIsFolder = j != iLength;
-            oFolders[sHash] = {
+            oFolders[sPath] = {
               folder: bIsFolder,
               name: sFolderFile,
               markdown: bIsFolder ? undefined : '<div>' + converter.makeHtml(sFile) + '</div>',
-              path: sHash,
+              path: sPath,
+              hash: sHash,
               nodes: [],
             };
+            oHashes[sHash] = oFolders[sPath];
 
             if (bTree && sFolderPath) {
-              oFolders[sFolderPath].nodes.push(oFolders[sHash]);
+              oFolders[sFolderPath].nodes.push(oFolders[sPath]);
             } else if (bTree || !bIsFolder) {
-              aTree.push(oFolders[sHash]);
+              aTree.push(oFolders[sPath]);
             }
           }
 
-          sFolderPath = sHash;
+          sFolderPath = sPath;
         }
       });
     });
 
-    return aTree;
+    return {
+      aTree: aTree,
+      oHashes: oHashes,
+    };
   },
 };

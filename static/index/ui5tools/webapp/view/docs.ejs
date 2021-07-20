@@ -10,7 +10,7 @@
     <% if(showTree) { %>
     <Tree
       id="docsTree"
-      items="{path:'ui5tools>/docs',sorter:{path:'folder',descending:true},parameters:{numberOfExpandedLevels: 1}}"
+      items="{path:'ui5tools>/docs/aTree',sorter:{path:'path'},parameters:{numberOfExpandedLevels: 1}}"
       itemPress="itemPressDocs"
       noDataText="Workspace without docs folder"
       showSeparators="Inner"
@@ -25,7 +25,7 @@
     <% } else { %>
     <List
       id="docsList"
-      items="{path:'ui5tools>/docs',sorter:{path:'path'}}"
+      items="{path:'ui5tools>/docs/aTree',sorter:{path:'path'}}"
       itemPress="itemPressDocs"
       noDataText="Workspace without docs folder"
       showSeparators="Inner"
