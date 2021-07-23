@@ -4,29 +4,24 @@ import http from 'http';
 import https from 'https';
 import path from 'path';
 import WebSocket from 'ws';
-import portfinder from 'portfinder';
-import chokidar from 'chokidar';
 
 import Utils from '../Utils/Utils';
 import Config from '../Utils/Config';
-import Server from './Server';
 
 const DELAY_REFRESH = 500;
 
 export default {
   liveServerWS: undefined,
   liveServer: undefined,
-  watching: undefined,
 
-  async start(serverApp, ui5Apps) {
+  async start(oConfigParams) {
     return new Promise(async (resolve, reject) => {
       try {
         Utils.logOutputServer('LiveServer > Starting...');
-        let portLiveReload = await portfinder.getPortPromise({
-          port: 35729,
-        });
-        this.middleware({ serverApp, portLiveReload, ui5Apps });
-        await this.createServer(portLiveReload);
+        this.middleware(oConfigParams);
+        if (!oConfigParams.restarting) {
+          await this.createServer(oConfigParams);
+        }
         resolve();
       } catch (error) {
         reject(error);
@@ -34,9 +29,10 @@ export default {
     });
   },
 
-  async createServer(portLiveReload) {
+  async createServer(oConfigParams) {
     return new Promise((resolve, reject) => {
       try {
+        let { portLiveReload } = oConfigParams;
         let protocol = Config.server('protocol');
 
         if (protocol === 'http') {
@@ -57,8 +53,6 @@ export default {
           Utils.logOutputServer('LiveServer > Started!');
           resolve();
         });
-
-        this.watch();
       } catch (error) {
         reject(error);
       }
@@ -156,40 +150,10 @@ export default {
     );
   },
 
-  async watch() {
-    let ui5Apps = await Utils.getAllUI5Apps();
-    let paths = ui5Apps.map((ui5App) => {
-      let path;
-      if (Server.serverMode === Server.SERVER_MODES.DEV) {
-        path = ui5App.srcFsPath;
-      } else {
-        path = ui5App.distFsPath;
-      }
-      return path;
-    });
-    this.watching = chokidar.watch(paths, {
-      ignoreInitial: true,
-      ignored: [/\.git\//, /\.svn\//, /\.hg\//, /\.node_modules\//],
-      usePolling: false,
-    });
-    this.watching.on('add', (filePath) => this.checkRefresh(filePath));
-    this.watching.on('change', (filePath) => this.checkRefresh(filePath));
-    this.watching.on('unlink', (filePath) => this.checkRefresh(filePath));
-  },
-
-  checkRefresh(filePath) {
-    let watchExtensions = Config.server('watchExtensions').replace(/\\s/g, '');
-    let watchExtensionsArray = watchExtensions.split(',');
-    let fileExtension = path.extname(filePath).replace('.', '');
-    if (watchExtensionsArray.includes(fileExtension)) {
-      this.refresh(filePath);
-    }
-  },
-
-  refresh(filePath) {
+  refresh(sFilePath) {
     let data = JSON.stringify({
       command: 'reload',
-      path: filePath,
+      path: sFilePath,
       liveCSS: true,
       liveImg: true,
       originalPath: '',
@@ -219,19 +183,14 @@ export default {
   },
 
   async stop() {
-    let stopped = false;
     if (this.liveServerWS) {
       Utils.logOutputServer('LiveServer > Stopping...');
-      this.watching.unwatch('*');
-      this.watching = undefined;
       this.liveServer.close();
       this.liveServer = undefined;
       this.liveServerWS.close();
       this.liveServerWS = undefined;
-      stopped = true;
       Utils.logOutputServer('LiveServer > Stopped!');
     }
-    return stopped;
   },
 
   debug(message) {

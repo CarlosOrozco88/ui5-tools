@@ -1,8 +1,7 @@
 <mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:core="sap.ui.core" controllerName="ui5tools.controller.info" xmlns:f="sap.ui.layout.form" displayBlock="true" width="100%" height="100%">
   <Page title="Info">
-    <f:SimpleForm columnsXL="4" columnsL="2" columnsM="2" layout="ResponsiveGridLayout">
-      <f:content>
-        <core:Title text="General" />
+    <Panel headerText="General" expanded="true" expandable="true" backgroundDesign="Solid">
+      <f:SimpleForm>
         <Label text="Source folder" />
         <Text text="{ui5tools>/config/srcFolder}" />
         <Label text="Library folder" />
@@ -11,14 +10,19 @@
         <Text text="{ui5tools>/config/distFolder}" />
         <Label text="UI5 Version" />
         <Text text="{ui5tools>/config/ui5Version}" />
-
-        <core:Title text="Deployer" />
+      </f:SimpleForm>
+    </Panel>
+    <Panel headerText="Deployer" expanded="true" expandable="true" backgroundDesign="Solid">
+      <f:SimpleForm>
         <Label text="Autosave Order" />
         <Text text="{ui5tools>/config/deployer/autoSaveOrder}" />
         <Label text="Autoprefix BSP" />
         <Text text="{ui5tools>/config/deployer/autoPrefixBSP}" />
+      </f:SimpleForm>
+    </Panel>
+    <Panel headerText="Server" expanded="true" expandable="true" backgroundDesign="Solid">
+      <f:SimpleForm>
 
-        <core:Title text="Server" />
         <Label text="Server name" />
         <Text text="{ui5tools>/config/server/name}" />
         <Label text="Serve folder" />
@@ -49,8 +53,11 @@
         <Text text="{ui5tools>/config/server/timeout}" />
         <Label text="Server protocol" />
         <Text text="{ui5tools>/config/server/protocol}" />
+      </f:SimpleForm>
+    </Panel>
+    <Panel headerText="Builder" expanded="true" expandable="true" backgroundDesign="Solid">
+      <f:SimpleForm>
 
-        <core:Title text="Builder" />
         <Label text="Debug resources" />
         <Text text="{ui5tools>/config/builder/debugSources}" />
         <Label text="Uglify resources" />
@@ -76,8 +83,7 @@
 
         <FormattedText htmlText="{path:'ui5tools>/config/builder/replaceKeysValues',formatter:'.formatReplaceKeyValue'}" />
 
-
-      </f:content>
-    </f:SimpleForm>
+      </f:SimpleForm>
+    </Panel>
   </Page>
 </mvc:View>

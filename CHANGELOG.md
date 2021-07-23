@@ -1,3 +1,12 @@
+## 1.0.0 (23-07-2021)
+
+- Dependencies upgrade
+- AppCachebuster simulator in localhost server with timestamps for every file served. Timestamp from
+  last modification/creaton of every file.
+- It is now possible to debug with F12 without `Disable cache` option checked in `Network` tab if you are using AppCacheBuster.
+- Other improvements, server index, extension messages, builder code, live server/live builder, live server production...
+- Server index changes: Sponsors section, About and Changelog section, modified Info section
+
 ## 0.6.13 (20-07-2021)
 
 - Dependencies upgrade

@@ -3,12 +3,12 @@
   "env": {
     "browser": false,
     "commonjs": true,
-    "es6": true,
     "node": true,
-    "mocha": true
+    "mocha": true,
+    "es2020": true
   },
   "parserOptions": {
-    "ecmaVersion": 6,
+    "ecmaVersion": 2020,
     "ecmaFeatures": {
       "jsx": true
     },

@@ -4,13 +4,11 @@ import Utils from '../../Utils/Utils';
 import ResourcesProxy from '../../Server/Proxy/Resources';
 
 export default {
-  async set(serverApp) {
-    if (Utils.isLaunchpadMounted()) {
+  async set(oConfigParams) {
+    let { serverApp, ui5Apps = [], baseDir, ui5ToolsPath, isLaunchpadMounted } = oConfigParams;
+    if (isLaunchpadMounted) {
       Utils.logOutputServer('Mounting launchpad');
       // LAUNCHPAD IN /flp/
-      let ui5Apps = await Utils.getAllUI5Apps();
-      let baseDir = Utils.getWorkspaceRootPath();
-      let ui5ToolsPath = Utils.getUi5ToolsPath();
 
       // DONT MOUNT RESOURCE ROOTS TO SIMULATE LAUNCHPAD
       // Object.entries(manifests).forEach(([folder, manifest]) => {
@@ -42,13 +40,13 @@ export default {
       });
 
       serverApp.get('/flp/test-resources/sap/ushell/shells/sandbox/fioriSandboxConfig.json', (req, res) => {
-        res.json(fioriSandboxConfig);
+        res.send(JSON.stringify(fioriSandboxConfig, null, 2));
       });
       serverApp.get('/appconfig/fioriSandboxConfig.json', (req, res) => {
         res.sendFile(path.join(baseDir, 'fioriSandboxConfig.json'));
       });
 
-      ResourcesProxy.setTest(serverApp);
+      ResourcesProxy.setTest(oConfigParams);
     }
     return;
   },

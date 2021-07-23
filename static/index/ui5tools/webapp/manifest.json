@@ -61,6 +61,21 @@
           "pattern": "info",
           "name": "info",
           "target": "info"
+        },
+        {
+          "pattern": "sponsors",
+          "name": "sponsors",
+          "target": "sponsors"
+        },
+        {
+          "pattern": "about",
+          "name": "about",
+          "target": "about"
+        },
+        {
+          "pattern": "changelog",
+          "name": "changelog",
+          "target": "changelog"
         }
       ],
       "targets": {
@@ -93,12 +108,27 @@
           "viewName": "info",
           "viewId": "info",
           "viewLevel": 0
+        },
+        "sponsors": {
+          "viewName": "sponsors",
+          "viewId": "sponsors",
+          "viewLevel": 0
+        },
+        "about": {
+          "viewName": "about",
+          "viewId": "about",
+          "viewLevel": 0
+        },
+        "changelog": {
+          "viewName": "changelog",
+          "viewId": "changelog",
+          "viewLevel": 0
         }
       }
     },
     "models": {
       "ui5tools": {
-        "preload": true,
+        "preload": false,
         "uri": "ui5tools.json",
         "type": "sap.ui.model.json.JSONModel"
       }

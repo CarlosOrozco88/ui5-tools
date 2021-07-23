@@ -1,6 +1,7 @@
 import { window, ConfigurationTarget } from 'vscode';
 import Config from '../Utils/Config';
 import Utils from '../Utils/Utils';
+import Server from '../Server/Server';
 
 export default {
   async wizard() {
@@ -13,6 +14,7 @@ export default {
         await this.inputBoxOtherUri();
         await this.inputBoxOdataMountPath();
       }
+      Server.restart();
     } catch (error) {
       throw new Error(error);
     }

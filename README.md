@@ -17,17 +17,18 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 
 #### Server
 
-- Multiple comands: start `alt+s alt+s`, restart `alt+s alt+r`... (check commands secction)
+- **Handles AppCachebuster** in localhost, it is unnecessary to check `Disable cache`option from `Network` tab in Developer tools when using cachebuster.
 - Configurable **proxy** to one o multiple **odata service** (Gateway, Other, None). Command `alt+c alt+o`
 - Supports `.env` file for odata service authentication. `UI5TOOLS_ODATA_USER - UI5TOOLS_ODATA_PASSWORD`, `UI5TOOLS_ODATA_USER_2 - UI5TOOLS_ODATA_PASSWORD_2`, etc.
 - Configurable **proxy** to **resources** (Gateway, CDN SAPUI5, CDN OpenUI5, None). Command `alt+c alt+u`
-- Resources proxy has **built in server cache**, only cleaned at server start/restart.
+- Resources proxy has **built in server cache**, cleaned at every server start.
 - Configurable UI5 version (when using gateway proxy, extension will detect sapui5 version automatically)
 - **Live reload browser**, css and images hot reload
 - **Built in localhost home** page server, with apps launchpad, readme.md, docs (md files), links, server info...
 - **Built in launchpad** for resources: Gateway and CDN SAPUI5. Configurable with file `fioriSandboxConfig.json`
 - Server uses **folder hierarchy**. For product apps and Z apps, is possible to emulate gateway bsp paths
 - Start server in **development mode** `alt+s alt+s` or **production mode** `alt+s alt+p` (launches `srcFolder` or `distFolder` folder of each project)
+- Multiple comands: start `alt+s alt+s`, restart `alt+s alt+r`... (check commands secction)
 
 #### Builder
 
@@ -43,7 +44,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 
 #### Deployer
 
-- **Gateway deploy**, process includes previous build. Deploy your project doing right click in project folder or `alt+d alt+d` and select project
+- **Gateway deploy**, process includes build process. Deploy your project doing right click in project folder or `alt+d alt+d` and select project
 - **ui5-tools.json** file located at project folder, with deployment configuration: [ui5-tools.json example](workspaceExample/Z_APP1/ui5-tools.json)
 - **Create, update and save** last order in ui5-tools.json file (configurable)
 - **Autoprefix** BSP name in order text while creation (optional)

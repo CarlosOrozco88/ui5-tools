@@ -1,5 +1,4 @@
-import { commands, workspace } from 'vscode';
-import path from 'path';
+import { commands } from 'vscode';
 
 // Server
 import Server from './Server/Server';
@@ -9,6 +8,7 @@ import Ui5Provider from './Configurator/Ui5Provider';
 import ReplaceStrings from './Configurator/ReplaceStrings';
 // Builder
 import Builder from './Builder/Builder';
+import LiveBuilder from './Builder/LiveBuilder';
 // Deployer
 import Deployer from './Deployer/Deployer';
 // Fonts
@@ -34,7 +34,7 @@ export async function activate(context) {
       Server.startProduction();
     })
   );
-  subscriptions.push(registerCommand('ui5-tools.server.stop', () => Server.stop()));
+  subscriptions.push(registerCommand('ui5-tools.server.stop', () => Server.stopAll()));
   subscriptions.push(registerCommand('ui5-tools.server.restart', () => Server.restart()));
   subscriptions.push(registerCommand('ui5-tools.server.toggle', () => Server.toggle()));
 
@@ -56,37 +56,13 @@ export async function activate(context) {
 
   subscriptions.push(registerCommand('ui5-tools.showOutput', () => Utils.showOutput()));
 
-  // Configure listeners
-  workspace.onDidChangeConfiguration((event) => onDidChangeConfiguration(event));
-  workspace.onDidSaveTextDocument((event) => onDidSaveTextDocument(event));
-
   await StatusBar.init(subscriptions);
+
+  LiveBuilder.attachWatch();
+
   if (Config.server('startOnLaunch')) {
     Utils.logOutputGeneral(`Start on launch`);
     Server.start();
-  }
-}
-
-async function onDidChangeConfiguration(event) {
-  await StatusBar.init();
-  Server.restart();
-}
-
-async function onDidSaveTextDocument(event) {
-  // Configure auto build less
-  Builder.liveCompileLess(event);
-
-  // Configure restart server
-  let { fileName } = event;
-  let baseName = path.basename(fileName);
-  switch (baseName) {
-    case '.env':
-      Server.restart();
-      break;
-    case 'manifest.json':
-      await StatusBar.init();
-      Server.restart();
-      break;
   }
 }
 

@@ -4,6 +4,7 @@ import http from 'http';
 
 import Config from '../Utils/Config';
 import Utils from '../Utils/Utils';
+import Server from '../Server/Server';
 
 export default {
   async wizard() {
@@ -12,10 +13,7 @@ export default {
       if (ui5Provider === 'Gateway') {
         let sGatewayUri = await this.inputBoxGatewayUri();
         try {
-          Utils.logOutputConfigurator(`Fetching ui5Version from Gateway...`);
-          let gatewayVersion = await this.getGatewayVersion(sGatewayUri);
-          await Config.general().update('ui5Version', gatewayVersion.version, ConfigurationTarget.Workspace);
-          Utils.logOutputConfigurator(`Set ui5version value to ${gatewayVersion.version}`);
+          await this.configureGWVersion(sGatewayUri);
         } catch (oError) {
           Utils.logOutputConfigurator(oError, 'ERROR');
           await this.setUi5Version();
@@ -24,6 +22,7 @@ export default {
       if (ui5Provider !== 'None' && ui5Provider !== 'Gateway') {
         await this.setUi5Version();
       }
+      Server.restart();
     } catch (error) {
       throw new Error(error);
     }
@@ -272,101 +271,27 @@ export default {
   },
 
   async getVersionOverview(framework = 'sapui5') {
-    return new Promise((resolve, reject) => {
-      let url = `https://${framework}.hana.ondemand.com/versionoverview.json`;
-      let options = {
-        timeout: 5000,
-      };
-      https
-        .get(url, options, (res) => {
-          if (res.statusCode !== 200) {
-            reject();
-          } else {
-            let rawData = '';
-            res.on('data', (chunk) => {
-              rawData += chunk;
-            });
-            res.on('end', () => {
-              try {
-                resolve(JSON.parse(rawData));
-              } catch (e) {
-                reject(e.message);
-              }
-            });
-          }
-        })
-        .on('error', (e) => {
-          reject(e);
-        });
-    });
+    let url = `https://${framework}.hana.ondemand.com/versionoverview.json`;
+    let sFile = await Utils.fetchFile(url);
+    return JSON.parse(sFile);
   },
 
   async getNeoApp(framework = 'sapui5') {
-    return new Promise((resolve, reject) => {
-      let url = `https://${framework}.hana.ondemand.com/neo-app.json`;
-      let options = {
-        timeout: 5000,
-      };
-      https
-        .get(url, options, (res) => {
-          if (res.statusCode !== 200) {
-            reject();
-          } else {
-            let rawData = '';
-            res.on('data', (chunk) => {
-              rawData += chunk;
-            });
-            res.on('end', () => {
-              try {
-                resolve(JSON.parse(rawData));
-              } catch (e) {
-                reject(e.message);
-              }
-            });
-          }
-        })
-        .on('error', (e) => {
-          reject(e);
-        });
-    });
+    let url = `https://${framework}.hana.ondemand.com/neo-app.json`;
+    let sFile = await Utils.fetchFile(url);
+    return JSON.parse(sFile);
+  },
+
+  async configureGWVersion(sGatewayUri) {
+    Utils.logOutputConfigurator(`Fetching ui5Version from Gateway...`);
+    let gatewayVersion = await this.getGatewayVersion(sGatewayUri);
+    await Config.general().update('ui5Version', gatewayVersion.version, ConfigurationTarget.Workspace);
+    Utils.logOutputConfigurator(`Set ui5version value to ${gatewayVersion.version}`);
   },
 
   async getGatewayVersion(sGatewayUri) {
-    return new Promise((resolve, reject) => {
-      let url = `${sGatewayUri}/sap/public/bc/ui5_ui5/1/resources/sap-ui-version.json`;
-      url = url.split('//').join('/');
-
-      let options = {
-        timeout: 5000,
-      };
-
-      let httpModule;
-      if (url.indexOf('https') == 0) {
-        httpModule = https;
-      } else {
-        httpModule = http;
-      }
-      httpModule
-        .get(url, options, (res) => {
-          if (res.statusCode !== 200) {
-            reject();
-          } else {
-            let rawData = '';
-            res.on('data', (chunk) => {
-              rawData += chunk;
-            });
-            res.on('end', () => {
-              try {
-                resolve(JSON.parse(rawData));
-              } catch (e) {
-                reject(e.message);
-              }
-            });
-          }
-        })
-        .on('error', (e) => {
-          reject(e);
-        });
-    });
+    let url = `${sGatewayUri}/sap/public/bc/ui5_ui5/1/resources/sap-ui-version.json`;
+    let sFile = await Utils.fetchFile(url);
+    return JSON.parse(sFile);
   },
 };

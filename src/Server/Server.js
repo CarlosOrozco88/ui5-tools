@@ -4,6 +4,7 @@ import http from 'http';
 import https from 'https';
 import portfinder from 'portfinder';
 
+import Apps from './Apps';
 import LiveServer from './LiveServer';
 import StatusBar from '../StatusBar/StatusBar';
 import Utils from '../Utils/Utils';
@@ -37,15 +38,14 @@ export default {
    * Starts server in development mode (serving srcFolder)
    * @param {object} object params
    */
-  async startDevelopment({ restarting = false } = {}) {
-    if (this.serverMode !== SERVER_MODES.DEV) {
-      await this.stop();
-    }
+  async startDevelopment(oParameters) {
+    await this.stopAll();
+
     this.serverMode = SERVER_MODES.DEV;
     try {
-      await this.start({ restarting });
+      await this.start(oParameters);
     } catch (e) {
-      this.stop();
+      this.stopAll();
     }
     return;
   },
@@ -54,15 +54,14 @@ export default {
    * Starts server in production mode (serving distFolder)
    * @param {object} object params
    */
-  async startProduction({ restarting = false } = {}) {
-    if (this.serverMode !== SERVER_MODES.PROD) {
-      await this.stop();
-    }
+  async startProduction(oParameters) {
+    await this.stopAll();
+
     this.serverMode = SERVER_MODES.PROD;
     try {
-      await this.start({ restarting });
+      await this.start(oParameters);
     } catch (e) {
-      this.stop();
+      this.stopAll();
     }
     return;
   },
@@ -71,9 +70,13 @@ export default {
    * Start server
    * @param {object} object params
    */
-  async start({ restarting = false } = {}) {
-    let started = false;
+  async start(oParameters = { restarting: false }) {
     if (this.status === STATUSES.STOPPED) {
+      if (oParameters.restarting) {
+        await StatusBar.checkVisibility();
+      }
+      ResourcesProxy.resetCache();
+
       Utils.logOutputServer('Starting...');
       try {
         this.serverApp = express();
@@ -82,82 +85,86 @@ export default {
         // @ts-ignore
         this.serverApp.engine('ejs', ejs.__express);
 
-        ResourcesProxy.resetCache();
-
         this.status = STATUSES.STARTING;
         StatusBar.startingText();
 
         // Reload config, checks new projects
+        let bServeProduction = this.serverMode === SERVER_MODES.PROD;
         let ui5Apps = await Utils.getAllUI5Apps();
+        let oConfigParams = {
+          ...oParameters,
+          serverApp: this.serverApp,
+          ui5Apps: ui5Apps,
+          bServeProduction: bServeProduction,
+          watch: Config.server('watch'),
+          protocol: Config.server('protocol'),
+          port: await portfinder.getPortPromise({
+            port: Config.server('port'),
+          }),
+          portLiveReload: await portfinder.getPortPromise({
+            port: 35729,
+          }),
+          timeout: Config.server('timeout'),
+          baseDir: Utils.getWorkspaceRootPath(),
+          ui5ToolsPath: Utils.getUi5ToolsPath(),
+          ui5ToolsIndex: Utils.getUi5ToolsIndexFolder(),
+          isLaunchpadMounted: Utils.isLaunchpadMounted(),
+        };
 
-        let watch = Config.server('watch');
-        if (watch) {
+        if (oConfigParams.watch) {
           try {
-            await LiveServer.start(this.serverApp, ui5Apps);
+            await LiveServer.start(oConfigParams);
           } catch (oError) {
             Utils.logOutputServer(oError, 'ERROR');
           }
         }
 
-        // Static serve all apps
-        ui5Apps.forEach((ui5App) => {
-          let staticPath = ui5App.srcFsPath;
-          if (this.serverMode === SERVER_MODES.PROD) {
-            staticPath = ui5App.distFsPath;
-          }
-          this.serverApp.use(ui5App.appServerPath, express.static(staticPath));
-        });
+        Apps.serve(oConfigParams);
 
         try {
-          await OdataProxy.set(this.serverApp);
+          await OdataProxy.set(oConfigParams);
         } catch (oError) {
           Utils.logOutputServer(oError, 'ERROR');
         }
         try {
-          await ResourcesProxy.set(this.serverApp);
+          await ResourcesProxy.set(oConfigParams);
         } catch (oError) {
           Utils.logOutputServer(oError, 'ERROR');
         }
 
         try {
-          await IndexUI5Tools.set(this.serverApp);
+          await IndexUI5Tools.set(oConfigParams);
         } catch (oError) {
           Utils.logOutputServer(oError, 'ERROR');
         }
         try {
-          await IndexLaunchpad.set(this.serverApp);
+          await IndexLaunchpad.set(oConfigParams);
         } catch (oError) {
           Utils.logOutputServer(oError, 'ERROR');
         }
 
-        let protocol = Config.server('protocol');
-        let port = await portfinder.getPortPromise({
-          port: Config.server('port'),
-        });
-        if (protocol === 'https') {
+        if (oConfigParams.protocol === 'https') {
           this.server = https.createServer(Utils.getHttpsCert(), this.serverApp);
         } else {
           this.server = http.createServer(this.serverApp);
         }
-        let timeout = Config.server('timeout');
-        if (timeout > 0) {
-          this.server.timeout = timeout;
+
+        if (oConfigParams.timeout > 0) {
+          this.server.timeout = oConfigParams.timeout;
         }
-        this.server.listen(port, () => {
+        this.server.listen(oConfigParams.port, () => {
           Utils.logOutputServer('Started!');
           let openBrowser = Config.server('openBrowser');
           let ui5ToolsIndex = Utils.getUi5ToolsIndexFolder();
 
-          if (openBrowser && !restarting) {
-            opn(`${protocol}://localhost:${port}/${ui5ToolsIndex}/`);
+          if (openBrowser && !oConfigParams.restarting) {
+            opn(`${oConfigParams.protocol}://localhost:${oConfigParams.port}/${ui5ToolsIndex}/`);
           }
         });
         this.status = STATUSES.STARTED;
-        StatusBar.stopText(port);
-
-        started = true;
+        StatusBar.stopText(oConfigParams.port);
       } catch (e) {
-        this.stop();
+        this.stopAll();
         throw new Error(e);
       }
     } else {
@@ -165,7 +172,6 @@ export default {
       Utils.logOutputServer(sMessage);
       throw new Error(sMessage);
     }
-    return started;
   },
 
   stopServer() {
@@ -183,12 +189,20 @@ export default {
     });
   },
 
-  async stop({ restarting = false } = {}) {
-    let stopped = false;
+  async stop() {
     if (this.status === STATUSES.STARTED) {
-      if (!restarting) {
-        this.serverMode = this.SERVER_MODES.DEV;
-      }
+      this.status = STATUSES.STOPPING;
+      StatusBar.stoppingText();
+
+      await this.stopServer();
+
+      this.status = STATUSES.STOPPED;
+      StatusBar.startText();
+    }
+  },
+
+  async stopAll() {
+    if (this.status === STATUSES.STARTED) {
       this.status = STATUSES.STOPPING;
       StatusBar.stoppingText();
 
@@ -196,37 +210,43 @@ export default {
 
       this.status = STATUSES.STOPPED;
       StatusBar.startText();
-      stopped = true;
     }
-    return stopped;
   },
 
   async restart() {
-    let restarted = false;
     if (this.status === STATUSES.STARTED) {
       Utils.logOutputServer('Restarting...');
-      await this.stop({ restarting: true });
+      await this.stop();
       try {
-        await this.startDevelopment({
+        await this.start({
           restarting: true,
         });
       } catch (e) {
-        this.stop();
+        this.stopAll();
       }
-      restarted = true;
     }
-    return restarted;
   },
 
   async toggle() {
     switch (this.status) {
       case STATUSES.STOPPED:
-        await this.startDevelopment();
+        await this.start();
         break;
       case STATUSES.STARTED:
-        await this.stop();
+        await this.stopAll();
         break;
     }
-    return true;
+  },
+
+  isStarted() {
+    return this.status === STATUSES.STARTED;
+  },
+
+  isStartedDevelopment() {
+    return this.isStarted() && this.serverMode === SERVER_MODES.DEV;
+  },
+
+  isStartedProduction() {
+    return this.isStarted() && this.serverMode === SERVER_MODES.PROD;
   },
 };

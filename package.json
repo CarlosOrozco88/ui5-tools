@@ -2,7 +2,7 @@
   "name": "ui5-tools",
   "displayName": "UI5 Tools",
   "description": "Local development tools for UI5",
-  "version": "0.6.13",
+  "version": "1.0.0",
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
@@ -494,13 +494,13 @@
     "typescript": "^4.3.5",
     "vscode-test": "^1.6.1",
     "webassembly-loader": "^1.1.0",
-    "webpack": "^5.45.1",
+    "webpack": "^5.46.0",
     "webpack-cli": "^4.7.2"
   },
   "dependencies": {
-    "@babel/core": "^7.14.6",
+    "@babel/core": "^7.14.8",
     "@babel/plugin-transform-modules-commonjs": "7.14.5",
-    "@babel/preset-env": "^7.14.7",
+    "@babel/preset-env": "^7.14.8",
     "apicache": "^1.6.2",
     "babel-plugin-transform-async-to-promises": "^0.8.15",
     "babel-plugin-transform-remove-console": "^6.9.4",
@@ -516,7 +516,6 @@
     "less": "^4.1.1",
     "less-openui5": "^0.11.2",
     "livereload": "^0.9.3",
-    "on-headers": "^1.0.2",
     "openui5-preload": "4.0.0",
     "opn": "^6.0.0",
     "portfinder": "^1.0.28",

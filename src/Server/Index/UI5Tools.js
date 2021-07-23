@@ -10,10 +10,9 @@ const converter = new showdown.Converter();
 
 export default {
   // SERVER INDEX
-  async set(serverApp) {
+  async set({ serverApp, ui5Apps, ui5ToolsIndex, baseDir, ui5ToolsPath, isLaunchpadMounted }) {
     Utils.logOutputServer('Mounting ui5-tools root page');
-    let ui5ToolsIndex = Utils.getUi5ToolsIndexFolder();
-    let ui5Apps = await Utils.getAllUI5Apps();
+
     let existBasePathInApp = ui5Apps.find((ui5App) => {
       return ui5App.appServerPath === '/';
     });
@@ -23,18 +22,20 @@ export default {
       });
     }
 
-    let baseDir = Utils.getWorkspaceRootPath();
-    let ui5ToolsPath = Utils.getUi5ToolsInfo().extensionUri.fsPath;
-
     let ui5toolsData = {
+      ...Utils.getOptionsVersion(),
       readme: '',
-      launchpad: Utils.isLaunchpadMounted(),
+      launchpad: isLaunchpadMounted,
       links: [],
-      docs: [],
-      ui5Apps: ui5Apps,
+      docs: { aTree: [], oHashes: {} },
+      ui5Apps: {
+        application: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'application'),
+        component: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'component'),
+        library: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'library'),
+        card: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'card'),
+      },
       config: Config.general(),
     };
-    Utils.getOptionsVersion(ui5toolsData);
 
     let indexPath = path.join(ui5ToolsPath, 'static', 'index', 'ui5tools', 'webapp');
     let indexHTML = (req, res, next) => {
@@ -61,14 +62,29 @@ export default {
       `/${ui5ToolsIndex}`,
       express.static(path.join(ui5ToolsPath, 'static', 'index', 'ui5tools', 'webapp'))
     );
+    serverApp.use(`/${ui5ToolsIndex}/static`, express.static(path.join(ui5ToolsPath, 'static')));
 
     // Serve app data
     serverApp.get(`/${ui5ToolsIndex}/ui5tools.json`, async (req, res) => {
       ui5toolsData.readme = converter.makeHtml(await this.readFile(path.join(baseDir, 'README.md'), ''));
+      ui5toolsData.about = converter.makeHtml(await this.readFile(path.join(ui5ToolsPath, 'README.md'), ''));
+      ui5toolsData.changelog = converter.makeHtml(await this.readFile(path.join(ui5ToolsPath, 'CHANGELOG.md'), ''));
       ui5toolsData.links = JSON.parse(await this.readFile(path.join(baseDir, 'links.json'), '[]'));
       ui5toolsData.docs = await this.findDocs(baseDir, ui5toolsData.showTree);
+      ui5toolsData.contributors = [
+        {
+          src: 'https://avatars.githubusercontent.com/u/11719827?v=4',
+          tooltip: 'Carlos Orozco Jimenez',
+          url: 'https://github.com/CarlosOrozco88',
+        },
+        {
+          src: 'https://avatars.githubusercontent.com/u/18210819?v=4',
+          tooltip: 'Joaquim Monserrat Companys',
+          url: 'https://github.com/jeremies',
+        },
+      ];
 
-      res.json(ui5toolsData);
+      res.send(JSON.stringify(ui5toolsData, null, 2));
     });
     return;
   },
@@ -101,9 +117,9 @@ export default {
     let aTree = [];
     let oHashes = {};
     aMDFiles.forEach((sFile, i) => {
-      var oPath = aMDFilesPaths[i];
-      var sPath = oPath.fsPath.replace(sBaseDirPath, '');
-      var aPaths = sPath.split(path.sep);
+      let oPath = aMDFilesPaths[i];
+      let sPath = oPath.fsPath.replace(sBaseDirPath, '');
+      let aPaths = sPath.split(path.sep);
       let iLength = aPaths.length - 1;
       let sFolderPath = '';
       aPaths.forEach((sFolderFile, j) => {

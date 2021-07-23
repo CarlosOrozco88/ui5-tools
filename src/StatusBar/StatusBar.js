@@ -7,21 +7,24 @@ export default {
   serverNavBar: undefined,
 
   async init(subscriptions) {
-    Utils.logOutputGeneral(`Checking for ui5 projects...`);
+    Utils.logOutputGeneral(`Exploring ui5 projects...`);
     if (!this.serverNavBar && subscriptions) {
       this.serverNavBar = window.createStatusBarItem(StatusBarAlignment.Left, 100);
       this.serverNavBar.command = 'ui5-tools.server.toggle';
       subscriptions.push(this.serverNavBar);
       this.startText();
+      await this.checkVisibility();
     }
-    await this.checkVisibility();
   },
 
-  async checkVisibility() {
-    let ui5Apps = await Utils.refreshAllUI5Apps();
-    if (ui5Apps.length) {
-      this.show();
-    } else {
+  async checkVisibility(bRefresh = true) {
+    let sOriginalText = this.serverNavBar.text;
+    this.serverNavBar.text = `$(loading~spin) Exploring ui5 projects...`;
+    this.show();
+    let ui5Apps = await Utils.getAllUI5Apps(bRefresh);
+    this.serverNavBar.text = sOriginalText;
+
+    if (!ui5Apps.length) {
       this.hide();
     }
     return ui5Apps.length > 0;

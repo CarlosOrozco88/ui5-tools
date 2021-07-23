@@ -4,7 +4,7 @@ import Config from '../../Utils/Config';
 import Utils from '../../Utils/Utils';
 
 export default {
-  async set(serverApp) {
+  async set({ serverApp }) {
     let odataMountPath = Config.server('odataMountPath');
     let proxy, targetUri;
     let odataProxy = Config.server('odataProxy');
