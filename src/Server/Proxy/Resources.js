@@ -2,6 +2,8 @@ import { window } from 'vscode';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
 import apicache from 'apicache';
+import onHeaders from 'on-headers';
+
 import Ui5Provider from '../../Configurator/Ui5Provider';
 import Config from '../../Utils/Config';
 import Utils from '../../Utils/Utils';
@@ -12,8 +14,18 @@ const cacheResources = apicache
     statusCodes: {
       exclude: [404, 403],
     },
+    headers: {
+      'cache-control': 'no-cache',
+    },
   })
   .middleware();
+
+const onProxyRes = function (req, res, next) {
+  onHeaders(res, () => {
+    res.set('cache-control', 'no-cache');
+  });
+  next();
+};
 
 export default {
   resetCache() {
@@ -55,7 +67,7 @@ export default {
             logProvider: Utils.newLogProviderProxy,
           });
 
-          serverApp.use(['/resources', '/**/resources'], cacheResources, proxy);
+          serverApp.use(['/resources', '/**/resources'], onProxyRes, cacheResources, proxy);
         }
         break;
 
@@ -77,7 +89,7 @@ export default {
             logProvider: Utils.newLogProviderProxy,
           });
 
-          serverApp.use(['/resources', '/**/resources'], cacheResources, proxy);
+          serverApp.use(['/resources', '/**/resources'], onProxyRes, cacheResources, proxy);
         }
 
         try {
@@ -135,7 +147,7 @@ export default {
         logProvider: Utils.newLogProviderProxy,
       });
 
-      serverApp.use('/flp/test-resources/**', cacheResources, proxy);
+      serverApp.use('/flp/test-resources/**', onProxyRes, cacheResources, proxy);
     }
   },
 };

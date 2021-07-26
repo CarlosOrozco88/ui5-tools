@@ -2,7 +2,7 @@
   "name": "ui5-tools",
   "displayName": "UI5 Tools",
   "description": "Local development tools for UI5",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
@@ -340,6 +340,23 @@
           "default": "",
           "description": "Your resources server url (example: http://srvaspgwd.com:8080/)"
         },
+        "ui5-tools.server.cacheBuster": {
+          "type": "string",
+          "enum": [
+            "PROD",
+            "DEV",
+            "Allways",
+            "None"
+          ],
+          "enumDescriptions": [
+            "Activate cacheBuster only in PROD mode",
+            "Activate cacheBuster only in DEV mode",
+            "Activate cacheBuster allways",
+            "CacheBuster disabled"
+          ],
+          "default": "PROD",
+          "description": "Activate cacheBuster in server mode:"
+        },
         "ui5-tools.server.resourcesSecure": {
           "type": "boolean",
           "default": false,
@@ -516,6 +533,7 @@
     "less": "^4.1.1",
     "less-openui5": "^0.11.2",
     "livereload": "^0.9.3",
+    "on-headers": "^1.0.2",
     "openui5-preload": "4.0.0",
     "opn": "^6.0.0",
     "portfinder": "^1.0.28",

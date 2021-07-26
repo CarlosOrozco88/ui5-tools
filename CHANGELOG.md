@@ -1,3 +1,8 @@
+## 1.0.1 (26-07-2021)
+
+- AppcacheBuster is now enabled by default in PROD mode only, new configuration property `ui5-tools.server.cacheBuster`
+- Restored no-cache flag for resources proxy
+
 ## 1.0.0 (23-07-2021)
 
 - Dependencies upgrade

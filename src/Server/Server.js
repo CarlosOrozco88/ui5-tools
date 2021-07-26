@@ -90,12 +90,14 @@ export default {
 
         // Reload config, checks new projects
         let bServeProduction = this.serverMode === SERVER_MODES.PROD;
+        let sServerMode = bServeProduction ? SERVER_MODES.PROD : SERVER_MODES.DEV;
         let ui5Apps = await Utils.getAllUI5Apps();
         let oConfigParams = {
           ...oParameters,
           serverApp: this.serverApp,
           ui5Apps: ui5Apps,
           bServeProduction: bServeProduction,
+          sServerMode: sServerMode,
           watch: Config.server('watch'),
           protocol: Config.server('protocol'),
           port: await portfinder.getPortPromise({
@@ -109,6 +111,7 @@ export default {
           ui5ToolsPath: Utils.getUi5ToolsPath(),
           ui5ToolsIndex: Utils.getUi5ToolsIndexFolder(),
           isLaunchpadMounted: Utils.isLaunchpadMounted(),
+          bCacheBuster: Config.server('cacheBuster') === sServerMode,
         };
 
         if (oConfigParams.watch) {

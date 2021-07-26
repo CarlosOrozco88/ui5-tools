@@ -17,7 +17,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 
 #### Server
 
-- **Handles AppCachebuster** in localhost, it is unnecessary to check `Disable cache`option from `Network` tab in Developer tools when using cachebuster.
+- **Handles AppCachebuster** in localhost (by default only in PROD mode).
 - Configurable **proxy** to one o multiple **odata service** (Gateway, Other, None). Command `alt+c alt+o`
 - Supports `.env` file for odata service authentication. `UI5TOOLS_ODATA_USER - UI5TOOLS_ODATA_PASSWORD`, `UI5TOOLS_ODATA_USER_2 - UI5TOOLS_ODATA_PASSWORD_2`, etc.
 - Configurable **proxy** to **resources** (Gateway, CDN SAPUI5, CDN OpenUI5, None). Command `alt+c alt+u`
@@ -88,6 +88,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - `ui5-tools.server.resourcesProxy`: Proxy all odata calls to a gateway, cdn or local folder (proxy all url begining with /resources) | default: `CDN SAPUI5`
 - `ui5-tools.server.resourcesUri`: Your resources server url (example: http://srvaspgwd.com:8080/)
 - `ui5-tools.server.resourcesSecure`: Verify resourcesProxy SSL Certs | default: `false`
+- `ui5-tools.server.cacheBuster`: Activate cacheBuster in server mode: | Default: `PROD`
 
 #### Builder Settings
 
