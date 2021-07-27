@@ -5,10 +5,11 @@ import deepmerge from 'deepmerge';
 import fs from 'fs';
 
 import Builder from '../Builder/Builder';
+import Log from '../Utils/Log';
 import Utils from '../Utils/Utils';
 import Config from '../Utils/Config';
 
-const oLogger = Utils.newLogProviderDeployer();
+const oLogger = Log.newLogProviderDeployer();
 const ODEPLOYSTATUS = {
   ERROR: 0,
   SKIPPED: 1,
@@ -19,7 +20,7 @@ export default {
   async askProjectToDeploy() {
     let ui5App = undefined;
     try {
-      Utils.logOutputDeployer(`Asking project to deploy`);
+      Log.logDeployer(`Asking project to deploy`);
       let ui5Apps = await Utils.getAllUI5Apps();
       if (ui5Apps.length > 1) {
         let qpOptions = [];
@@ -62,12 +63,12 @@ export default {
     try {
       await this.askCreateReuseTransport(ui5App);
     } catch (oError) {
-      Utils.logOutputDeployer(oError.message, 'ERROR');
+      Log.logDeployer(oError.message, 'ERROR');
     }
   },
 
   async deployAllProjects() {
-    Utils.logOutputDeployer(`Deploy all ui5 projects`);
+    Log.logDeployer(`Deploy all ui5 projects`);
     let ui5Apps = await Utils.getAllUI5Apps();
     await window.withProgress(
       {
@@ -101,14 +102,14 @@ export default {
           } catch (oError) {
             oResults[ODEPLOYSTATUS.ERROR]++;
             let sMessage = `Project ${ui5Apps[i].folderName} not deployed`;
-            Utils.logOutputDeployer(sMessage, 'ERROR');
+            Log.logDeployer(sMessage, 'ERROR');
             window.showErrorMessage(sMessage);
           }
         }
         let sMessage = `Deploy finished with ${oResults[ODEPLOYSTATUS.SUCCESS]} projects deployed,
         ${oResults[ODEPLOYSTATUS.SKIPPED]} skipped and
         ${oResults[ODEPLOYSTATUS.ERROR]} not deployed`;
-        Utils.logOutputDeployer(sMessage, 'SUCCESS');
+        Log.logDeployer(sMessage, 'SUCCESS');
         window.showInformationMessage(sMessage);
         return;
       }
@@ -137,11 +138,11 @@ export default {
         let sOption;
 
         if (oOptions.transportno) {
-          Utils.logOutputDeployer(`Using transportno ${oOptions.transportno}...`);
+          Log.logDeployer(`Using transportno ${oOptions.transportno}...`);
           oDeployOptions = deepmerge(oDeployOptions, oDeployOptionsFs);
           sOption = oOptions.transportno;
         } else {
-          Utils.logOutputDeployer(`Asking create or update transportno...`);
+          Log.logDeployer(`Asking create or update transportno...`);
 
           let qpOptions = [
             {
@@ -199,7 +200,7 @@ export default {
             await this.updateTransport(ui5App, oDeployOptions);
             break;
           case 'Read':
-            Utils.logOutputDeployer(`Using ui5tools.json file`);
+            Log.logDeployer(`Using ui5tools.json file`);
             break;
           default:
             await this.updateTransport(ui5App, oDeployOptions, sOption);
@@ -210,7 +211,7 @@ export default {
         oOptions.deployed = ODEPLOYSTATUS.SUCCESS;
       }
     } catch (oError) {
-      Utils.logOutputDeployer(oError.message, 'ERROR');
+      Log.logDeployer(oError.message, 'ERROR');
       window.showErrorMessage(oError.message);
       oOptions.deployed = ODEPLOYSTATUS.ERROR;
       throw oError;
@@ -304,10 +305,10 @@ export default {
     return new TransportManager(oDeployOptions, oLogger);
   },
 
-  async deployProject(ui5App, oParamOptions, oOptions = {}) {
+  async deployProject(ui5App, oDeployOptions, oOptions = {}) {
     if (ui5App) {
       let folderName = ui5App.folderName;
-      Utils.logOutputDeployer(`Deploying ${folderName}`);
+      Log.logDeployer(`Deploying ${folderName}`);
       await window.withProgress(
         {
           location: ProgressLocation.Notification,
@@ -319,11 +320,11 @@ export default {
             throw new Error('Deploy canceled');
           });
           try {
-            await Builder.build(ui5App, progress, 0.5);
-            await this.deploy(ui5App, oParamOptions, progress, 0.5);
+            await Builder.build({ ui5App, progress, multiplier: 0.5 });
+            await this.deploy({ ui5App, oDeployOptions, progress, multiplier: 0.5 });
 
             let sMessage = `Project ${ui5App.folderName} deployed!`;
-            Utils.logOutputDeployer(sMessage);
+            Log.logDeployer(sMessage);
 
             if (!oOptions.globalDeploy) {
               window.showInformationMessage(sMessage);
@@ -336,7 +337,7 @@ export default {
     }
   },
 
-  async deploy(ui5App, oDeployOptions = {}, progress = undefined, multiplier = 1) {
+  async deploy({ ui5App, oDeployOptions = {}, progress = undefined, multiplier = 1 }) {
     let sMessage = '';
 
     let ui5AppConfig = await Utils.getUi5ToolsFile(ui5App);
@@ -346,7 +347,7 @@ export default {
       // Authentication
       sMessage = 'Gateway destination found';
       progress?.report({ increment: 20 * multiplier, message: sMessage });
-      Utils.logOutputDeployer(sMessage);
+      Log.logDeployer(sMessage);
 
       this.autoSaveOrder(ui5App, oDeployOptions);
 
@@ -368,13 +369,13 @@ export default {
         let oLoggerProgress = deepmerge(oLogger, {
           log: (sText) => {
             if (sText.indexOf('file ') === 0) {
-              progress?.report({ increment: iStep * multiplier, message: sText });
+              progress?.report({ increment: iStep * multiplier, message: 'Deploy in process...' });
             }
             oLogger.log(sText);
           },
         });
 
-        if (oDeployOptions.conn.useStrictSSL === false && !Config.deployer('rejectUnauthorized')) {
+        if (oDeployOptions.conn?.useStrictSSL === false && !Config.deployer('rejectUnauthorized')) {
           process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
         }
 
@@ -404,7 +405,7 @@ export default {
   },
 
   async createConfigFile(ui5App) {
-    Utils.logOutputDeployer(`Create ui5-tools.json file?`);
+    Log.logDeployer(`Create ui5-tools.json file?`);
     let qpOptions = [
       {
         label: `Yes`,
@@ -431,10 +432,10 @@ export default {
       selTransportOptionQp.show();
     });
     if (!selTransportOption || selTransportOption.label !== 'Yes') {
-      Utils.logOutputDeployer(`Abort creation`);
+      Log.logDeployer(`Abort creation`);
       throw new Error(`File ui5tools.json not found for project ${ui5App.folderName}`);
     }
-    Utils.logOutputDeployer(`Collecting data...`);
+    Log.logDeployer(`Collecting data...`);
 
     let oConfigFile = {
       deployer: {
@@ -462,7 +463,7 @@ export default {
     if (!sServer) {
       throw new Error(`No server url found`);
     }
-    Utils.logOutputDeployer(`ui5-tools.json: Server ${sServer}`);
+    Log.logDeployer(`ui5-tools.json: Server ${sServer}`);
     oConfigFile.deployer.options.conn.server = sServer;
 
     let sClient;
@@ -484,7 +485,7 @@ export default {
       sClient = undefined;
     }
     if (sClient && !isNaN(Number(sClient))) {
-      Utils.logOutputDeployer(`ui5-tools.json: Client ${sClient}`);
+      Log.logDeployer(`ui5-tools.json: Client ${sClient}`);
       oConfigFile.deployer.options.conn.client = Number(sClient);
     }
 
@@ -504,7 +505,7 @@ export default {
     if (!sLanguage) {
       throw new Error(`No language configured`);
     }
-    Utils.logOutputDeployer(`ui5-tools.json: Language ${sLanguage}`);
+    Log.logDeployer(`ui5-tools.json: Language ${sLanguage}`);
     oConfigFile.deployer.options.ui5.language = sLanguage;
 
     let sPackage = await new Promise(async (resolve, reject) => {
@@ -523,7 +524,7 @@ export default {
     if (!sPackage) {
       throw new Error(`No package configured`);
     }
-    Utils.logOutputDeployer(`ui5-tools.json: Package ${sPackage}`);
+    Log.logDeployer(`ui5-tools.json: Package ${sPackage}`);
     oConfigFile.deployer.options.ui5.package = sPackage;
 
     let sBspContainer = await new Promise(async (resolve, reject) => {
@@ -547,7 +548,7 @@ export default {
     if (!sBspContainer) {
       throw new Error(`No BSP container configured`);
     }
-    Utils.logOutputDeployer(`ui5-tools.json: BSP Container ${sBspContainer}`);
+    Log.logDeployer(`ui5-tools.json: BSP Container ${sBspContainer}`);
     oConfigFile.deployer.options.ui5.bspcontainer = sBspContainer;
 
     let sBspContainerText = await new Promise(async (resolve, reject) => {
@@ -566,13 +567,13 @@ export default {
     if (!sBspContainerText) {
       throw new Error(`No BSP container text configured`);
     }
-    Utils.logOutputDeployer(`ui5-tools.json: BSP Container Text ${sBspContainerText}`);
+    Log.logDeployer(`ui5-tools.json: BSP Container Text ${sBspContainerText}`);
     oConfigFile.deployer.options.ui5.bspcontainer_text = sBspContainerText;
 
     oConfigFile.deployer.options.ui5.calc_appindex = true;
 
     await Utils.setUi5ToolsFile(ui5App, oConfigFile);
-    Utils.logOutputDeployer(`ui5-tools.json: File created!`);
+    Log.logDeployer(`ui5-tools.json: File created!`);
 
     return oConfigFile;
   },

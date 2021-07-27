@@ -2,6 +2,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 
 import Config from '../../Utils/Config';
 import Utils from '../../Utils/Utils';
+import Log from '../../Utils/Log';
 
 export default {
   async set({ serverApp }) {
@@ -14,7 +15,7 @@ export default {
         targetUri = Config.server('odataUri');
 
         if (targetUri) {
-          Utils.logOutputServer(`Creating odataProxy to Gateway ${targetUri}`);
+          Log.logServer(`Creating odataProxy to Gateway ${targetUri}`);
           let targets = targetUri.replace(/\\s/g).split(',');
           let oAuth = this.getODATAAuth();
           proxy = createProxyMiddleware({
@@ -24,7 +25,7 @@ export default {
             changeOrigin: true,
             auth: oAuth,
             logLevel: 'error',
-            logProvider: Utils.newLogProviderProxy,
+            logProvider: Log.newLogProviderProxy,
           });
           serverApp.use('/sap', proxy);
         }
@@ -37,7 +38,7 @@ export default {
           let mpaths = odataMountPath.replace(/\\s/g).split(',');
           for (let i = 0; i < targets.length; i++) {
             if (mpaths && mpaths[i]) {
-              Utils.logOutputServer(`Creating resourcesProxy to Other ${targets[i]}`);
+              Log.logServer(`Creating resourcesProxy to Other ${targets[i]}`);
               proxy = createProxyMiddleware({
                 pathRewrite: function (i, path, req) {
                   let nPath = path.replace(mpaths[i], '');
@@ -48,7 +49,7 @@ export default {
                 changeOrigin: true,
                 auth: this.getODATAAuth(i),
                 logLevel: 'error',
-                logProvider: Utils.newLogProviderProxy,
+                logProvider: Log.newLogProviderProxy,
               });
               serverApp.use(mpaths[i], proxy);
             }

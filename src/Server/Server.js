@@ -8,6 +8,7 @@ import Apps from './Apps';
 import LiveServer from './LiveServer';
 import StatusBar from '../StatusBar/StatusBar';
 import Utils from '../Utils/Utils';
+import Log from '../Utils/Log';
 import Config from '../Utils/Config';
 import OdataProxy from './Proxy/Odata';
 import ResourcesProxy from './Proxy/Resources';
@@ -77,7 +78,7 @@ export default {
       }
       ResourcesProxy.resetCache();
 
-      Utils.logOutputServer('Starting...');
+      Log.logServer('Starting...');
       try {
         this.serverApp = express();
         this.serverApp.set('view engine', 'ejs');
@@ -108,7 +109,7 @@ export default {
           }),
           timeout: Config.server('timeout'),
           baseDir: Utils.getWorkspaceRootPath(),
-          ui5ToolsPath: Utils.getUi5ToolsPath(),
+          ui5ToolsPath: Utils.getExtensionFsPath(),
           ui5ToolsIndex: Utils.getUi5ToolsIndexFolder(),
           isLaunchpadMounted: Utils.isLaunchpadMounted(),
           bCacheBuster: Config.server('cacheBuster') === sServerMode,
@@ -118,7 +119,7 @@ export default {
           try {
             await LiveServer.start(oConfigParams);
           } catch (oError) {
-            Utils.logOutputServer(oError, 'ERROR');
+            Log.logServer(oError, 'ERROR');
           }
         }
 
@@ -127,23 +128,23 @@ export default {
         try {
           await OdataProxy.set(oConfigParams);
         } catch (oError) {
-          Utils.logOutputServer(oError, 'ERROR');
+          Log.logServer(oError, 'ERROR');
         }
         try {
           await ResourcesProxy.set(oConfigParams);
         } catch (oError) {
-          Utils.logOutputServer(oError, 'ERROR');
+          Log.logServer(oError, 'ERROR');
         }
 
         try {
           await IndexUI5Tools.set(oConfigParams);
         } catch (oError) {
-          Utils.logOutputServer(oError, 'ERROR');
+          Log.logServer(oError, 'ERROR');
         }
         try {
           await IndexLaunchpad.set(oConfigParams);
         } catch (oError) {
-          Utils.logOutputServer(oError, 'ERROR');
+          Log.logServer(oError, 'ERROR');
         }
 
         if (oConfigParams.protocol === 'https') {
@@ -156,7 +157,7 @@ export default {
           this.server.timeout = oConfigParams.timeout;
         }
         this.server.listen(oConfigParams.port, () => {
-          Utils.logOutputServer('Started!');
+          Log.logServer('Started!');
           let openBrowser = Config.server('openBrowser');
           let ui5ToolsIndex = Utils.getUi5ToolsIndexFolder();
 
@@ -172,7 +173,7 @@ export default {
       }
     } else {
       let sMessage = 'Error during server startup';
-      Utils.logOutputServer(sMessage);
+      Log.logServer(sMessage);
       throw new Error(sMessage);
     }
   },
@@ -180,9 +181,9 @@ export default {
   stopServer() {
     return new Promise((resolve, reject) => {
       if (this.server && this.server.listening) {
-        Utils.logOutputServer('Stopping...');
+        Log.logServer('Stopping...');
         this.server.close(() => {
-          Utils.logOutputServer('Stopped!');
+          Log.logServer('Stopped!');
           //server.unref();
           resolve();
         });
@@ -218,7 +219,7 @@ export default {
 
   async restart() {
     if (this.status === STATUSES.STARTED) {
-      Utils.logOutputServer('Restarting...');
+      Log.logServer('Restarting...');
       await this.stop();
       try {
         await this.start({

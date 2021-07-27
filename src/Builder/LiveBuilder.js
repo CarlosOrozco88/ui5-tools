@@ -56,7 +56,7 @@ export default {
           if (Server.isStartedProduction()) {
             if (bIsLessFile) {
               await this.liveCompileLess(ui5App, ui5App.srcFsPath, [ui5App.srcFsPath, ui5App.distFsPath]);
-              await Builder.compressFiles(ui5App.distFsPath, {
+              await Builder.compressFiles(ui5App, ui5App.distFsPath, {
                 js: false,
                 json: false,
                 xml: false,
@@ -115,7 +115,7 @@ export default {
             },
             async (progress, token) => {
               progress.report({ message: ui5App.folderName });
-              await Builder.compileLess(srcFsPath, aDistFsPath, ui5App.manifest);
+              await Builder.compileLess(ui5App, srcFsPath, aDistFsPath);
               resolve();
             }
           );

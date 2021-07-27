@@ -1,4 +1,4 @@
-import { window, workspace, RelativePattern, Uri, extensions, commands } from 'vscode';
+import { workspace, RelativePattern, Uri, extensions, commands } from 'vscode';
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
@@ -6,8 +6,8 @@ import https from 'https';
 import http from 'http';
 
 import Config from './Config';
+import Log from './Log';
 
-let ui5toolsOutput = window.createOutputChannel(`ui5-tools`);
 let ui5Apps = [];
 let getUi5AppsPromise;
 let sPromiseStatus;
@@ -19,89 +19,103 @@ const Utils = {
         try {
           sPromiseStatus = 'loading';
           ui5Apps = [];
-          let oManifestsMap = {};
+
           let srcFolder = Config.general('srcFolder');
           let libraryFolder = Config.general('libraryFolder');
           let distFolder = Config.general('distFolder');
 
+          let aWorkspacesPromises = [];
           for (let wsUri of workspace.workspaceFolders) {
-            let manifestList = await workspace.findFiles(
+            let aManifestList = await workspace.findFiles(
               new RelativePattern(wsUri, `**/{${srcFolder},${libraryFolder}}/manifest.json`),
               new RelativePattern(wsUri, `**/{node_modules,.git}/`)
             );
+            aWorkspacesPromises.push(aManifestList);
+          }
+          let aWorkspacesList = await Promise.all(aWorkspacesPromises);
 
-            for (let i = 0; i < manifestList.length; i++) {
-              let manifest = manifestList[i];
-              let manifestFsPath = manifest.fsPath;
-              if (!oManifestsMap[manifestFsPath]) {
-                oManifestsMap[manifestFsPath] = true;
-                let manifestUri = Uri.file(manifestFsPath);
+          let aPaths = new Set();
+          aWorkspacesList.forEach((aWorkspaceManifests) => {
+            aWorkspaceManifests.forEach((oUriManifest) => {
+              aPaths.add(oUriManifest.fsPath);
+            });
+          });
 
-                try {
-                  let manifestString = await workspace.fs.readFile(manifestUri);
-
-                  let manifestJson = JSON.parse(manifestString.toString());
-
-                  if (manifestJson?.['sap.app']?.id && manifestJson?.['sap.app'].type) {
-                    let isLibrary = await Utils.getManifestLibrary(manifestJson);
-                    let namespace = await Utils.getManifestId(manifestJson);
-                    let appSrcFolder = isLibrary ? libraryFolder : srcFolder;
-
-                    if (namespace) {
-                      let manifestInnerPath = path.join(appSrcFolder, 'manifest.json');
-                      let appFsPath = manifestUri.fsPath.replace(manifestInnerPath, '');
-                      let appResourceDirname = manifestUri.fsPath.replace(path.sep + manifestInnerPath, '');
-
-                      let appConfigPath = path.join(appResourceDirname, 'ui5-tools.json');
-                      // clean all srcFolders/libraryFolders/distFolders if has any parent app
-                      let appServerPath = Utils.fsPathToServerPath(appFsPath);
-
-                      let srcFsPath = path.join(appFsPath, appSrcFolder);
-                      let distFsPath = path.join(appFsPath, distFolder);
-
-                      let sDeployFolder = Config.deployer('deployFolder');
-                      let deployFsPath = sDeployFolder == 'Dist Folder' ? distFsPath : appFsPath;
-
-                      let folderName = path.basename(appFsPath);
-
-                      ui5Apps.push({
-                        appFsPath: appFsPath,
-                        appConfigPath: appConfigPath,
-                        appResourceDirname: appResourceDirname,
-                        appServerPath: appServerPath,
-                        isLibrary: isLibrary,
-                        srcFsPath: srcFsPath,
-                        distFsPath: distFsPath,
-                        deployFsPath: deployFsPath,
-                        manifestUri: manifestUri,
-                        manifest: manifestJson,
-                        folderName: folderName,
-                        namespace: manifestJson['sap.app'].id,
-                      });
-                    }
-                  } else {
-                    throw new Error(
-                      `Manifest found in ${manifestUri} path. If this manifest refers to an ui5 app, ` +
-                        `check if it well formatted and has sap.app.type and sap.app.id properties filled`
-                    );
-                  }
-                } catch (oError) {
-                  Utils.logOutputGeneral(oError.message, 'ERROR');
-                }
-              }
+          let aManifestPromises = [];
+          for (let manifestFsPath of aPaths) {
+            let manifestUri = Uri.file(manifestFsPath);
+            try {
+              let manifestPromise = workspace.fs.readFile(manifestUri);
+              aManifestPromises.push(manifestPromise);
+            } catch (oError) {
+              Log.logGeneral(oError.message, 'ERROR');
             }
           }
 
-          ui5Apps = ui5Apps.sort((app1, app2) => {
-            let sort = 0;
-            if (app1.folderName > app2.folderName) {
-              sort = 1;
-            } else if (app1.folderName < app2.folderName) {
-              sort = -1;
+          let aManifestsFiles = await Promise.allSettled(aManifestPromises);
+
+          let i = 0;
+          for (let manifestFsPath of aPaths) {
+            let manifest;
+            let manifestPromise = aManifestsFiles[i];
+            if (manifestPromise.status === 'fulfilled') {
+              try {
+                manifest = JSON.parse(manifestPromise.value.toString());
+              } catch (oError) {
+                Log.logGeneral(oError.message, 'ERROR');
+              }
+
+              if (manifest?.['sap.app']?.id) {
+                let type = manifest?.['sap.app']?.type || 'application';
+                let isLibrary = type === 'library';
+                let namespace = manifest['sap.app'].id;
+                let appSrcFolder = isLibrary ? libraryFolder : srcFolder;
+
+                if (namespace) {
+                  let manifestInnerPath = path.join(appSrcFolder, 'manifest.json');
+                  let appFsPath = manifestFsPath.replace(manifestInnerPath, '');
+                  let appResourceDirname = manifestFsPath.replace(path.sep + manifestInnerPath, '');
+
+                  let appConfigPath = path.join(appResourceDirname, 'ui5-tools.json');
+                  // clean all srcFolders/libraryFolders/distFolders if has any parent app
+                  let appServerPath = Utils.fsPathToServerPath(appFsPath);
+
+                  let srcFsPath = path.join(appFsPath, appSrcFolder);
+                  let distFsPath = path.join(appFsPath, distFolder);
+
+                  let sDeployFolder = Config.deployer('deployFolder');
+                  let deployFsPath = sDeployFolder == 'Dist Folder' ? distFsPath : appFsPath;
+
+                  let folderName = path.basename(appFsPath);
+
+                  ui5Apps.push({
+                    appFsPath,
+                    appConfigPath,
+                    appResourceDirname,
+                    appServerPath,
+                    type,
+                    isLibrary,
+                    srcFsPath,
+                    distFsPath,
+                    deployFsPath,
+                    manifest,
+                    folderName,
+                    namespace,
+                  });
+                }
+              } else {
+                Log.logGeneral(
+                  `Manifest found in ${manifestFsPath} path. If this manifest refers to an ui5 app, ` +
+                    `check if it well formatted and has sap.app.type and sap.app.id properties filled`,
+                  'ERROR'
+                );
+              }
             }
-            return sort;
-          });
-          Utils.logOutputGeneral(`${ui5Apps.length} ui5 projects found!`);
+            i++;
+          }
+
+          Log.logGeneral(`${ui5Apps.length} ui5 projects found!`);
+
           let aResourcesDirname = ui5Apps.map((app) => app.appResourceDirname);
           commands.executeCommand('setContext', 'ui5-tools:resourcesPath', aResourcesDirname);
 
@@ -144,12 +158,12 @@ const Utils = {
     return baseDirWorkspace;
   },
 
-  getUi5ToolsInfo() {
+  getExtensionInfo() {
     return extensions.getExtension('carlosorozcojimenez.ui5-tools');
   },
 
-  getUi5ToolsPath() {
-    return Utils.getUi5ToolsInfo().extensionUri.fsPath;
+  getExtensionFsPath() {
+    return Utils.getExtensionInfo().extensionUri.fsPath;
   },
 
   loadEnv() {
@@ -161,7 +175,7 @@ const Utils = {
   },
 
   getHttpsCert() {
-    let ui5ToolsPath = Utils.getUi5ToolsPath();
+    let ui5ToolsPath = Utils.getExtensionFsPath();
     return {
       key: fs.readFileSync(path.join(ui5ToolsPath, 'static', 'cert', 'server.key')),
       cert: fs.readFileSync(path.join(ui5ToolsPath, 'static', 'cert', 'server.cert')),
@@ -304,77 +318,6 @@ const Utils = {
     let oUi5App = ui5Apps.find((ui5App) => this.isUi5AppFsPath(ui5App, sFsFilePath));
 
     return oUi5App;
-  },
-
-  showOutput() {
-    ui5toolsOutput.show();
-  },
-
-  logOutput(sText, sLevel = 'LOG') {
-    let oDate = new Date();
-    let sDate = oDate.toLocaleTimeString();
-    let sNewLine = `[${sLevel} ${sDate}] ${sText}`;
-    ui5toolsOutput.appendLine(sNewLine);
-    return console.log(sNewLine);
-  },
-
-  logOutputGeneral(sText, sLevel) {
-    return Utils.logOutput(`General: ${sText}`, sLevel);
-  },
-
-  logOutputConfigurator(sText, sLevel) {
-    return Utils.logOutput(`Configurator: ${sText}`, sLevel);
-  },
-
-  logOutputBuilder(sText, sLevel) {
-    return Utils.logOutput(`Builder: ${sText}`, sLevel);
-  },
-
-  logOutputDeployer(sText, sLevel) {
-    return Utils.logOutput(`Deployer: ${sText}`, sLevel);
-  },
-
-  logOutputServer(sText, sLevel) {
-    return Utils.logOutput(`Server: ${sText}`, sLevel);
-  },
-
-  logOutputProxy(sText, sLevel) {
-    return Utils.logOutput(`Server > Proxy: ${sText}`, sLevel);
-  },
-
-  logOutputFont(sText, sLevel) {
-    return Utils.logOutput(`Server > Font: ${sText}`, sLevel);
-  },
-
-  newLogProviderProxy() {
-    return Utils.newLogProvider(Utils.logOutputProxy);
-  },
-
-  newLogProviderDeployer() {
-    return Utils.newLogProvider(Utils.logOutputDeployer);
-  },
-
-  newLogProvider(fnLogger = Utils.logOutputGeneral) {
-    return {
-      log: (sMessage) => {
-        fnLogger(sMessage, 'LOG');
-      },
-      logVerbose: (oParam) => {
-        // console.log(oParam)
-      },
-      debug: (sMessage) => {
-        fnLogger(sMessage, 'DEBUG');
-      },
-      info: (sMessage) => {
-        fnLogger(sMessage, 'INFO');
-      },
-      warn: (sMessage) => {
-        fnLogger(sMessage, 'WARNING');
-      },
-      error: (sMessage) => {
-        fnLogger(sMessage, 'ERROR');
-      },
-    };
   },
 
   getMethods(obj) {

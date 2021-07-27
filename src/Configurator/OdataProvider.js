@@ -1,6 +1,6 @@
 import { window, ConfigurationTarget } from 'vscode';
 import Config from '../Utils/Config';
-import Utils from '../Utils/Utils';
+import Log from '../Utils/Log';
 import Server from '../Server/Server';
 
 export default {
@@ -47,11 +47,11 @@ export default {
           let value = quickpick.selectedItems[0].label;
           await Config.server().update('odataProxy', value, ConfigurationTarget.Workspace);
 
-          Utils.logOutputConfigurator(`Set odataProxy value to ${value}`);
+          Log.logConfigurator(`Set odataProxy value to ${value}`);
           resolve(value);
         } else {
           let sMessage = 'No odata proxy configured';
-          Utils.logOutputConfigurator(sMessage);
+          Log.logConfigurator(sMessage);
           reject(sMessage);
         }
         quickpick.hide();
@@ -73,11 +73,11 @@ export default {
       inputBox.onDidAccept(async () => {
         if (inputBox.value) {
           await Config.server().update('odataUri', inputBox.value, ConfigurationTarget.Workspace);
-          Utils.logOutputConfigurator(`Set odataUri value to ${inputBox.value}`);
+          Log.logConfigurator(`Set odataUri value to ${inputBox.value}`);
           resolve(inputBox.value);
         } else {
           let sMessage = 'No gateway url configured';
-          Utils.logOutputConfigurator(sMessage);
+          Log.logConfigurator(sMessage);
           reject(sMessage);
         }
         inputBox.hide();
@@ -99,11 +99,11 @@ export default {
       inputBox.onDidAccept(async () => {
         if (inputBox.value) {
           await Config.server().update('odataUri', inputBox.value, ConfigurationTarget.Workspace);
-          Utils.logOutputConfigurator(`Set odataUri value to ${inputBox.value}`);
+          Log.logConfigurator(`Set odataUri value to ${inputBox.value}`);
           resolve(inputBox.value);
         } else {
           let sMessage = 'No destination url configured';
-          Utils.logOutputConfigurator(sMessage);
+          Log.logConfigurator(sMessage);
           reject(sMessage);
         }
         inputBox.hide();
@@ -125,11 +125,11 @@ export default {
       inputBox.onDidAccept(async () => {
         if (inputBox.value) {
           await Config.server().update('odataMountPath', inputBox.value, ConfigurationTarget.Workspace);
-          Utils.logOutputConfigurator(`Set odataMountPath to ${inputBox.value}`);
+          Log.logConfigurator(`Set odataMountPath to ${inputBox.value}`);
           resolve(inputBox.value);
         } else {
           let sMessage = 'No mountpath url configured';
-          Utils.logOutputConfigurator(sMessage);
+          Log.logConfigurator(sMessage);
           reject(sMessage);
         }
         inputBox.hide();

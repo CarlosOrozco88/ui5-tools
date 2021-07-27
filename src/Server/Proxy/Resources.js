@@ -7,6 +7,7 @@ import onHeaders from 'on-headers';
 import Ui5Provider from '../../Configurator/Ui5Provider';
 import Config from '../../Utils/Config';
 import Utils from '../../Utils/Utils';
+import Log from '../../Utils/Log';
 
 const cacheResources = apicache
   .options({
@@ -30,7 +31,7 @@ const onProxyRes = function (req, res, next) {
 export default {
   resetCache() {
     if (apicache.clear) {
-      Utils.logOutputServer(`Clear resources cache`);
+      Log.logServer(`Clear resources cache`);
       apicache.clear(null);
     }
   },
@@ -53,7 +54,7 @@ export default {
         }
 
         if (targetUri) {
-          Utils.logOutputServer(`Creating resourcesProxy with ui5Version ${ui5Version} to Gateway ${targetUri}`);
+          Log.logServer(`Creating resourcesProxy with ui5Version ${ui5Version} to Gateway ${targetUri}`);
           proxy = createProxyMiddleware({
             pathRewrite(path, req) {
               let basePath = '/sap/public/bc/ui5_ui5/1';
@@ -64,7 +65,7 @@ export default {
             secure: Config.server('resourcesSecure'),
             changeOrigin: true,
             logLevel: 'error',
-            logProvider: Utils.newLogProviderProxy,
+            logProvider: Log.newLogProviderProxy,
           });
 
           serverApp.use(['/resources', '/**/resources'], onProxyRes, cacheResources, proxy);
@@ -76,7 +77,7 @@ export default {
         targetUri = `https://${framework}.hana.ondemand.com/${ui5Version}/`;
 
         if (ui5Version) {
-          Utils.logOutputServer(`Creating resourcesProxy with ui5Version ${ui5Version} to CDN ${targetUri}`);
+          Log.logServer(`Creating resourcesProxy with ui5Version ${ui5Version} to CDN ${targetUri}`);
           proxy = createProxyMiddleware({
             pathRewrite(path, req) {
               let resourcesPath = path.slice(path.indexOf('/resources/'), path.length);
@@ -86,7 +87,7 @@ export default {
             secure: Config.server('resourcesSecure'),
             changeOrigin: true,
             logLevel: 'error',
-            logProvider: Utils.newLogProviderProxy,
+            logProvider: Log.newLogProviderProxy,
           });
 
           serverApp.use(['/resources', '/**/resources'], onProxyRes, cacheResources, proxy);
@@ -99,7 +100,7 @@ export default {
         } catch (oError) {
           let sError = `Error: Unable to get sap-ui-core.js, framework ${framework} does not have ${ui5Version} available at CDN.`;
 
-          Utils.logOutputServer(sError, 'ERROR');
+          Log.logServer(sError, 'ERROR');
           window.showErrorMessage(sError);
         }
 
@@ -134,7 +135,7 @@ export default {
         break;
     }
     if (targetUri) {
-      Utils.logOutputServer(`Creating testProxy with ui5Version ${ui5Version} to ${targetUri}`);
+      Log.logServer(`Creating testProxy with ui5Version ${ui5Version} to ${targetUri}`);
       let proxy = createProxyMiddleware({
         pathRewrite(path, req) {
           let resourcesPath = path.slice(path.indexOf('/test-resources/'), path.length);
@@ -144,7 +145,7 @@ export default {
         secure: Config.server('resourcesSecure'),
         changeOrigin: true,
         logLevel: 'error',
-        logProvider: Utils.newLogProviderProxy,
+        logProvider: Log.newLogProviderProxy,
       });
 
       serverApp.use('/flp/test-resources/**', onProxyRes, cacheResources, proxy);

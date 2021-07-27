@@ -1,5 +1,6 @@
 import Builder from '../Builder/Builder';
 import Deployer from '../Deployer/Deployer';
+import Log from '../Utils/Log';
 import Utils from '../Utils/Utils';
 
 export default {
@@ -12,7 +13,7 @@ export default {
     try {
       await Builder.buildProject(ui5App);
     } catch (oError) {
-      Utils.logOutputBuilder(oError.message, 'ERROR');
+      Log.logBuilder(oError.message, 'ERROR');
     }
   },
 
@@ -26,7 +27,7 @@ export default {
       try {
         await Deployer.askCreateReuseTransport(ui5App);
       } catch (oError) {
-        Utils.logOutputDeployer(oError.message, 'ERROR');
+        Log.logDeployer(oError.message, 'ERROR');
       }
     }
   },

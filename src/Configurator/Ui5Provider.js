@@ -1,9 +1,8 @@
 import { window, ConfigurationTarget } from 'vscode';
-import https from 'https';
-import http from 'http';
 
 import Config from '../Utils/Config';
 import Utils from '../Utils/Utils';
+import Log from '../Utils/Log';
 import Server from '../Server/Server';
 
 export default {
@@ -15,7 +14,7 @@ export default {
         try {
           await this.configureGWVersion(sGatewayUri);
         } catch (oError) {
-          Utils.logOutputConfigurator(oError, 'ERROR');
+          Log.logConfigurator(oError, 'ERROR');
           await this.setUi5Version();
         }
       }
@@ -58,11 +57,11 @@ export default {
         if (quickpick.selectedItems.length) {
           let value = quickpick.selectedItems[0].label;
           await Config.server().update('resourcesProxy', value, ConfigurationTarget.Workspace);
-          Utils.logOutputConfigurator(`Set resourcesProxy value to ${value}`);
+          Log.logConfigurator(`Set resourcesProxy value to ${value}`);
           resolve(value);
         } else {
           let sMessage = 'No ui5 provider configured';
-          Utils.logOutputConfigurator(sMessage);
+          Log.logConfigurator(sMessage);
           reject(sMessage);
         }
         quickpick.hide();
@@ -84,11 +83,11 @@ export default {
       inputBox.onDidAccept(async () => {
         if (inputBox.value) {
           await Config.server().update('resourcesUri', inputBox.value, ConfigurationTarget.Workspace);
-          Utils.logOutputConfigurator(`Set resourcesUri value to ${inputBox.value}`);
+          Log.logConfigurator(`Set resourcesUri value to ${inputBox.value}`);
           resolve(inputBox.value);
         } else {
           let sMessage = 'No gateway url configured';
-          Utils.logOutputConfigurator(sMessage);
+          Log.logConfigurator(sMessage);
           reject(sMessage);
         }
         inputBox.hide();
@@ -115,10 +114,10 @@ export default {
         }
         await Config.general().update('ui5Version', ui5Version, ConfigurationTarget.Workspace);
 
-        Utils.logOutputConfigurator(`Set ui5Version value ${ui5Version}`);
+        Log.logConfigurator(`Set ui5Version value ${ui5Version}`);
         resolve(ui5Version);
       } catch (sError) {
-        Utils.logOutputConfigurator(sError, 'ERROR');
+        Log.logConfigurator(sError, 'ERROR');
         reject(sError);
       }
       resolve(ui5Version);
@@ -283,10 +282,10 @@ export default {
   },
 
   async configureGWVersion(sGatewayUri) {
-    Utils.logOutputConfigurator(`Fetching ui5Version from Gateway...`);
+    Log.logConfigurator(`Fetching ui5Version from Gateway...`);
     let gatewayVersion = await this.getGatewayVersion(sGatewayUri);
     await Config.general().update('ui5Version', gatewayVersion.version, ConfigurationTarget.Workspace);
-    Utils.logOutputConfigurator(`Set ui5version value to ${gatewayVersion.version}`);
+    Log.logConfigurator(`Set ui5version value to ${gatewayVersion.version}`);
   },
 
   async getGatewayVersion(sGatewayUri) {

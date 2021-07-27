@@ -5,6 +5,7 @@ import fs from 'fs';
 import https from 'https';
 import Handlebars from 'handlebars';
 
+import Log from '../Utils/Log';
 import Utils from '../Utils/Utils';
 import assert from 'assert';
 
@@ -13,7 +14,7 @@ export default {
     let oFontConfig = undefined;
 
     try {
-      Utils.logOutputFont(`Asking project to deploy`);
+      Log.logFont(`Asking project to deploy`);
       let ui5Apps = await Utils.getAllUI5Apps();
 
       let aConfigPromises = [];
@@ -84,7 +85,7 @@ export default {
     try {
       await this.generateFont(oFontConfig);
     } catch (oError) {
-      Utils.logOutputFont(oError.message, 'ERROR');
+      Log.logFont(oError.message, 'ERROR');
       window.showErrorMessage(oError.message);
     }
   },
@@ -108,7 +109,7 @@ export default {
     });
     assert(!aExcluded.length, `Property 'assetTypes' only accept ${aDefaultAssetTypes.toString()} values`);
 
-    let sTemplatePath = path.resolve(Utils.getUi5ToolsPath(), 'static', 'templates');
+    let sTemplatePath = path.resolve(Utils.getExtensionFsPath(), 'static', 'templates');
     let oFontOptions = {
       inputDir: path.join(ui5App.appFsPath, font.inputDir || ''),
       outputDir: path.join(ui5App.appFsPath, font.outputDir, font.name),

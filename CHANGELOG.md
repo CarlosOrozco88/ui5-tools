@@ -1,3 +1,9 @@
+## 1.0.2 (27-07-2021)
+
+- Deploy bug solved
+- Log extracted in a single file
+- Refactoring
+
 ## 1.0.1 (26-07-2021)
 
 - AppcacheBuster is now enabled by default in PROD mode only, new configuration property `ui5-tools.server.cacheBuster`

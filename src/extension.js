@@ -20,6 +20,7 @@ import StatusBar from './StatusBar/StatusBar';
 // Utils
 import Config from './Utils/Config';
 import Utils from './Utils/Utils';
+import Log from './Utils/Log';
 
 export async function activate(context) {
   const { registerCommand } = commands;
@@ -54,14 +55,14 @@ export async function activate(context) {
   subscriptions.push(registerCommand('ui5-tools.menu.builder.build', (oResource) => Menu.build(oResource)));
   subscriptions.push(registerCommand('ui5-tools.menu.deployer.deploy', (oResource) => Menu.deploy(oResource)));
 
-  subscriptions.push(registerCommand('ui5-tools.showOutput', () => Utils.showOutput()));
+  subscriptions.push(registerCommand('ui5-tools.showOutput', () => Log.showOutput()));
 
   await StatusBar.init(subscriptions);
 
   LiveBuilder.attachWatch();
 
   if (Config.server('startOnLaunch')) {
-    Utils.logOutputGeneral(`Start on launch`);
+    Log.logGeneral(`Start on launch`);
     Server.start();
   }
 }

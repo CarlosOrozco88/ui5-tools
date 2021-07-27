@@ -1,13 +1,14 @@
 import path from 'path';
 
 import Utils from '../../Utils/Utils';
+import Log from '../../Utils/Log';
 import ResourcesProxy from '../../Server/Proxy/Resources';
 
 export default {
   async set(oConfigParams) {
     let { serverApp, ui5Apps = [], baseDir, ui5ToolsPath, isLaunchpadMounted } = oConfigParams;
     if (isLaunchpadMounted) {
-      Utils.logOutputServer('Mounting launchpad');
+      Log.logServer('Mounting launchpad');
       // LAUNCHPAD IN /flp/
 
       // DONT MOUNT RESOURCE ROOTS TO SIMULATE LAUNCHPAD

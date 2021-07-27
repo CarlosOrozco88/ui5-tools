@@ -1,13 +1,14 @@
 import { window, StatusBarAlignment } from 'vscode';
 import Config from '../Utils/Config';
 import Utils from '../Utils/Utils';
+import Log from '../Utils/Log';
 import Server from '../Server/Server';
 
 export default {
   serverNavBar: undefined,
 
   async init(subscriptions) {
-    Utils.logOutputGeneral(`Exploring ui5 projects...`);
+    Log.logGeneral(`Exploring ui5 projects...`);
     if (!this.serverNavBar && subscriptions) {
       this.serverNavBar = window.createStatusBarItem(StatusBarAlignment.Left, 100);
       this.serverNavBar.command = 'ui5-tools.server.toggle';

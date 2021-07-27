@@ -5,13 +5,14 @@ import showdown from 'showdown';
 
 import Utils from '../../Utils/Utils';
 import Config from '../../Utils/Config';
+import Log from '../../Utils/Log';
 
 const converter = new showdown.Converter();
 
 export default {
   // SERVER INDEX
   async set({ serverApp, ui5Apps, ui5ToolsIndex, baseDir, ui5ToolsPath, isLaunchpadMounted }) {
-    Utils.logOutputServer('Mounting ui5-tools root page');
+    Log.logServer('Mounting ui5-tools root page');
 
     let existBasePathInApp = ui5Apps.find((ui5App) => {
       return ui5App.appServerPath === '/';
@@ -25,8 +26,11 @@ export default {
     let ui5toolsData = {
       ...Utils.getOptionsVersion(),
       readme: '',
+      about: '',
+      changelog: '',
       launchpad: isLaunchpadMounted,
       links: [],
+      contributors: [],
       docs: { aTree: [], oHashes: {} },
       ui5Apps: {
         application: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'application'),

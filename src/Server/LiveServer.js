@@ -7,6 +7,7 @@ import WebSocket from 'ws';
 
 import Utils from '../Utils/Utils';
 import Config from '../Utils/Config';
+import Log from '../Utils/Log';
 
 const DELAY_REFRESH = 500;
 
@@ -17,7 +18,7 @@ export default {
   async start(oConfigParams) {
     return new Promise(async (resolve, reject) => {
       try {
-        Utils.logOutputServer('LiveServer > Starting...');
+        Log.logServer('LiveServer > Starting...');
         this.middleware(oConfigParams);
         if (!oConfigParams.restarting) {
           await this.createServer(oConfigParams);
@@ -50,7 +51,7 @@ export default {
         this.liveServerWS.on('error', (error) => this.onError(error));
 
         this.liveServerWS.once('listening', () => {
-          Utils.logOutputServer('LiveServer > Started!');
+          Log.logServer('LiveServer > Started!');
           resolve();
         });
       } catch (error) {
@@ -109,7 +110,7 @@ export default {
       res.writeHead(200, {
         'Content-Type': 'text/javascript',
       });
-      return res.end(fs.readFileSync(path.join(Utils.getUi5ToolsPath(), 'static', 'scripts', 'livereload.js')));
+      return res.end(fs.readFileSync(path.join(Utils.getExtensionFsPath(), 'static', 'scripts', 'livereload.js')));
     }
   },
 
@@ -166,7 +167,7 @@ export default {
     if (this.liveServerWS) {
       clearTimeout(this._sendAllClientsTimeout);
       this._sendAllClientsTimeout = setTimeout(() => {
-        Utils.logOutputServer('Refreshing browser...');
+        Log.logServer('Refreshing browser...');
         this.liveServerWS.clients.forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
             this.debug('Sending: ' + data);
@@ -184,12 +185,12 @@ export default {
 
   async stop() {
     if (this.liveServerWS) {
-      Utils.logOutputServer('LiveServer > Stopping...');
+      Log.logServer('LiveServer > Stopping...');
       this.liveServer.close();
       this.liveServer = undefined;
       this.liveServerWS.close();
       this.liveServerWS = undefined;
-      Utils.logOutputServer('LiveServer > Stopped!');
+      Log.logServer('LiveServer > Stopped!');
     }
   },
 

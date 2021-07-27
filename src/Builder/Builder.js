@@ -11,6 +11,7 @@ import lessOpenUI5 from 'less-openui5';
 const lessOpenUI5Builder = new lessOpenUI5.Builder({});
 const xmlHtmlPrePattern = /<(?:\w+:)?pre>/;
 
+import Log from '../Utils/Log';
 import Utils from '../Utils/Utils';
 import Config from '../Utils/Config';
 
@@ -34,7 +35,7 @@ export default {
   async askProjectToBuild() {
     let ui5App = undefined;
     try {
-      Utils.logOutputBuilder(`Asking project to build`);
+      Log.logBuilder(`Asking project to build`);
       let ui5Apps = await Utils.getAllUI5Apps();
       if (ui5Apps.length > 1) {
         let qpOptions = [];
@@ -81,7 +82,7 @@ export default {
    * Build all workspace projects
    */
   async buildAllProjects() {
-    Utils.logOutputBuilder(`Build all ui5 projects`);
+    Log.logBuilder(`Build all ui5 projects`);
     let ui5Apps = await Utils.getAllUI5Apps();
     await window.withProgress(
       {
@@ -92,14 +93,15 @@ export default {
       async (progress, token) => {
         progress.report({ increment: 0 });
         for (let i = 0; i < ui5Apps.length; i++) {
+          let ui5App = ui5Apps[i];
           if (token.isCancellationRequested) {
             return;
           }
           progress.report({
             increment: 100 / ui5Apps.length,
-            message: `${ui5Apps[i].folderName} (${i + 1}/${ui5Apps.length})`,
+            message: `${ui5App.folderName} (${i + 1}/${ui5Apps.length})`,
           });
-          await this.build(ui5Apps[i], undefined, progress, 0);
+          await this.build({ ui5App, progress, multiplier: 0 });
         }
         return;
       }
@@ -114,7 +116,7 @@ export default {
   async buildProject(ui5App, oTasks, bShowMessage = true) {
     if (ui5App) {
       let folderName = ui5App.folderName;
-      Utils.logOutputBuilder(`Building ${folderName}`);
+      Log.logBuilder(`Building ${folderName}`);
       await window.withProgress(
         {
           location: ProgressLocation.Notification,
@@ -127,10 +129,10 @@ export default {
           });
 
           try {
-            await this.build(ui5App, oTasks, progress);
+            await this.build({ ui5App, oTasks, progress });
 
             let sMessage = `Project ${ui5App.folderName} builded!`;
-            Utils.logOutputBuilder(sMessage);
+            Log.logBuilder(sMessage);
             if (bShowMessage) {
               window.showInformationMessage(sMessage);
             }
@@ -147,7 +149,7 @@ export default {
    * @param {Object} ui5App ui5App
    * @param {Progress|undefined} progress progress options
    */
-  async build(ui5App, oTasksParams = DEFAULT_TASKS_BUILD, progress = undefined, multiplier = 1) {
+  async build({ ui5App, oTasks = DEFAULT_TASKS_BUILD, progress = undefined, multiplier = 1 }) {
     let folderName = multiplier ? '' : `${ui5App.folderName}`;
     progress?.report({ increment: 0 });
 
@@ -163,15 +165,12 @@ export default {
       let increment = 10 * multiplier;
       progress?.report({ increment: increment, message: `${folderName} Reading manifest` });
 
-      let manifest = ui5App.manifest;
-
-      let srcFsPath = ui5App.srcFsPath;
-      let destFsPath = ui5App.distFsPath;
+      let { srcFsPath, distFsPath } = ui5App;
 
       // Tasks
-      let oTasks = {
+      let oTasksMerged = {
         ...DEFAULT_TASKS_BUILD,
-        ...oTasksParams,
+        ...oTasks,
       };
       let {
         cleanFolder,
@@ -183,7 +182,7 @@ export default {
         createDebugFiles,
         cleanFiles,
         createPreload,
-      } = oTasks;
+      } = oTasksMerged;
 
       // Config
       replaceStrings = replaceStrings && Config.builder('replaceStrings');
@@ -193,7 +192,7 @@ export default {
       createPreload = createPreload && Config.builder('buildPreload');
 
       // Check that we are not deleting files from srcFolder
-      if (srcFsPath === destFsPath) {
+      if (srcFsPath === distFsPath) {
         cleanFolder = false;
         copyFolder = false;
         replaceStrings = false;
@@ -207,7 +206,7 @@ export default {
       increment = 10 * multiplier;
       if (cleanFolder) {
         progress?.report({ increment: increment, message: `${folderName} Cleaning dist folder` });
-        await this.cleanFolder(destFsPath);
+        await this.cleanFolder(ui5App, distFsPath);
         increment = 0;
       }
 
@@ -215,7 +214,7 @@ export default {
       increment += 10 * multiplier;
       if (copyFolder) {
         progress?.report({ increment: increment, message: `${folderName} Copying files` });
-        await this.copyFolder(srcFsPath, destFsPath);
+        await this.copyFolder(ui5App, srcFsPath, distFsPath);
         increment = 0;
       }
 
@@ -223,7 +222,7 @@ export default {
       increment += 10 * multiplier;
       if (replaceStrings) {
         progress?.report({ increment: increment, message: `${folderName} Replacing strings` });
-        await this.replaceStrings(destFsPath);
+        await this.replaceStrings(ui5App, distFsPath);
         increment = 0;
       }
 
@@ -231,7 +230,7 @@ export default {
       increment += 10 * multiplier;
       if (compileLess) {
         progress?.report({ increment: increment, message: `${folderName} Compile less to css` });
-        await this.compileLess(srcFsPath, destFsPath, manifest);
+        await this.compileLess(ui5App, srcFsPath, distFsPath);
         increment = 0;
       }
 
@@ -239,7 +238,7 @@ export default {
       increment += 5 * multiplier;
       if (babelifyJSFiles) {
         progress?.report({ increment: increment, message: `${folderName} Babelify js files` });
-        await this.babelifyJSFiles(destFsPath);
+        await this.babelifyJSFiles(ui5App, distFsPath);
         increment = 0;
       }
 
@@ -247,7 +246,7 @@ export default {
       increment += 10 * multiplier;
       if (compressFiles) {
         progress?.report({ increment: increment, message: `${folderName} Compress files` });
-        await this.compressFiles(destFsPath);
+        await this.compressFiles(ui5App, distFsPath);
         increment = 0;
       }
 
@@ -255,7 +254,7 @@ export default {
       increment += 5 * multiplier;
       if (createDebugFiles) {
         progress?.report({ increment: increment, message: `${folderName} Creating dbg files` });
-        await this.createDebugFiles(srcFsPath, destFsPath);
+        await this.createDebugFiles(ui5App, srcFsPath, distFsPath);
         increment = 0;
       }
 
@@ -263,7 +262,7 @@ export default {
       increment += 10 * multiplier;
       if (cleanFiles) {
         progress?.report({ increment: increment, message: `${folderName} Cleaning files` });
-        await this.cleanFiles(destFsPath);
+        await this.cleanFiles(ui5App, distFsPath);
         increment = 0;
       }
 
@@ -271,7 +270,7 @@ export default {
       increment += 20 * multiplier;
       if (createPreload) {
         progress?.report({ increment: increment, message: `${folderName} Building preload` });
-        await this.createPreload(srcFsPath, destFsPath, manifest);
+        await this.createPreload(ui5App, srcFsPath, distFsPath);
         increment = 0;
       }
 
@@ -286,10 +285,10 @@ export default {
    * Deletes folder or file
    * @param {string} folderPath uri folder to delete
    */
-  async cleanFolder(folderPath) {
+  async cleanFolder(ui5App, folderPath) {
     if (folderPath) {
       let uriToDelete = Uri.file(folderPath);
-      Utils.logOutputBuilder(`Deleting ${uriToDelete}`);
+      Log.logBuilder(`Deleting ${uriToDelete}`);
       try {
         await workspace.fs.delete(uriToDelete, {
           recursive: true,
@@ -308,7 +307,7 @@ export default {
    * Replace all strings
    * @param {string} folderPath URI folder
    */
-  async replaceStrings(folderPath) {
+  async replaceStrings(ui5App, folderPath) {
     let replaceExtensions = Config.builder('replaceExtensions');
     let pattern = new RelativePattern(folderPath, `**/*.{${replaceExtensions}}`);
     let files = await workspace.findFiles(pattern);
@@ -317,7 +316,7 @@ export default {
     const aCalculedKeys = Object.entries(calculedKeys);
 
     if (files.length) {
-      Utils.logOutputBuilder(`Replacing strings to folder ${folderPath}`);
+      Log.logBuilder(`Replacing strings to folder ${folderPath}`);
       try {
         for (let i = 0; i < files.length; i++) {
           await this.replaceStringsFile(files[i], aCalculedKeys);
@@ -377,10 +376,10 @@ export default {
    * @param {string} srcPath uri folder source
    * @param {string} destPath uri folder destination
    */
-  async copyFolder(srcPath, destPath) {
+  async copyFolder(ui5App, srcPath, destPath) {
     let uriSrc = Uri.file(srcPath);
     let uriDest = Uri.file(destPath);
-    Utils.logOutputBuilder(`Copying folder ${uriSrc} to ${uriDest}`);
+    Log.logBuilder(`Copying folder ${uriSrc} to ${uriDest}`);
     try {
       await workspace.fs.copy(uriSrc, uriDest, {
         overwrite: true,
@@ -393,20 +392,16 @@ export default {
 
   /**
    * Compile less from destPath
+   * @param {object} ui5App the ui5App
    * @param {string} srcPath uri source path
    * @param {Array} aDestPath uri dest path
-   * @param {object|undefined} manifest manifest object
    */
-  async compileLess(srcPath, aDestPath = [], manifest = undefined) {
+  async compileLess(ui5App, srcPath, aDestPath = []) {
     if (typeof aDestPath === 'string' && aDestPath) {
       aDestPath = [aDestPath];
     }
     if (aDestPath && aDestPath.length) {
-      if (!manifest) {
-        manifest = await Utils.getManifest(srcPath);
-      }
-      //let isLibrary = await Utils.getManifestLibrary(manifest);
-      let namespace = await Utils.getManifestId(manifest);
+      let { namespace } = ui5App;
 
       //if (isLibrary) {
       // Generate css for library
@@ -414,7 +409,7 @@ export default {
       let lessFilesLibrary = await workspace.findFiles(patternLessLibrary);
       if (lessFilesLibrary.length) {
         for (let i = 0; i < lessFilesLibrary.length; i++) {
-          Utils.logOutputBuilder(`Compiling less theme ${lessFilesLibrary[i].fsPath}`);
+          Log.logBuilder(`Compiling less theme ${lessFilesLibrary[i].fsPath}`);
           let output = await lessOpenUI5Builder.build({
             lessInputPath: lessFilesLibrary[i].fsPath,
             // @ts-ignore
@@ -449,7 +444,7 @@ export default {
 
       if (lessFilesComponent.length) {
         for (let i = 0; i < lessFilesComponent.length; i++) {
-          Utils.logOutputBuilder(`Compiling less file ${lessFilesComponent[i].fsPath}`);
+          Log.logBuilder(`Compiling less file ${lessFilesComponent[i].fsPath}`);
           let lessFile = await workspace.fs.readFile(Uri.file(lessFilesComponent[i].fsPath));
           let output = await less.render(lessFile.toString(), {
             filename: lessFilesComponent[i].fsPath,
@@ -469,10 +464,10 @@ export default {
    * Babelify js files
    * @param {string} folderPath folder uri
    */
-  async babelifyJSFiles(folderPath) {
+  async babelifyJSFiles(ui5App, folderPath) {
     if (Config.builder('babelSources') || true) {
       try {
-        Utils.logOutputBuilder(`Babelify files ${folderPath}`);
+        Log.logBuilder(`Babelify files ${folderPath}`);
         // Create -dbg files
         let patternJs = new RelativePattern(folderPath, `**/*.js`);
         let babelSourcesExclude = Config.builder(`babelSourcesExclude`) || '';
@@ -529,10 +524,10 @@ export default {
    * @param {string} srcPath uri source path
    * @param {string} folderPath folder uri
    */
-  async createDebugFiles(srcPath, folderPath) {
+  async createDebugFiles(ui5App, srcPath, folderPath) {
     if (Config.builder('debugSources')) {
       try {
-        Utils.logOutputBuilder(`Create dbg files ${folderPath}`);
+        Log.logBuilder(`Create dbg files ${folderPath}`);
         // Create -dbg files
         let patternJs = new RelativePattern(srcPath, `**/*.js`);
         let jsFiles = await workspace.findFiles(patternJs);
@@ -555,14 +550,14 @@ export default {
    * Compress files from folderPath
    * @param {string} folderPath uri folder path
    */
-  async compressFiles(folderPath, oOptionsParams = DEFAULT_COMPRESS_EXT) {
+  async compressFiles(ui5App, folderPath, oOptionsParams = DEFAULT_COMPRESS_EXT) {
     if (Config.builder('uglifySources')) {
       let oOptions = {
         ...DEFAULT_TASKS_BUILD,
         ...oOptionsParams,
       };
       try {
-        Utils.logOutputBuilder(`Compres files to ${folderPath}`);
+        Log.logBuilder(`Compres files to ${folderPath}`);
         if (oOptions.js) {
           // Compress js files
           let patternJs = new RelativePattern(folderPath, `**/*.js`);
@@ -632,9 +627,9 @@ export default {
    * Cleans unneeded uri files
    * @param {string} folderPath folder uri
    */
-  async cleanFiles(folderPath) {
+  async cleanFiles(ui5App, folderPath) {
     try {
-      Utils.logOutputBuilder(`Clean files from ${folderPath}`);
+      Log.logBuilder(`Clean files from ${folderPath}`);
       // delete .less
       let patternLess = new RelativePattern(folderPath, `**/*.less`);
       let lessFiles = await workspace.findFiles(patternLess);
@@ -651,45 +646,41 @@ export default {
 
   /**
    * Creates component preload
+   * @param {object} ui5App the ui5App
    * @param {string} destPath uri folder source
    * @param {string} destPath uri folder destination
-   * @param {object} manifest manifest file
    */
-  async createPreload(srcPath, destPath, manifest) {
-    if (!manifest) {
-      manifest = await Utils.getManifest(srcPath);
-    }
-    let idApp = await Utils.getManifestId(manifest);
-    let isLibrary = await Utils.getManifestLibrary(manifest);
+  async createPreload(ui5App, srcPath, destPath) {
+    let { isLibrary, namespace } = ui5App;
 
-    Utils.logOutputBuilder(`Create preload ${srcPath}`);
+    Log.logBuilder(`Create preload ${srcPath}`);
     let sFile = isLibrary ? 'library.js' : 'Component.js';
     let sComponentPath = Uri.file(path.join(srcPath, sFile));
 
     try {
       await workspace.fs.readFile(sComponentPath);
     } catch (oError) {
-      Utils.logOutputBuilder(`${sFile} not found in path ${srcPath}, skiping preload creation...`);
+      Log.logBuilder(`${sFile} not found in path ${srcPath}, skiping preload creation...`);
       return;
     }
 
     let { compatVersion } = Utils.getOptionsVersion();
-    let namespace = idApp.split('.').join('/');
+    let namespaceBars = namespace.split('.').join('/');
     let preloadSrc = Config.builder('preloadSrc');
     let uglifyPreload = Config.builder('uglifyPreload');
 
     await preload({
       resources: {
         cwd: destPath,
-        prefix: namespace,
+        prefix: namespaceBars,
         src: preloadSrc,
       },
       dest: destPath,
       compatVersion: compatVersion,
       compress: uglifyPreload,
       log: false,
-      components: !isLibrary ? namespace : false,
-      libraries: isLibrary ? namespace : false,
+      components: !isLibrary ? namespaceBars : false,
+      libraries: isLibrary ? namespaceBars : false,
     });
   },
 };
