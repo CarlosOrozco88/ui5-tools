@@ -19,10 +19,19 @@ export default {
       this.watchApps.close();
       this.watchApps = undefined;
     }
+    let distFolder = Config.general('distFolder');
     let sWorkspaceRootPath = Utils.getWorkspaceRootPath();
     this.watchApps = chokidar.watch([sWorkspaceRootPath], {
       ignoreInitial: true,
-      ignored: [/\.git\//, /\.svn\//, /\.hg\//, /\.node_modules\//],
+      ignored: (sPath) => {
+        let bIgnore = false;
+        let aIgnored = ['.git', '.svn', '.hg', '.node_modules', distFolder];
+        for (let i = 0; i < aIgnored.length && !bIgnore; i++) {
+          let sIgnored = aIgnored[i];
+          bIgnore = sPath.includes(sIgnored);
+        }
+        return bIgnore;
+      },
       usePolling: false,
     });
     this.watchApps.on('add', (sFilePath) => this.fileChanged(sFilePath));
@@ -56,12 +65,7 @@ export default {
           if (Server.isStartedProduction()) {
             if (bIsLessFile) {
               await this.liveCompileLess(ui5App, ui5App.srcFsPath, [ui5App.srcFsPath, ui5App.distFsPath]);
-              await Builder.compressFiles(ui5App, ui5App.distFsPath, {
-                js: false,
-                json: false,
-                xml: false,
-                css: true,
-              });
+              await Builder.compressCss(ui5App, ui5App.distFsPath);
             } else if (bWatchedExtension && !bIsCssFile) {
               await Builder.buildProject(ui5App, undefined, false);
             }

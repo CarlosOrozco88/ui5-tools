@@ -1,3 +1,7 @@
+## 1.0.3 (28-07-2021)
+
+- Chokidar bug solved
+
 ## 1.0.2 (27-07-2021)
 
 - Deploy bug solved
