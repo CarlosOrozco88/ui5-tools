@@ -1,5 +1,5 @@
 import express from 'express';
-import opn from 'opn';
+import open from 'open';
 import http from 'http';
 import https from 'https';
 import portfinder from 'portfinder';
@@ -15,34 +15,18 @@ import ResourcesProxy from './Proxy/Resources';
 import IndexUI5Tools from './Index/UI5Tools';
 import IndexLaunchpad from './Index/Launchpad';
 import ejs from 'ejs';
+import { ServerParameter, ServerOptions, ServerMode, ServerStatus, Protocols, Level } from '../Types/Types';
 
-const STATUSES = {
-  STOPPED: 0,
-  STARTING: 1,
-  STARTED: 2,
-  STOPPING: 3,
-};
-const SERVER_MODES = {
-  DEV: 'DEV',
-  PROD: 'PROD',
-};
+let serverApp: express.Express;
+let server: https.Server | http.Server;
+let status: ServerStatus = ServerStatus.STOPPED;
+let serverMode: ServerMode = ServerMode.DEV;
 
 export default {
-  serverApp: undefined,
-  server: undefined,
-  STATUSES: STATUSES,
-  SERVER_MODES: SERVER_MODES,
-  serverMode: SERVER_MODES.DEV,
-  status: STATUSES.STOPPED,
-
-  /**
-   * Starts server in development mode (serving srcFolder)
-   * @param {object} object params
-   */
-  async startDevelopment(oParameters) {
+  async startDevelopment(oParameters?: ServerParameter): Promise<void> {
     await this.stopAll();
 
-    this.serverMode = SERVER_MODES.DEV;
+    serverMode = ServerMode.DEV;
     try {
       await this.start(oParameters);
     } catch (e) {
@@ -55,10 +39,10 @@ export default {
    * Starts server in production mode (serving distFolder)
    * @param {object} object params
    */
-  async startProduction(oParameters) {
+  async startProduction(oParameters?: ServerParameter): Promise<void> {
     await this.stopAll();
 
-    this.serverMode = SERVER_MODES.PROD;
+    serverMode = ServerMode.PROD;
     try {
       await this.start(oParameters);
     } catch (e) {
@@ -71,55 +55,56 @@ export default {
    * Start server
    * @param {object} object params
    */
-  async start(oParameters = { restarting: false }) {
-    if (this.status === STATUSES.STOPPED) {
-      if (oParameters.restarting) {
+  async start(oParameters?: ServerParameter): Promise<void> {
+    if (status === ServerStatus.STOPPED) {
+      if (oParameters?.restarting) {
         await StatusBar.checkVisibility();
       }
       ResourcesProxy.resetCache();
 
       Log.logServer('Starting...');
       try {
-        this.serverApp = express();
-        this.serverApp.set('view engine', 'ejs');
-        this.serverApp.disable('x-powered-by');
-        // @ts-ignore
-        this.serverApp.engine('ejs', ejs.__express);
+        serverApp = express();
+        serverApp.set('view engine', 'ejs');
+        serverApp.disable('x-powered-by');
 
-        this.status = STATUSES.STARTING;
+        serverApp.engine('ejs', ejs.renderFile);
+
+        status = ServerStatus.STARTING;
         StatusBar.startingText();
 
         // Reload config, checks new projects
-        let bServeProduction = this.serverMode === SERVER_MODES.PROD;
-        let sServerMode = bServeProduction ? SERVER_MODES.PROD : SERVER_MODES.DEV;
-        let ui5Apps = await Utils.getAllUI5Apps();
-        let oConfigParams = {
-          ...oParameters,
-          serverApp: this.serverApp,
+        const bServeProduction = serverMode === ServerMode.PROD;
+        const sServerMode = bServeProduction ? ServerMode.PROD : ServerMode.DEV;
+        const ui5Apps = await Utils.getAllUI5Apps();
+        const protocol = Config.server('protocol') as keyof typeof Protocols;
+        const oConfigParams: ServerOptions = {
+          serverApp: serverApp,
           ui5Apps: ui5Apps,
           bServeProduction: bServeProduction,
           sServerMode: sServerMode,
-          watch: Config.server('watch'),
-          protocol: Config.server('protocol'),
+          watch: Boolean(Config.server('watch')),
+          protocol: Protocols[protocol],
           port: await portfinder.getPortPromise({
-            port: Config.server('port'),
+            port: Number(Config.server('port')),
           }),
           portLiveReload: await portfinder.getPortPromise({
             port: 35729,
           }),
-          timeout: Config.server('timeout'),
+          timeout: Number(Config.server('timeout')),
           baseDir: Utils.getWorkspaceRootPath(),
           ui5ToolsPath: Utils.getExtensionFsPath(),
           ui5ToolsIndex: Utils.getUi5ToolsIndexFolder(),
           isLaunchpadMounted: Utils.isLaunchpadMounted(),
           bCacheBuster: Config.server('cacheBuster') === sServerMode,
+          restarting: Boolean(oParameters?.restarting),
         };
 
         if (oConfigParams.watch) {
           try {
             await LiveServer.start(oConfigParams);
           } catch (oError) {
-            Log.logServer(oError, 'ERROR');
+            Log.logServer(oError, Level.ERROR);
           }
         }
 
@@ -128,61 +113,61 @@ export default {
         try {
           await OdataProxy.set(oConfigParams);
         } catch (oError) {
-          Log.logServer(oError, 'ERROR');
+          Log.logServer(oError, Level.ERROR);
         }
         try {
           await ResourcesProxy.set(oConfigParams);
         } catch (oError) {
-          Log.logServer(oError, 'ERROR');
+          Log.logServer(oError, Level.ERROR);
         }
 
         try {
           await IndexUI5Tools.set(oConfigParams);
         } catch (oError) {
-          Log.logServer(oError, 'ERROR');
+          Log.logServer(oError, Level.ERROR);
         }
         try {
           await IndexLaunchpad.set(oConfigParams);
         } catch (oError) {
-          Log.logServer(oError, 'ERROR');
+          Log.logServer(oError, Level.ERROR);
         }
 
         if (oConfigParams.protocol === 'https') {
-          this.server = https.createServer(Utils.getHttpsCert(), this.serverApp);
+          server = https.createServer(Utils.getHttpsCert(), serverApp);
         } else {
-          this.server = http.createServer(this.serverApp);
+          server = http.createServer(serverApp);
         }
 
         if (oConfigParams.timeout > 0) {
-          this.server.timeout = oConfigParams.timeout;
+          server.timeout = oConfigParams.timeout;
         }
-        this.server.listen(oConfigParams.port, () => {
+        server.listen(oConfigParams.port, () => {
           Log.logServer('Started!');
-          let openBrowser = Config.server('openBrowser');
-          let ui5ToolsIndex = Utils.getUi5ToolsIndexFolder();
+          const openBrowser = Config.server('openBrowser');
+          const ui5ToolsIndex = Utils.getUi5ToolsIndexFolder();
 
           if (openBrowser && !oConfigParams.restarting) {
-            opn(`${oConfigParams.protocol}://localhost:${oConfigParams.port}/${ui5ToolsIndex}/`);
+            open(`${oConfigParams.protocol}://localhost:${oConfigParams.port}/${ui5ToolsIndex}/`);
           }
         });
-        this.status = STATUSES.STARTED;
+        status = ServerStatus.STARTED;
         StatusBar.stopText(oConfigParams.port);
       } catch (e) {
         this.stopAll();
         throw new Error(e);
       }
     } else {
-      let sMessage = 'Error during server startup';
+      const sMessage = 'Error during server startup';
       Log.logServer(sMessage);
       throw new Error(sMessage);
     }
   },
 
-  stopServer() {
+  stopServer(): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (this.server && this.server.listening) {
+      if (server && server.listening) {
         Log.logServer('Stopping...');
-        this.server.close(() => {
+        server.close(() => {
           Log.logServer('Stopped!');
           //server.unref();
           resolve();
@@ -194,31 +179,31 @@ export default {
   },
 
   async stop() {
-    if (this.status === STATUSES.STARTED) {
-      this.status = STATUSES.STOPPING;
+    if (status === ServerStatus.STARTED) {
+      status = ServerStatus.STOPPING;
       StatusBar.stoppingText();
 
       await this.stopServer();
 
-      this.status = STATUSES.STOPPED;
+      status = ServerStatus.STOPPED;
       StatusBar.startText();
     }
   },
 
   async stopAll() {
-    if (this.status === STATUSES.STARTED) {
-      this.status = STATUSES.STOPPING;
+    if (status === ServerStatus.STARTED) {
+      status = ServerStatus.STOPPING;
       StatusBar.stoppingText();
 
       await Promise.all([this.stopServer(), LiveServer.stop()]);
 
-      this.status = STATUSES.STOPPED;
+      status = ServerStatus.STOPPED;
       StatusBar.startText();
     }
   },
 
   async restart() {
-    if (this.status === STATUSES.STARTED) {
+    if (status === ServerStatus.STARTED) {
       Log.logServer('Restarting...');
       await this.stop();
       try {
@@ -232,25 +217,25 @@ export default {
   },
 
   async toggle() {
-    switch (this.status) {
-      case STATUSES.STOPPED:
+    switch (status) {
+      case ServerStatus.STOPPED:
         await this.start();
         break;
-      case STATUSES.STARTED:
+      case ServerStatus.STARTED:
         await this.stopAll();
         break;
     }
   },
 
   isStarted() {
-    return this.status === STATUSES.STARTED;
+    return status === ServerStatus.STARTED;
   },
 
   isStartedDevelopment() {
-    return this.isStarted() && this.serverMode === SERVER_MODES.DEV;
+    return this.isStarted() && serverMode === ServerMode.DEV;
   },
 
   isStartedProduction() {
-    return this.isStarted() && this.serverMode === SERVER_MODES.PROD;
+    return this.isStarted() && serverMode === ServerMode.PROD;
   },
 };

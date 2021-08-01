@@ -8,6 +8,9 @@ import Ui5Provider from '../../Configurator/Ui5Provider';
 import Config from '../../Utils/Config';
 import Utils from '../../Utils/Utils';
 import Log from '../../Utils/Log';
+import { Level, ServerOptions } from '../../Types/Types';
+import { NextFunction, Request, Response, RequestHandler } from 'express';
+import { ServerResponse } from 'http';
 
 const cacheResources = apicache
   .options({
@@ -21,31 +24,32 @@ const cacheResources = apicache
   })
   .middleware();
 
-const onProxyRes = function (req, res, next) {
-  onHeaders(res, () => {
-    res.set('cache-control', 'no-cache');
+const onProxyRes: RequestHandler = function (req: Request, res: Response, next: NextFunction): void {
+  const oRes: ServerResponse = res;
+  onHeaders(oRes, () => {
+    res.setHeader('cache-control', 'no-cache');
   });
   next();
 };
 
 export default {
-  resetCache() {
+  resetCache(): void {
     if (apicache.clear) {
       Log.logServer(`Clear resources cache`);
-      apicache.clear(null);
+      apicache.clear('');
     }
   },
 
-  async set({ serverApp }) {
-    let framework = Utils.getFramework();
+  async set({ serverApp }: ServerOptions): Promise<void> {
+    const framework = Utils.getFramework();
     let targetUri, proxy;
-    let resourcesProxy = Config.server('resourcesProxy');
+    const resourcesProxy = Config.server('resourcesProxy')?.toString() || '';
     let ui5Version = Config.general('ui5Version');
 
     // Options: Gateway, CDN SAPUI5, CDN OpenUI5, None
     switch (resourcesProxy) {
       case 'Gateway':
-        targetUri = Config.server('resourcesUri');
+        targetUri = Config.server('resourcesUri')?.toString() || '';
         try {
           await Ui5Provider.configureGWVersion(targetUri); // Upadate for correct version
           ui5Version = Config.general('ui5Version');
@@ -56,13 +60,13 @@ export default {
         if (targetUri) {
           Log.logServer(`Creating resourcesProxy with ui5Version ${ui5Version} to Gateway ${targetUri}`);
           proxy = createProxyMiddleware({
-            pathRewrite(path, req) {
-              let basePath = '/sap/public/bc/ui5_ui5/1';
-              let resourcesPath = path.slice(path.indexOf('/resources/'), path.length);
+            pathRewrite(path) {
+              const basePath = '/sap/public/bc/ui5_ui5/1';
+              const resourcesPath = path.slice(path.indexOf('/resources/'), path.length);
               return `${basePath}${resourcesPath}`;
             },
             target: targetUri,
-            secure: Config.server('resourcesSecure'),
+            secure: Boolean(Config.server('resourcesSecure')),
             changeOrigin: true,
             logLevel: 'error',
             logProvider: Log.newLogProviderProxy,
@@ -80,11 +84,11 @@ export default {
           Log.logServer(`Creating resourcesProxy with ui5Version ${ui5Version} to CDN ${targetUri}`);
           proxy = createProxyMiddleware({
             pathRewrite(path, req) {
-              let resourcesPath = path.slice(path.indexOf('/resources/'), path.length);
+              const resourcesPath = path.slice(path.indexOf('/resources/'), path.length);
               return resourcesPath;
             },
             target: targetUri,
-            secure: Config.server('resourcesSecure'),
+            secure: Boolean(Config.server('resourcesSecure')),
             changeOrigin: true,
             logLevel: 'error',
             logProvider: Log.newLogProviderProxy,
@@ -95,12 +99,12 @@ export default {
 
         try {
           // Check for sap-ui-core.JS
-          let url = `${targetUri}resources/sap-ui-core.js`;
+          const url = `${targetUri}resources/sap-ui-core.js`;
           Utils.fetchFile(url);
         } catch (oError) {
-          let sError = `Error: Unable to get sap-ui-core.js, framework ${framework} does not have ${ui5Version} available at CDN.`;
+          const sError = `Error: Unable to get sap-ui-core.js, framework ${framework} does not have ${ui5Version} available at CDN.`;
 
-          Log.logServer(sError, 'ERROR');
+          Log.logServer(sError, Level.ERROR);
           window.showErrorMessage(sError);
         }
 
@@ -110,21 +114,21 @@ export default {
     return;
   },
 
-  setTest({ serverApp }) {
-    let ui5Version = Config.general('ui5Version');
-    let resourcesProxy = Config.server('resourcesProxy');
-    let framework = Utils.getFramework();
+  setTest({ serverApp }: ServerOptions): void {
+    const ui5Version = Config.general('ui5Version');
+    const resourcesProxy = Config.server('resourcesProxy');
+    const framework = Utils.getFramework();
     let targetUri = ``;
 
     let basePath = '';
     switch (resourcesProxy) {
       case 'Gateway':
-        targetUri = Config.server('resourcesUri');
+        targetUri = Config.server('resourcesUri')?.toString() || '';
         basePath = '/sap/public/bc/ui5_ui5/1';
         serverApp.get('/flp/test-resources/sap/ushell/bootstrap/sandbox.js', async (req, res) => {
-          let sCdnTargetUri = `https://sapui5.hana.ondemand.com/${ui5Version}/`;
-          let url = `${sCdnTargetUri}test-resources/sap/ushell/bootstrap/sandbox.js`;
-          let sFile = await Utils.fetchFile(url);
+          const sCdnTargetUri = `https://sapui5.hana.ondemand.com/${ui5Version}/`;
+          const url = `${sCdnTargetUri}test-resources/sap/ushell/bootstrap/sandbox.js`;
+          const sFile = await Utils.fetchFile(url);
           res.send(sFile);
         });
         break;
@@ -136,13 +140,13 @@ export default {
     }
     if (targetUri) {
       Log.logServer(`Creating testProxy with ui5Version ${ui5Version} to ${targetUri}`);
-      let proxy = createProxyMiddleware({
+      const proxy = createProxyMiddleware({
         pathRewrite(path, req) {
-          let resourcesPath = path.slice(path.indexOf('/test-resources/'), path.length);
+          const resourcesPath = path.slice(path.indexOf('/test-resources/'), path.length);
           return `${basePath}${resourcesPath}`;
         },
         target: targetUri,
-        secure: Config.server('resourcesSecure'),
+        secure: Boolean(Config.server('resourcesSecure')),
         changeOrigin: true,
         logLevel: 'error',
         logProvider: Log.newLogProviderProxy,

@@ -7,57 +7,58 @@ import http from 'http';
 
 import Config from './Config';
 import Log from './Log';
+import { Ui5Apps } from '../Types/Types';
 
-let ui5Apps = [];
-let getUi5AppsPromise;
+let ui5Apps: Ui5Apps = [];
+let getUi5AppsPromise: Promise<Ui5Apps>;
 let sPromiseStatus;
 
 const Utils = {
-  async getAllUI5Apps(bRefresh) {
+  async getAllUI5Apps(bRefresh = false): Promise<Ui5Apps> {
     if (!getUi5AppsPromise || (bRefresh && !sPromiseStatus)) {
       getUi5AppsPromise = new Promise(async (resolve, reject) => {
         try {
           sPromiseStatus = 'loading';
           ui5Apps = [];
 
-          let srcFolder = Config.general('srcFolder');
-          let libraryFolder = Config.general('libraryFolder');
-          let distFolder = Config.general('distFolder');
+          const srcFolder = Config.general('srcFolder');
+          const libraryFolder = Config.general('libraryFolder');
+          const distFolder = Config.general('distFolder');
 
-          let aWorkspacesPromises = [];
-          for (let wsUri of workspace.workspaceFolders) {
-            let aManifestList = await workspace.findFiles(
+          const aWorkspacesPromises = [];
+          for (const wsUri of workspace.workspaceFolders) {
+            const aManifestList = await workspace.findFiles(
               new RelativePattern(wsUri, `**/{${srcFolder},${libraryFolder}}/manifest.json`),
               new RelativePattern(wsUri, `**/{node_modules,.git}/`)
             );
             aWorkspacesPromises.push(aManifestList);
           }
-          let aWorkspacesList = await Promise.all(aWorkspacesPromises);
+          const aWorkspacesList = await Promise.all(aWorkspacesPromises);
 
-          let aPaths = new Set();
+          const aPaths: Set<string> = new Set();
           aWorkspacesList.forEach((aWorkspaceManifests) => {
             aWorkspaceManifests.forEach((oUriManifest) => {
               aPaths.add(oUriManifest.fsPath);
             });
           });
 
-          let aManifestPromises = [];
-          for (let manifestFsPath of aPaths) {
-            let manifestUri = Uri.file(manifestFsPath);
+          const aManifestPromises = [];
+          for (const manifestFsPath of aPaths) {
+            const manifestUri = Uri.file(manifestFsPath);
             try {
-              let manifestPromise = workspace.fs.readFile(manifestUri);
+              const manifestPromise = workspace.fs.readFile(manifestUri);
               aManifestPromises.push(manifestPromise);
             } catch (oError) {
               Log.logGeneral(oError.message, 'ERROR');
             }
           }
 
-          let aManifestsFiles = await Promise.allSettled(aManifestPromises);
+          const aManifestsFiles = await (Promise as any).allSettled(aManifestPromises);
 
           let i = 0;
-          for (let manifestFsPath of aPaths) {
+          for (const manifestFsPath of aPaths) {
             let manifest;
-            let manifestPromise = aManifestsFiles[i];
+            const manifestPromise = aManifestsFiles[i];
             if (manifestPromise.status === 'fulfilled') {
               try {
                 manifest = JSON.parse(manifestPromise.value.toString());
@@ -66,27 +67,27 @@ const Utils = {
               }
 
               if (manifest?.['sap.app']?.id) {
-                let type = manifest?.['sap.app']?.type || 'application';
-                let isLibrary = type === 'library';
-                let namespace = manifest['sap.app'].id;
-                let appSrcFolder = isLibrary ? libraryFolder : srcFolder;
+                const type = manifest?.['sap.app']?.type || 'application';
+                const isLibrary = type === 'library';
+                const namespace = manifest['sap.app'].id;
+                const appSrcFolder = isLibrary ? libraryFolder : srcFolder;
 
                 if (namespace) {
-                  let manifestInnerPath = path.join(appSrcFolder, 'manifest.json');
-                  let appFsPath = manifestFsPath.replace(manifestInnerPath, '');
-                  let appResourceDirname = manifestFsPath.replace(path.sep + manifestInnerPath, '');
+                  const manifestInnerPath = path.join(appSrcFolder, 'manifest.json');
+                  const appFsPath = manifestFsPath.replace(manifestInnerPath, '');
+                  const appResourceDirname = manifestFsPath.replace(path.sep + manifestInnerPath, '');
 
-                  let appConfigPath = path.join(appResourceDirname, 'ui5-tools.json');
+                  const appConfigPath = path.join(appResourceDirname, 'ui5-tools.json');
                   // clean all srcFolders/libraryFolders/distFolders if has any parent app
-                  let appServerPath = Utils.fsPathToServerPath(appFsPath);
+                  const appServerPath = Utils.fsPathToServerPath(appFsPath);
 
-                  let srcFsPath = path.join(appFsPath, appSrcFolder);
-                  let distFsPath = path.join(appFsPath, distFolder);
+                  const srcFsPath = path.join(appFsPath, appSrcFolder);
+                  const distFsPath = path.join(appFsPath, distFolder);
 
-                  let sDeployFolder = Config.deployer('deployFolder');
-                  let deployFsPath = sDeployFolder == 'Dist Folder' ? distFsPath : appFsPath;
+                  const sDeployFolder = Config.deployer('deployFolder');
+                  const deployFsPath = sDeployFolder == 'Dist Folder' ? distFsPath : appFsPath;
 
-                  let folderName = path.basename(appFsPath);
+                  const folderName = path.basename(appFsPath);
 
                   ui5Apps.push({
                     appFsPath,
@@ -116,7 +117,7 @@ const Utils = {
 
           Log.logGeneral(`${ui5Apps.length} ui5 projects found!`);
 
-          let aResourcesDirname = ui5Apps.map((app) => app.appResourceDirname);
+          const aResourcesDirname = ui5Apps.map((app) => app.appResourceDirname);
           commands.executeCommand('setContext', 'ui5-tools:resourcesPath', aResourcesDirname);
 
           sPromiseStatus = undefined;
@@ -132,10 +133,10 @@ const Utils = {
   },
 
   fsPathToServerPath(appFsPath) {
-    let workspaceRootPath = Utils.getWorkspaceRootPath();
-    let libraryFolder = Config.general('libraryFolder');
-    let distFolder = Config.general('distFolder');
-    let srcFolder = Config.general('srcFolder');
+    const workspaceRootPath = Utils.getWorkspaceRootPath();
+    const libraryFolder = Config.general('libraryFolder');
+    const distFolder = Config.general('distFolder');
+    const srcFolder = Config.general('srcFolder');
 
     let appServerPath = appFsPath.replace(workspaceRootPath, '').split(path.sep).join('/');
     appServerPath = appServerPath
@@ -147,12 +148,12 @@ const Utils = {
 
   getWorkspaceRootPath() {
     let baseDirWorkspace = '';
-    let workspaceFileUri = workspace.workspaceFile;
+    const workspaceFileUri = workspace.workspaceFile;
     if (workspaceFileUri) {
       baseDirWorkspace = path.dirname(workspaceFileUri.fsPath);
     } else {
       // only 1 workspace folder
-      let workspaceFolders = workspace.workspaceFolders;
+      const workspaceFolders = workspace.workspaceFolders;
       baseDirWorkspace = workspaceFolders[0].uri.fsPath;
     }
     return baseDirWorkspace;
@@ -167,15 +168,15 @@ const Utils = {
   },
 
   loadEnv() {
-    let baseDir = Utils.getWorkspaceRootPath();
-    let oDotEnv = dotenv.config({
+    const baseDir = Utils.getWorkspaceRootPath();
+    const oDotEnv = dotenv.config({
       path: path.join(baseDir, '.env'),
     });
     return oDotEnv.parsed || {};
   },
 
   getHttpsCert() {
-    let ui5ToolsPath = Utils.getExtensionFsPath();
+    const ui5ToolsPath = Utils.getExtensionFsPath();
     return {
       key: fs.readFileSync(path.join(ui5ToolsPath, 'static', 'cert', 'server.key')),
       cert: fs.readFileSync(path.join(ui5ToolsPath, 'static', 'cert', 'server.cert')),
@@ -183,7 +184,7 @@ const Utils = {
   },
 
   getFramework() {
-    let resourcesProxy = Config.server('resourcesProxy');
+    const resourcesProxy = Config.server('resourcesProxy');
     let framework = '';
     if (resourcesProxy.indexOf('OpenUI5') >= 0) {
       framework = 'openui5';
@@ -197,7 +198,7 @@ const Utils = {
     let ui5AppConfig = undefined;
     if (ui5App) {
       try {
-        let appConfigFile = await workspace.fs.readFile(Uri.file(ui5App.appConfigPath));
+        const appConfigFile = await workspace.fs.readFile(Uri.file(ui5App.appConfigPath));
         ui5AppConfig = JSON.parse(appConfigFile.toString());
       } catch (oError) {
         ui5AppConfig = undefined;
@@ -209,7 +210,7 @@ const Utils = {
   async setUi5ToolsFile(ui5App, oConfigFile) {
     if (ui5App && typeof oConfigFile === 'object') {
       try {
-        let sConfigFile = JSON.stringify(oConfigFile, undefined, 2);
+        const sConfigFile = JSON.stringify(oConfigFile, undefined, 2);
         await workspace.fs.writeFile(Uri.file(ui5App.appConfigPath), Buffer.from(sConfigFile));
       } catch (oError) {
         throw oError;
@@ -222,16 +223,16 @@ const Utils = {
     let manifest = undefined;
     if (uriOrManifest) {
       if (typeof uriOrManifest === 'string') {
-        let libraryFolder = Config.general('libraryFolder');
-        let distFolder = Config.general('distFolder');
-        let manifestString = await workspace.findFiles(
+        const libraryFolder = Config.general('libraryFolder');
+        const distFolder = Config.general('distFolder');
+        const manifestString = await workspace.findFiles(
           new RelativePattern(uriOrManifest, `**/manifest.json`),
           `**/{${distFolder},${libraryFolder},node_modules}/**`,
           1
         );
         if (manifestString.length) {
-          let uri = Uri.file(manifestString[0].fsPath);
-          let file = await workspace.fs.readFile(uri);
+          const uri = Uri.file(manifestString[0].fsPath);
+          const file = await workspace.fs.readFile(uri);
           manifest = JSON.parse(file.toString());
         }
       } else {
@@ -243,7 +244,7 @@ const Utils = {
 
   async getManifestLibrary(uriOrManifest) {
     let isLib = false;
-    let manifest = await Utils.getManifest(uriOrManifest);
+    const manifest = await Utils.getManifest(uriOrManifest);
     if (manifest?.['sap.app']?.type === 'library') {
       isLib = true;
     }
@@ -252,7 +253,7 @@ const Utils = {
 
   async getManifestId(uriOrManifest) {
     let manifestId = undefined;
-    let manifest = await Utils.getManifest(uriOrManifest);
+    const manifest = await Utils.getManifest(uriOrManifest);
     if (manifest?.['sap.app']?.id) {
       manifestId = manifest['sap.app'].id;
     }
@@ -260,8 +261,8 @@ const Utils = {
   },
 
   getOptionsVersion() {
-    let ui5Version = Config.general('ui5Version');
-    let ui5toolsData = {
+    const ui5Version = Config.general('ui5Version');
+    const ui5toolsData = {
       compatVersion: 'edge', // for building
       showTree: false, // shows list or tree in docs folder
       theme: 'sap_bluecrystal', // theme to use in index server and flp
@@ -299,7 +300,7 @@ const Utils = {
   },
 
   isLaunchpadMounted() {
-    let resourcesProxy = Config.server('resourcesProxy');
+    const resourcesProxy = Config.server('resourcesProxy');
     return resourcesProxy === 'CDN SAPUI5' || resourcesProxy === 'Gateway';
   },
 
@@ -314,16 +315,16 @@ const Utils = {
   },
 
   async findUi5AppForFsPath(sFsFilePath) {
-    let ui5Apps = await Utils.getAllUI5Apps();
-    let oUi5App = ui5Apps.find((ui5App) => this.isUi5AppFsPath(ui5App, sFsFilePath));
+    const ui5Apps = await Utils.getAllUI5Apps();
+    const oUi5App = ui5Apps.find((ui5App) => this.isUi5AppFsPath(ui5App, sFsFilePath));
 
     return oUi5App;
   },
 
-  getMethods(obj) {
-    let properties = new Set();
+  getMethods(obj): Array<string> {
+    const properties: Set<string> = new Set();
     let currentObj = obj;
-    let aExclude = [
+    const aExclude = [
       'constructor',
       '__defineGetter__',
       '__defineSetter__',
@@ -341,7 +342,7 @@ const Utils = {
     });
   },
 
-  fetchFile(url, options = { timeout: 5000 }) {
+  fetchFile(url, options = { timeout: 5000 }): Promise<string> {
     return new Promise((resolve, reject) => {
       url = url.split('//').join('/');
 

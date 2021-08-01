@@ -1,4 +1,4 @@
-import connectLiveReload from 'connect-livereload';
+import connectLiveReload, { FileMatcher } from 'connect-livereload';
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
@@ -8,14 +8,19 @@ import WebSocket from 'ws';
 import Utils from '../Utils/Utils';
 import Config from '../Utils/Config';
 import Log from '../Utils/Log';
+import { ServerOptions } from '../Types/Types';
+import { NextFunction, Request, Response } from 'express';
 
 const DELAY_REFRESH = 500;
+let liveServer: http.Server | https.Server | undefined;
+let liveServerWS: WebSocket.Server | undefined;
+let timeout: ReturnType<typeof setTimeout>;
 
 export default {
   liveServerWS: undefined,
   liveServer: undefined,
 
-  async start(oConfigParams) {
+  async start(oConfigParams: ServerOptions): Promise<void> {
     return new Promise(async (resolve, reject) => {
       try {
         Log.logServer('LiveServer > Starting...');
@@ -30,27 +35,27 @@ export default {
     });
   },
 
-  async createServer(oConfigParams) {
+  async createServer(oConfigParams: ServerOptions): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        let { portLiveReload } = oConfigParams;
-        let protocol = Config.server('protocol');
+        const { portLiveReload } = oConfigParams;
+        const protocol = Config.server('protocol');
 
         if (protocol === 'http') {
-          this.liveServer = http.createServer(this.serveLiveReloadScript);
+          liveServer = http.createServer(this.serveLiveReloadScript);
         } else {
-          this.liveServer = https.createServer(Utils.getHttpsCert(), this.serveLiveReloadScript);
+          liveServer = https.createServer(Utils.getHttpsCert(), this.serveLiveReloadScript);
         }
-        this.liveServer.listen(portLiveReload);
+        liveServer.listen(portLiveReload);
 
-        this.liveServerWS = new WebSocket.Server({
-          server: this.liveServer,
+        liveServerWS = new WebSocket.Server({
+          server: liveServer,
         });
-        this.liveServerWS.on('connection', (ws) => this.onConnection(ws));
-        this.liveServerWS.on('close', (ws) => this.onClose(ws));
-        this.liveServerWS.on('error', (error) => this.onError(error));
+        liveServerWS.on('connection', (ws: WebSocket) => this.onConnection(ws));
+        liveServerWS.on('close', () => this.onClose());
+        liveServerWS.on('error', (error) => this.onError(error.message));
 
-        this.liveServerWS.once('listening', () => {
+        liveServerWS.once('listening', () => {
           Log.logServer('LiveServer > Started!');
           resolve();
         });
@@ -60,17 +65,17 @@ export default {
     });
   },
 
-  onConnection(ws) {
+  onConnection(ws: WebSocket): WebSocket {
     this.debug('Browser connected');
     ws.on(
       'message',
       ((ws) => {
-        return (data) => {
+        return (data: string) => {
           this.debug('Client message: ' + data);
-          let request = JSON.parse(data);
+          const request = JSON.parse(data);
           if (request.command === 'hello') {
             this.debug('Client requested handshake...');
-            let data = JSON.stringify({
+            const data = JSON.stringify({
               command: 'hello',
               protocols: [
                 'http://livereload.com/protocols/official-7',
@@ -92,36 +97,37 @@ export default {
     ws.on('error', (error) => {
       return this.debug('Error in client: ' + error);
     });
-    return ws.on('close', (ws) => {
+    return ws.on('close', () => {
       return this.debug('Client closed connection');
     });
   },
 
-  onError(error) {
-    return this.debug('Error:' + error);
+  onError(error: string): void {
+    this.debug('Error:' + error);
   },
 
-  onClose(ws) {
-    return this.debug('WebSocket closed');
+  onClose(): void {
+    this.debug('WebSocket closed');
   },
 
-  serveLiveReloadScript(req, res) {
+  serveLiveReloadScript(req: Request, res: Response, next: NextFunction): void {
     if (req.url.indexOf('/livereload.js') === 0) {
       res.writeHead(200, {
         'Content-Type': 'text/javascript',
       });
-      return res.end(fs.readFileSync(path.join(Utils.getExtensionFsPath(), 'static', 'scripts', 'livereload.js')));
+      res.end(fs.readFileSync(path.join(Utils.getExtensionFsPath(), 'static', 'scripts', 'livereload.js')));
     }
+    next();
   },
 
-  middleware({ serverApp = undefined, portLiveReload = 35729, ui5Apps = [] } = {}) {
+  middleware({ serverApp, portLiveReload }: ServerOptions): void {
     // let include = [];
 
     // ui5Apps.forEach((ui5App) => {
     //   include.push(new RegExp(`^${ui5App.appServerPath}(.*)`, 'g'));
     // });
     // Include only workspace projects
-    let ignore = [
+    const aIgnore: FileMatcher[] = [
       /\.js(\?.*)?$/,
       /\.css(\?.*)?$/,
       /\.svg(\?.*)?$/,
@@ -136,23 +142,22 @@ export default {
       /(.*)\/resources\/(.*)/,
     ];
 
-    let odataMountPath = Config.server('odataMountPath');
-    let mpaths = odataMountPath.replace(/\\s/g).split(',');
+    const odataMountPath = Config.server('odataMountPath')?.toString() || '';
+    const mpaths = odataMountPath.replace(/\\s/g, '').split(',');
     mpaths.forEach((path) => {
-      let re = new RegExp(`^${path}`, 'g');
-      ignore.push(re);
+      const re = new RegExp(`^${path}`, 'g');
+      aIgnore.push(re);
     });
 
-    serverApp.use(
-      connectLiveReload({
-        port: portLiveReload,
-        ignore: ignore,
-      })
-    );
+    const connLiveReload: any = connectLiveReload({
+      port: portLiveReload,
+      ignore: aIgnore,
+    });
+    serverApp.use(connLiveReload);
   },
 
-  refresh(sFilePath) {
-    let data = JSON.stringify({
+  refresh(sFilePath: string): void {
+    const data = JSON.stringify({
       command: 'reload',
       path: sFilePath,
       liveCSS: true,
@@ -163,38 +168,40 @@ export default {
     this.sendAllClients(data);
   },
 
-  sendAllClients(data) {
-    if (this.liveServerWS) {
-      clearTimeout(this._sendAllClientsTimeout);
-      this._sendAllClientsTimeout = setTimeout(() => {
-        Log.logServer('Refreshing browser...');
-        this.liveServerWS.clients.forEach((client) => {
+  sendAllClients(data: string): void {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      Log.logServer('Refreshing browser...');
+      if (liveServerWS) {
+        liveServerWS.clients.forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
             this.debug('Sending: ' + data);
 
             client.send(data, (error) => {
               if (error) {
-                this.debug(error);
+                this.debug(error.message);
               }
             });
           }
         });
-      }, DELAY_REFRESH);
-    }
+      }
+    }, DELAY_REFRESH);
   },
 
-  async stop() {
-    if (this.liveServerWS) {
+  async stop(): Promise<void> {
+    if (liveServerWS) {
+      liveServerWS.close();
+      liveServerWS = undefined;
+    }
+    if (liveServer) {
       Log.logServer('LiveServer > Stopping...');
-      this.liveServer.close();
-      this.liveServer = undefined;
-      this.liveServerWS.close();
-      this.liveServerWS = undefined;
+      liveServer.close();
+      liveServer = undefined;
       Log.logServer('LiveServer > Stopped!');
     }
   },
 
-  debug(message) {
+  debug(message: string): string {
     console.log(message);
     return message;
   },

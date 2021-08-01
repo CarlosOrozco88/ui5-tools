@@ -10,56 +10,60 @@ import Server from '../Server/Server';
 import Utils from '../Utils/Utils';
 import Config from '../Utils/Config';
 import LiveServer from '../Server/LiveServer';
+import { Ui5App } from '../Types/Types';
+
+let watchApps: chokidar.FSWatcher | undefined;
+
+let awaiter: Record<string, ReturnType<typeof setTimeout>>;
+let timeouts: Record<string, ReturnType<typeof setTimeout>>;
 
 export default {
-  watchApps: undefined,
-
-  async attachWatch() {
-    if (this.watchApps) {
-      this.watchApps.close();
-      this.watchApps = undefined;
+  async attachWatch(): Promise<void> {
+    if (watchApps) {
+      watchApps.close();
+      watchApps = undefined;
     }
-    let distFolder = Config.general('distFolder');
-    let sWorkspaceRootPath = Utils.getWorkspaceRootPath();
-    this.watchApps = chokidar.watch([sWorkspaceRootPath], {
+    const distFolder: string = Config.general('distFolder')?.toString() || '';
+    const sWorkspaceRootPath = Utils.getWorkspaceRootPath();
+    watchApps = chokidar.watch([sWorkspaceRootPath], {
       ignoreInitial: true,
-      ignored: (sPath) => {
+      ignored: (sPath: string) => {
         let bIgnore = false;
-        let aIgnored = ['.git', '.svn', '.hg', '.node_modules', distFolder];
+        const aIgnored: Array<string> = ['.git', '.svn', '.hg', '.node_modules', distFolder];
         for (let i = 0; i < aIgnored.length && !bIgnore; i++) {
-          let sIgnored = aIgnored[i];
+          const sIgnored = aIgnored[i];
           bIgnore = sPath.includes(sIgnored);
         }
         return bIgnore;
       },
       usePolling: false,
     });
-    this.watchApps.on('add', (sFilePath) => this.fileChanged(sFilePath));
-    this.watchApps.on('change', (sFilePath) => this.fileChanged(sFilePath));
-    this.watchApps.on('unlink', (sFilePath) => this.fileChanged(sFilePath));
+    watchApps.on('add', (sFilePath) => this.fileChanged(sFilePath));
+    watchApps.on('change', (sFilePath) => this.fileChanged(sFilePath));
+    watchApps.on('unlink', (sFilePath) => this.fileChanged(sFilePath));
   },
 
   awaiter: {},
-  async fileChanged(sFilePath) {
-    let fileExtension = path.extname(sFilePath).replace('.', '');
-    let bIsLessFile = fileExtension === 'less';
-    let bIsCssFile = fileExtension === 'css';
+  async fileChanged(sFilePath: string): Promise<void> {
+    const fileExtension = path.extname(sFilePath).replace('.', '');
+    const bIsLessFile = fileExtension === 'less';
+    const bIsCssFile = fileExtension === 'css';
 
-    let ui5App = await Utils.findUi5AppForFsPath(sFilePath);
+    const ui5App = await Utils.findUi5AppForFsPath(sFilePath);
 
     if (ui5App) {
-      let sKey = `${ui5App.srcFsPath}-${bIsLessFile}`;
-      if (this.awaiter[sKey]) {
-        clearTimeout(this.awaiter[sKey]);
-        delete this.awaiter[sKey];
+      const sKey = `${ui5App.srcFsPath}-${bIsLessFile}`;
+      if (awaiter[sKey]) {
+        clearTimeout(awaiter[sKey]);
+        delete awaiter[sKey];
       }
-      this.awaiter[sKey] = setTimeout(async () => {
-        let watchExtensions = Config.server('watchExtensions').replace(/\\s/g, '');
-        let watchExtensionsArray = watchExtensions.split(',');
-        let bWatchedExtension = watchExtensionsArray.includes(fileExtension);
+      awaiter[sKey] = setTimeout(async () => {
+        const watchExtensions = (Config.server('watchExtensions')?.toString() || '').replace(/\\s/g, '');
+        const watchExtensionsArray = watchExtensions.split(',');
+        const bWatchedExtension = watchExtensionsArray.includes(fileExtension);
         let bRefreshedServer = false;
 
-        let bChangedSrc = Utils.isUi5AppFsPathSrc(ui5App, sFilePath);
+        const bChangedSrc = Utils.isUi5AppFsPathSrc(ui5App, sFilePath);
         if (bChangedSrc) {
           // Production
           if (Server.isStartedProduction()) {
@@ -88,9 +92,9 @@ export default {
     }
   },
 
-  async checkRefreshApps(sFilePath) {
+  async checkRefreshApps(sFilePath: string): Promise<boolean> {
     let bRefreshedServer = false;
-    let baseName = path.basename(sFilePath);
+    const baseName = path.basename(sFilePath);
     if (['manifest.json', '.env'].includes(baseName)) {
       await Server.restart();
       LiveServer.refresh(sFilePath);
@@ -104,13 +108,13 @@ export default {
    * Live compile less to css
    * @param {TextDocument} event save file event
    */
-  async liveCompileLess(ui5App, srcFsPath, aDistFsPath) {
+  async liveCompileLess(ui5App: Ui5App, srcFsPath: string, aDistFsPath: Array<string> | string): Promise<void> {
     return new Promise(async (resolve, reject) => {
-      let buildLess = Config.builder('buildLess');
+      const buildLess = Config.builder('buildLess');
       if (buildLess && ui5App) {
-        let sTimeoutKey = `_liveCompileTimeout${ui5App.folderName}`;
-        clearTimeout(this[sTimeoutKey]);
-        this[sTimeoutKey] = setTimeout(async () => {
+        const sTimeoutKey = `_liveCompileTimeout${ui5App.folderName}`;
+        clearTimeout(timeouts[sTimeoutKey]);
+        timeouts[sTimeoutKey] = setTimeout(async () => {
           await window.withProgress(
             {
               location: ProgressLocation.Notification,

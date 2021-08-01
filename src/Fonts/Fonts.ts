@@ -1,5 +1,5 @@
 import { generateFonts, FontAssetType, OtherAssetType } from 'fantasticon';
-import { window, workspace, Uri, ProgressLocation } from 'vscode';
+import { window, workspace, Uri, ProgressLocation, QuickPickItem } from 'vscode';
 import path from 'path';
 import fs from 'fs';
 import https from 'https';
@@ -55,7 +55,7 @@ export default {
       console.log(aFonts);
 
       if (aFonts.length > 1) {
-        let fontToGenerate = await new Promise(async (resolve, reject) => {
+        let fontToGenerate : QuickPickItem = await new Promise(async (resolve, reject) => {
           let fontToGenerateQp = await window.createQuickPick();
           fontToGenerateQp.title = 'ui5-tools > Fonts > Select font';
           fontToGenerateQp.items = qpOptions;

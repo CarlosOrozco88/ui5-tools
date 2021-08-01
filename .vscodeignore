@@ -4,7 +4,6 @@
 .gitignore
 .prettierrc.json
 .prettierignore
-babel.config.json
 jsconfig.json
 node_modules
 test/**
