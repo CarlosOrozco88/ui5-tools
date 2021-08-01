@@ -11,8 +11,6 @@ import Builder from './Builder/Builder';
 import LiveBuilder from './Builder/LiveBuilder';
 // Deployer
 import Deployer from './Deployer/Deployer';
-// Fonts
-import Fonts from './Fonts/Fonts';
 // Menu
 import Menu from './Menu/Menu';
 // StatusBar
@@ -43,9 +41,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   subscriptions.push(registerCommand('ui5-tools.deployer.deploy', () => Deployer.askProjectToDeploy()));
   subscriptions.push(registerCommand('ui5-tools.deployer.deployAll', () => Deployer.deployAllProjects()));
-
-  subscriptions.push(registerCommand('ui5-tools.fonts.generate', () => Fonts.askFontToGenerate()));
-  subscriptions.push(registerCommand('ui5-tools.fonts.generateAll', () => Fonts.generateAllFonts()));
 
   subscriptions.push(registerCommand('ui5-tools.configurator.odataProvider', () => OdataProvider.wizard()));
   subscriptions.push(registerCommand('ui5-tools.configurator.ui5Provider', () => Ui5Provider.wizard()));

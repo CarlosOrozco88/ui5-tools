@@ -18,7 +18,7 @@ import Builder from '../Builder/Builder';
 import Log from '../Utils/Log';
 import Utils from '../Utils/Utils';
 import Config from '../Utils/Config';
-import { Level } from '../Types/Types';
+import { Level, Ui5App } from '../Types/Types';
 
 const oLogger = Log.newLogProviderDeployer();
 const ODEPLOYSTATUS = {
@@ -122,13 +122,11 @@ export default {
         ${oResults[ODEPLOYSTATUS.ERROR]} not deployed`;
         Log.logDeployer(sMessage, Level.SUCCESS);
         window.showInformationMessage(sMessage);
-        return;
       }
     );
-    return;
   },
 
-  async askCreateReuseTransport(ui5App, oOptions?) {
+  async askCreateReuseTransport(ui5App: Ui5App, oOptions?) {
     let oDeployOptions;
     try {
       oOptions.deployed = ODEPLOYSTATUS.ERROR;
@@ -228,7 +226,7 @@ export default {
     return oOptions;
   },
 
-  async createTransport(ui5App, oDeployOptions, oOptions) {
+  async createTransport(ui5App: Ui5App, oDeployOptions, oOptions) {
     const sDate = new Date().toLocaleString();
     const sDefaultText = `${ui5App.folderName}: ${sDate}`;
 
@@ -267,7 +265,7 @@ export default {
         oTransportManager.createTransport(
           oDeployOptions.ui5.package,
           oDeployOptions.ui5.transport_text,
-          async function (oError, sTransportNo) {
+          async function (oError: Error, sTransportNo: string) {
             if (oError) {
               reject(oError);
             }
@@ -281,7 +279,7 @@ export default {
     }
   },
 
-  async updateTransport(ui5App, oDeployOptions, transportno) {
+  async updateTransport(ui5App: Ui5App, oDeployOptions, transportno) {
     if (!transportno) {
       try {
         transportno = await new Promise(async (resolve, reject) => {
@@ -314,7 +312,7 @@ export default {
     return new TransportManager(oDeployOptions, oLogger);
   },
 
-  async deployProject(ui5App, oDeployOptions, oOptions) {
+  async deployProject(ui5App: Ui5App, oDeployOptions, oOptions): Promise<void> {
     if (ui5App) {
       const folderName = ui5App.folderName;
       Log.logDeployer(`Deploying ${folderName}`);
@@ -346,7 +344,17 @@ export default {
     }
   },
 
-  async deploy({ ui5App, oDeployOptions, progress = undefined, multiplier = 1 }) {
+  async deploy({
+    ui5App,
+    oDeployOptions,
+    progress,
+    multiplier = 1,
+  }: {
+    ui5App: Ui5App;
+    oDeployOptions: object;
+    progress?: Progress;
+    multiplier: number;
+  }) {
     let sMessage = '';
 
     const ui5AppConfig = await Utils.getUi5ToolsFile(ui5App);
@@ -402,7 +410,7 @@ export default {
     }
   },
 
-  async autoSaveOrder(ui5App, oDeployOptions) {
+  async autoSaveOrder(ui5App: Ui5App, oDeployOptions) {
     const bAutoSaveOrder = Config.deployer('autoSaveOrder');
     if (bAutoSaveOrder) {
       const ui5AppConfig = await Utils.getUi5ToolsFile(ui5App);
@@ -413,7 +421,7 @@ export default {
     }
   },
 
-  async createConfigFile(ui5App) {
+  async createConfigFile(ui5App: Ui5App) {
     Log.logDeployer(`Create ui5-tools.json file?`);
     const qpOptions = [
       {

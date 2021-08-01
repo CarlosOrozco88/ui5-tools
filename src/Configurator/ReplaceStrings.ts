@@ -1,8 +1,8 @@
-import { window, ConfigurationTarget, QuickInputButtons, workspace } from 'vscode';
+import { window, ConfigurationTarget, QuickInputButtons, workspace, QuickPick, QuickPickItem } from 'vscode';
 import Config from '../Utils/Config';
 
 export default {
-  async wizard() {
+  async wizard(): Promise<void> {
     try {
       let askMore = true;
       while (askMore) {
@@ -11,14 +11,13 @@ export default {
     } catch (error) {
       throw new Error(error);
     }
-    return true;
   },
 
-  async quickPickAddRemoveStrings() {
+  async quickPickAddRemoveStrings(): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      let replaceKeysValues = Config.builder('replaceKeysValues');
+      const replaceKeysValues: Array<object> = Config.builder('replaceKeysValues');
 
-      let options = replaceKeysValues.map((keyValue) => {
+      const options = replaceKeysValues.map((keyValue) => {
         return {
           description: keyValue.value,
           label: keyValue.key,
@@ -26,8 +25,7 @@ export default {
         };
       });
 
-      let quickPickValueKey;
-      quickPickValueKey = window.createQuickPick();
+      const quickPickValueKey: QuickPick<QuickPickItem> = window.createQuickPick();
       quickPickValueKey.title = `ui5-tools > Configurator > Replace Strings`;
       quickPickValueKey.items = options;
       quickPickValueKey.selectedItems = options;
@@ -36,15 +34,15 @@ export default {
       quickPickValueKey.placeholder = `Write a pair (key=value) to add a replacement. Unselect to delete`;
       quickPickValueKey.show();
       quickPickValueKey.onDidChangeSelection(async (event) => {
-        let actualKeysValues = Config.builder('replaceKeysValues');
-        if (actualKeysValues.length !== event.length) {
-          let newKeyValues = event.map((item) => {
+        const actualKeysValues = Config.builder('replaceKeysValues');
+        if (actualKeysValues instanceof Array && actualKeysValues.length !== event.length) {
+          const newKeyValues = event.map((item) => {
             return {
               key: item.label,
               value: item.description,
             };
           });
-          await Config.builder().update('replaceKeysValues', newKeyValues, ConfigurationTarget.Workspace);
+          await Config.builder()?.update('replaceKeysValues', newKeyValues, ConfigurationTarget.Workspace);
           quickPickValueKey.hide();
           resolve(true);
         }
@@ -52,10 +50,10 @@ export default {
       quickPickValueKey.onDidAccept(async () => {
         const introData = quickPickValueKey.value;
         if (introData) {
-          let keyValue = /(?<key>\S+)\s*={1}\s*(?<value>.+)/g.exec(introData);
+          const keyValue = /(?<key>\S+)\s*={1}\s*(?<value>.+)/g.exec(introData);
           if (keyValue) {
-            let newReplaceKeysValues = Config.builder('replaceKeysValues');
-            let mapKeys = newReplaceKeysValues.map((keyValue) => keyValue.key);
+            const newReplaceKeysValues = Config.builder('replaceKeysValues');
+            const mapKeys = newReplaceKeysValues.map((keyValue) => keyValue.key);
             if (mapKeys.includes(keyValue.groups.key)) {
               window.showErrorMessage(`${keyValue.groups.key} already exists`);
               quickPickValueKey.hide();
@@ -69,7 +67,7 @@ export default {
                 key: keyValue.groups.key,
                 value: keyValue.groups.value,
               });
-              await Config.builder().update('replaceKeysValues', newReplaceKeysValues, ConfigurationTarget.Workspace);
+              await Config.builder()?.update('replaceKeysValues', newReplaceKeysValues, ConfigurationTarget.Workspace);
               quickPickValueKey.hide();
               resolve(true);
             }

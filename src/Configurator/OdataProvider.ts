@@ -44,7 +44,7 @@ export default {
       quickpick.onDidAccept(async () => {
         if (quickpick.selectedItems.length) {
           const value = quickpick.selectedItems[0].label;
-          await Config.server().update('odataProxy', value, ConfigurationTarget.Workspace);
+          await Config.server()?.update('odataProxy', value, ConfigurationTarget.Workspace);
 
           Log.logConfigurator(`Set odataProxy value to ${value}`);
           resolve(value);
@@ -71,7 +71,7 @@ export default {
       inputBox.ignoreFocusOut = true;
       inputBox.onDidAccept(async () => {
         if (inputBox.value) {
-          await Config.server().update('odataUri', inputBox.value, ConfigurationTarget.Workspace);
+          await Config.server()?.update('odataUri', inputBox.value, ConfigurationTarget.Workspace);
           Log.logConfigurator(`Set odataUri value to ${inputBox.value}`);
           resolve(inputBox.value);
         } else {
@@ -97,7 +97,7 @@ export default {
       inputBox.ignoreFocusOut = true;
       inputBox.onDidAccept(async () => {
         if (inputBox.value) {
-          await Config.server().update('odataUri', inputBox.value, ConfigurationTarget.Workspace);
+          await Config.server()?.update('odataUri', inputBox.value, ConfigurationTarget.Workspace);
           Log.logConfigurator(`Set odataUri value to ${inputBox.value}`);
           resolve(inputBox.value);
         } else {
@@ -123,7 +123,7 @@ export default {
       inputBox.ignoreFocusOut = true;
       inputBox.onDidAccept(async () => {
         if (inputBox.value) {
-          await Config.server().update('odataMountPath', inputBox.value, ConfigurationTarget.Workspace);
+          await Config.server()?.update('odataMountPath', inputBox.value, ConfigurationTarget.Workspace);
           Log.logConfigurator(`Set odataMountPath to ${inputBox.value}`);
           resolve(inputBox.value);
         } else {

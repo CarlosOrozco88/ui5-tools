@@ -125,16 +125,6 @@
         "mac": "alt+d alt+a"
       },
       {
-        "command": "ui5-tools.fonts.generate",
-        "key": "alt+f alt+f",
-        "mac": "alt+f alt+f"
-      },
-      {
-        "command": "ui5-tools.fonts.generateAll",
-        "key": "alt+f alt+a",
-        "mac": "alt+f alt+a"
-      },
-      {
         "command": "ui5-tools.showOutput",
         "key": "alt+v alt+o",
         "mac": "alt+v alt+o"
@@ -196,14 +186,6 @@
       {
         "command": "ui5-tools.menu.deployer.deploy",
         "title": "UI5 Tools: Deploy UI5 project"
-      },
-      {
-        "command": "ui5-tools.fonts.generate",
-        "title": "UI5 Tools: Fonts > Generate font"
-      },
-      {
-        "command": "ui5-tools.fonts.generateAll",
-        "title": "UI5 Tools: Fonts > Generate all fonts"
       },
       {
         "command": "ui5-tools.showOutput",

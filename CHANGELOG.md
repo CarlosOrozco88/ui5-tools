@@ -1,3 +1,8 @@
+## 1.1.0 (28-07-2021)
+- Extension migrated to typescript
+- Removed font generator (check new extension Icon Font Bundler)
+- Added tests
+
 ## 1.0.3 (28-07-2021)
 
 - Chokidar bug solved

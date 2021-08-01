@@ -8,26 +8,26 @@ export default {
     return workspace.getConfiguration('ui5-tools' + tool);
   },
 
-  property(property?: string, tool = ''): string | number | undefined | Array<string> | WorkspaceConfiguration {
+  property(property?: string, tool = ''): string | number | undefined | Array<any> | WorkspaceConfiguration {
     if (property) {
       return this.get(tool).get(property);
     }
     return this.get(tool);
   },
 
-  general(property?: string): string | number | undefined | Array<string> | WorkspaceConfiguration {
+  general(property?: string): string | number | undefined | Array<any> | WorkspaceConfiguration {
     return this.property(property);
   },
 
-  server(property?: string): string | number | undefined | Array<string> | WorkspaceConfiguration {
+  server(property?: string): string | number | undefined | Array<any> | WorkspaceConfiguration {
     return this.property(property, 'server');
   },
 
-  builder(property?: string): string | number | undefined | Array<string> | WorkspaceConfiguration {
+  builder(property?: string): string | number | undefined | Array<any> | WorkspaceConfiguration {
     return this.property(property, 'builder');
   },
 
-  deployer(property?: string): string | number | undefined | Array<string> | WorkspaceConfiguration {
+  deployer(property?: string): string | number | undefined | Array<any> | WorkspaceConfiguration {
     return this.property(property, 'deployer');
   },
 };

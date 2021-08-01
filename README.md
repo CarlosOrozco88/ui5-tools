@@ -52,11 +52,6 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - Deploy process uses [ui5-nwabap-deployer-core
   ](https://github.com/pfefferf/ui5-nwabap-deployer/blob/master/packages/ui5-nwabap-deployer-core), so the extension uses the same configuration in file ui5-tools.json (property deployer.options)
 
-### IconFont generator
-
-- **Custom fonts** from a svg set with fantasticon
-- **FontAwesome** import from github
-
 ### String replacer
 
 - **Replace pattern** `<% TIMESTAMP %>`, `<% ISODATE %>`
@@ -136,11 +131,6 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - `ui5-tools.configurator.ui5Provider`: Configure ui5 provider | Shortcut: `alt+c alt+u`
 - `ui5-tools.configurator.replaceStrings`: Configure replace strings | Shortcut: `alt+c alt+r`
 
-#### Fonts Commands
-
-- `ui5-tools.fonts.generate`: Generate font | Shortcut: `alt+f alt+f`
-- `ui5-tools.fonts.generateAll`: Generate all fonts| Shortcut: `alt+f alt+a`
-
 ## Menus
 
 - `ui5-tools.menu.builder.build`: Build option in project folder menu (right click)
@@ -151,4 +141,3 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - Preload javascript builder: [openui5-preload](https://github.com/r-murphy/openui5-preload) - [Ryan Murphy](https://github.com/r-murphy)
 - Deployer: [ui5-nwabap-deployer-core](https://github.com/pfefferf/ui5-nwabap-deployer/blob/master/packages/ui5-nwabap-deployer-core) - [Florian Pfeffer](https://github.com/pfefferf)
 - Less library builder: [less-openui5](https://github.com/SAP/less-openui5) - [SAP](https://github.com/SAP)
-- Fantasticon icon-font generator: [fantasticon](https://github.com/tancredi/fantasticon) - [Tancredi Trugenberger](https://github.com/tancredi)
