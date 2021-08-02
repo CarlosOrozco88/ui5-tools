@@ -1,3 +1,7 @@
+## 1.0.4 (28-07-2021)
+
+- Delete dist folder bug solved
+
 ## 1.0.3 (28-07-2021)
 
 - Chokidar bug solved

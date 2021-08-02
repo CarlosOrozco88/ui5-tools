@@ -294,11 +294,13 @@ export default {
           useTrash: true,
         });
       } catch (error) {
-        if (error.code !== FileSystemError.FileNotFound) {
+        Log.logBuilder(error.code);
+        if (error.code !== 'FileNotFound') {
           throw new Error(error);
         }
       }
     }
+    Log.logBuilder('ok');
     return true;
   },
 
