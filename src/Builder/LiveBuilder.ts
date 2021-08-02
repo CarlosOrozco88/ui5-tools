@@ -23,7 +23,7 @@ export default {
       watchApps.close();
       watchApps = undefined;
     }
-    const distFolder: string = String(Config.general('distFolder'));
+    const distFolder = String(Config.general('distFolder'));
     const sWorkspaceRootPath = Utils.getWorkspaceRootPath();
     watchApps = chokidar.watch([sWorkspaceRootPath], {
       ignoreInitial: true,

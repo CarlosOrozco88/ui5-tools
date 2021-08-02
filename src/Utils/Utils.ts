@@ -205,12 +205,9 @@ const Utils = {
   },
 
   async setUi5ToolsFile(ui5App: Ui5App, oConfigFile: Ui5ToolsConfiguration): Promise<Ui5ToolsConfiguration> {
-    try {
-      const sConfigFile = JSON.stringify(oConfigFile, undefined, 2);
-      await workspace.fs.writeFile(Uri.file(ui5App.appConfigPath), Buffer.from(sConfigFile));
-    } catch (oError) {
-      throw oError;
-    }
+    const sConfigFile = JSON.stringify(oConfigFile, undefined, 2);
+    await workspace.fs.writeFile(Uri.file(ui5App.appConfigPath), Buffer.from(sConfigFile));
+
     return oConfigFile;
   },
 

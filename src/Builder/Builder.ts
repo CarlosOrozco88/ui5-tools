@@ -1,13 +1,4 @@
-import {
-  workspace,
-  window,
-  RelativePattern,
-  ProgressLocation,
-  Progress,
-  FileSystemError,
-  Uri,
-  QuickPickItem,
-} from 'vscode';
+import { workspace, window, RelativePattern, ProgressLocation, Progress, Uri, QuickPickItem } from 'vscode';
 import path from 'path';
 
 import os from 'os';
@@ -64,7 +55,7 @@ export default {
           ui5ProjectToBuildQp.items = qpOptions;
           ui5ProjectToBuildQp.placeholder = 'Select UI5 project to build';
           ui5ProjectToBuildQp.canSelectMany = false;
-          ui5ProjectToBuildQp.onDidAccept(async (args) => {
+          ui5ProjectToBuildQp.onDidAccept(async () => {
             if (ui5ProjectToBuildQp.selectedItems.length) {
               resolve(ui5ProjectToBuildQp.selectedItems[0]);
             } else {
@@ -314,7 +305,7 @@ export default {
           useTrash: true,
         });
       } catch (error) {
-        if (error.code !== FileSystemError.FileNotFound) {
+        if (error.code !== 'FileNotFound') {
           throw new Error(error);
         }
       }
@@ -480,7 +471,7 @@ export default {
    * Babelify js files
    */
   async babelifyJSFiles(ui5App: Ui5App, folderPath: string): Promise<void> {
-    if (Config.builder('babelSources') || true) {
+    if (Config.builder('babelSources')) {
       try {
         Log.logBuilder(`Babelify files from ${folderPath}`);
         // Create -dbg files

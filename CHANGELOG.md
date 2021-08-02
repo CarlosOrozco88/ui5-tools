@@ -1,7 +1,11 @@
-## 1.1.0 (28-07-2021)
+## 1.1.0
 - Extension migrated to typescript
 - Removed font generator (check new extension Icon Font Bundler)
 - Added tests
+
+## 1.0.3 (02-08-2021)
+
+- Delete dist folder bug solved
 
 ## 1.0.3 (28-07-2021)
 

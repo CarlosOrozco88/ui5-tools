@@ -8,6 +8,7 @@
 		"strict": true,
 		"rootDir": "src",
 		"esModuleInterop": true,
+		"resolveJsonModule": true
 	},
 	"exclude": [
 		"node_modules",

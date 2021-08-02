@@ -1,14 +1,4 @@
-import {
-  workspace,
-  window,
-  RelativePattern,
-  ProgressLocation,
-  Progress,
-  Uri,
-  TextDocument,
-  QuickPickItem,
-  QuickPickOptions,
-} from 'vscode';
+import { workspace, window, RelativePattern, ProgressLocation, Progress, QuickPickItem } from 'vscode';
 //@ts-ignore
 import ui5DeployerCore from 'ui5-nwabap-deployer-core';
 //@ts-ignore
@@ -87,7 +77,7 @@ export default {
         cancellable: true,
       },
       async (progress, token) => {
-        let oMassiveOptions: DeployMassive = {
+        const oMassiveOptions: DeployMassive = {
           deployWorkspace: true,
           transportno: '',
         };
@@ -106,7 +96,7 @@ export default {
             message: `${ui5Apps[i].folderName} (${i + 1}/${ui5Apps.length})`,
           });
           try {
-            let deployed = await this.askCreateReuseTransport(ui5Apps[i], oMassiveOptions);
+            const deployed = await this.askCreateReuseTransport(ui5Apps[i], oMassiveOptions);
             oResults[deployed]++;
           } catch (oError) {
             oResults[DeployStatus.Error]++;
@@ -253,23 +243,20 @@ export default {
     oDeployOptions.ui5.transport_use_user_match = false;
 
     const oTransportManager = this.getTransportManager(oDeployOptions);
-    try {
-      const transportno: string = await new Promise((resolve, reject) => {
-        oTransportManager.createTransport(
-          oDeployOptions.ui5.package,
-          oDeployOptions.ui5.transport_text,
-          async function (oError: Error, sTransportNo: string) {
-            if (oError) {
-              reject(oError);
-            }
-            resolve(sTransportNo);
+
+    const transportno: string = await new Promise((resolve, reject) => {
+      oTransportManager.createTransport(
+        oDeployOptions.ui5.package,
+        oDeployOptions.ui5.transport_text,
+        async function (oError: Error, sTransportNo: string) {
+          if (oError) {
+            reject(oError);
           }
-        );
-      });
-      oDeployOptions.ui5.transportno = transportno;
-    } catch (oError) {
-      throw oError;
-    }
+          resolve(sTransportNo);
+        }
+      );
+    });
+    oDeployOptions.ui5.transportno = transportno;
   },
 
   async updateTransport(ui5App: Ui5App, oDeployOptions: DeployOptions, transportno?: string) {
@@ -319,18 +306,15 @@ export default {
           token.onCancellationRequested(() => {
             throw new Error('Deploy canceled');
           });
-          try {
-            await Builder.build({ ui5App, progress, multiplier: 0.5 });
-            await this.deploy({ ui5App, oDeployOptions, progress, multiplier: 0.5 });
 
-            const sMessage = `Project ${ui5App.folderName} deployed!`;
-            Log.logDeployer(sMessage);
+          await Builder.build({ ui5App, progress, multiplier: 0.5 });
+          await this.deploy({ ui5App, oDeployOptions, progress, multiplier: 0.5 });
 
-            if (!oMassiveOptions?.deployWorkspace) {
-              window.showInformationMessage(sMessage);
-            }
-          } catch (oError) {
-            throw oError;
+          const sMessage = `Project ${ui5App.folderName} deployed!`;
+          Log.logDeployer(sMessage);
+
+          if (!oMassiveOptions?.deployWorkspace) {
+            window.showInformationMessage(sMessage);
           }
         }
       );

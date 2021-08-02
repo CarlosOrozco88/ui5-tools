@@ -10,7 +10,6 @@ import Utils from '../../Utils/Utils';
 import Log from '../../Utils/Log';
 import { Level, ServerOptions } from '../../Types/Types';
 import { NextFunction, Request, Response, RequestHandler } from 'express';
-import { ServerResponse } from 'http';
 
 const cacheResources = apicache
   .options({
@@ -107,6 +106,7 @@ export default {
           Log.logServer(sError, Level.ERROR);
           window.showErrorMessage(sError);
         }
+        break;
 
       default:
         break;

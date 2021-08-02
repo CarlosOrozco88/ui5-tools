@@ -2,7 +2,7 @@
   "name": "ui5-tools",
   "displayName": "UI5 Tools",
   "description": "Local development tools for UI5",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
@@ -468,7 +468,7 @@
     "webpack-prod": "webpack --mode production",
     "lint": "eslint . --ext .ts",
     "pretest": "npm run lint",
-    "test-compile": "tsc -p ./",
+    "compile": "tsc -p ./",
     "test": "node ./test/runTest.js"
   },
   "devDependencies": {
@@ -500,7 +500,6 @@
     "mocha": "^9.0.3",
     "node-loader": "^2.0.0",
     "prettier": "^2.3.2",
-    "tslint": "^6.1.3",
     "typescript": "^4.3.5",
     "vscode-test": "^1.6.1",
     "webassembly-loader": "^1.1.0",

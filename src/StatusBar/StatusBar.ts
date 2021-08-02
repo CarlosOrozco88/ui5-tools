@@ -20,10 +20,10 @@ export default {
   },
 
   async checkVisibility(bRefresh = true) {
-    let sOriginalText = serverNavBar.text;
+    const sOriginalText = serverNavBar.text;
     serverNavBar.text = `$(loading~spin) Exploring ui5 projects...`;
     this.show();
-    let ui5Apps = await Utils.getAllUI5Apps(bRefresh);
+    const ui5Apps = await Utils.getAllUI5Apps(bRefresh);
     serverNavBar.text = sOriginalText;
 
     if (!ui5Apps.length) {
@@ -41,8 +41,8 @@ export default {
   },
 
   setText(text: string) {
-    let serverName = String(Config.server('name'));
-    let serverMode = Server.getServerMode();
+    const serverName = String(Config.server('name'));
+    const serverMode = Server.getServerMode();
     serverNavBar.text = text.replace('<serverName>', serverName).replace('<serverMode>', serverMode);
   },
 

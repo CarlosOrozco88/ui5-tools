@@ -10,8 +10,7 @@ export default {
 
   property(property?: string, tool = ''): WorkspaceConfiguration | unknown {
     if (typeof property === 'string') {
-      let value = this.getConfig(tool).get(property);
-      return value;
+      return this.getConfig(tool).get(property);
     } else {
       return this.getConfig(tool);
     }

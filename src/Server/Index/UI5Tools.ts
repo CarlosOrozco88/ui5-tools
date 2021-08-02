@@ -1,12 +1,12 @@
 import { workspace, RelativePattern, Uri } from 'vscode';
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import path from 'path';
 import showdown from 'showdown';
 
 import Utils from '../../Utils/Utils';
 import Config from '../../Utils/Config';
 import Log from '../../Utils/Log';
-import { ServerOptions } from '../../Types/Types';
+import { ServerOptions, Ui5ToolsData } from '../../Types/Types';
 
 const converter = new showdown.Converter();
 
@@ -31,7 +31,7 @@ export default {
       });
     }
 
-    const ui5toolsData = {
+    const ui5toolsData: Ui5ToolsData = {
       ...Utils.getOptionsVersion(),
       readme: '',
       about: '',
@@ -46,11 +46,12 @@ export default {
         library: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'library'),
         card: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'card'),
       },
+      //@ts-ignore
       config: Config.general(),
     };
 
     const indexPath = path.join(ui5ToolsPath, 'static', 'index', 'ui5tools', 'webapp');
-    const indexHTML = (req, res, next) => {
+    const indexHTML = (req: Request, res: Response, next: NextFunction) => {
       res.render(path.join(indexPath, 'index'), {
         theme: ui5toolsData.theme,
         edge: ui5toolsData.theme === 'sap_fiori_3',
@@ -78,10 +79,10 @@ export default {
 
     // Serve app data
     serverApp.get(`/${ui5ToolsIndex}/ui5tools.json`, async (req, res) => {
-      ui5toolsData.readme = converter.makeHtml(await this.readFile(path.join(baseDir, 'README.md'), ''));
-      ui5toolsData.about = converter.makeHtml(await this.readFile(path.join(ui5ToolsPath, 'README.md'), ''));
-      ui5toolsData.changelog = converter.makeHtml(await this.readFile(path.join(ui5ToolsPath, 'CHANGELOG.md'), ''));
-      ui5toolsData.links = JSON.parse(await this.readFile(path.join(baseDir, 'links.json'), '[]'));
+      ui5toolsData.readme = converter.makeHtml((await this.readFile(path.join(baseDir, 'README.md'))) || '');
+      ui5toolsData.about = converter.makeHtml((await this.readFile(path.join(ui5ToolsPath, 'README.md'))) || '');
+      ui5toolsData.changelog = converter.makeHtml((await this.readFile(path.join(ui5ToolsPath, 'CHANGELOG.md'))) || '');
+      ui5toolsData.links = JSON.parse((await this.readFile(path.join(baseDir, 'links.json'))) || '[]');
       ui5toolsData.docs = await this.findDocs(baseDir, ui5toolsData.showTree);
       ui5toolsData.contributors = [
         {
@@ -101,18 +102,18 @@ export default {
     return;
   },
 
-  async readFile(sPath: string, defaultValue = undefined): Promise<undefined | string> {
-    let oFile: undefined | string = defaultValue;
+  async readFile(sPath: string): Promise<undefined | string> {
+    let oFile: undefined | string;
     try {
       const oFileBuffer = await workspace.fs.readFile(Uri.file(sPath));
       oFile = oFileBuffer.toString();
     } catch (oError) {
-      oFile = defaultValue;
+      // err
     }
     return oFile;
   },
 
-  async findDocs(sBaseDirPath: string, bTree: boolean): Promise<Record<string, any>> {
+  async findDocs(sBaseDirPath: string, bTree: boolean): Promise<{ aTree: Array<any>; oHashes: Record<string, any> }> {
     const aMDFilesPaths = await workspace.findFiles(
       new RelativePattern(sBaseDirPath, `**/*.{md,MD}`),
       new RelativePattern(sBaseDirPath, `**/{node_modules,.git}/`)

@@ -1,4 +1,5 @@
 import express from 'express';
+import { WorkspaceConfiguration } from 'vscode';
 
 export interface ServerParameter {
   restarting?: boolean;
@@ -34,7 +35,7 @@ export interface Ui5App {
   srcFsPath: string;
   distFsPath: string;
   deployFsPath: string;
-  manifest: Record<string, string>;
+  manifest: Record<string, any>;
   folderName: string;
   namespace: string;
 }
@@ -88,7 +89,7 @@ export interface DeployOptions {
     client: number;
     useStrictSSL?: boolean;
     proxy?: string;
-    customQueryParams?: object;
+    customQueryParams?: Record<string, string>;
   };
   auth: {
     user?: string;
@@ -125,4 +126,24 @@ export interface Ui5ToolsConfiguration {
     globalDeploy?: boolean;
     options: DeployOptions;
   };
+}
+
+export interface Ui5ToolsData {
+  readme: string;
+  about: string;
+  changelog: string;
+  launchpad: boolean;
+  links: Array<any>;
+  contributors: Array<any>;
+  docs: { aTree: Array<any>; oHashes: Record<string, any> };
+  ui5Apps: {
+    application: Array<any>;
+    component: Array<any>;
+    library: Array<any>;
+    card: Array<any>;
+  };
+  config: WorkspaceConfiguration;
+  compatVersion: string;
+  showTree: boolean;
+  theme: string;
 }

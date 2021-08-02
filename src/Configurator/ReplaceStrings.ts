@@ -1,4 +1,4 @@
-import { window, ConfigurationTarget, QuickInputButtons, workspace, QuickPick, QuickPickItem } from 'vscode';
+import { window, ConfigurationTarget, QuickPick, QuickPickItem } from 'vscode';
 import Config from '../Utils/Config';
 
 export default {
@@ -54,6 +54,7 @@ export default {
         if (introData) {
           const keyValue = /(?<key>\S+)\s*={1}\s*(?<value>.+)/g.exec(introData);
           if (keyValue) {
+            // @ts-ignore
             const newReplaceKeysValues: Array<{ key: string; value: string }> = Config.builder('replaceKeysValues');
             const mapKeys = newReplaceKeysValues.map((keyValue) => keyValue.key);
             if (keyValue.groups?.key) {
