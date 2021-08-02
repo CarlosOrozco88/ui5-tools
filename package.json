@@ -467,8 +467,8 @@
     "webpack-dev": "webpack --mode development --watch",
     "webpack-prod": "webpack --mode production",
     "lint": "eslint . --ext .ts",
+    "watch": "tsc -watch -p ./",
     "pretest": "npm run lint",
-    "compile": "tsc -p ./",
     "test": "node ./test/runTest.js"
   },
   "devDependencies": {

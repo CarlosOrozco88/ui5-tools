@@ -23,7 +23,7 @@ const cacheResources = apicache
   })
   .middleware();
 
-const onProxyRes: RequestHandler = function (req: Request, res: Response, next: NextFunction): void {
+const onProxyRes: RequestHandler = function (req, res, next): void {
   //@ts-ignore
   onHeaders(res, () => {
     res.setHeader('cache-control', 'no-cache');

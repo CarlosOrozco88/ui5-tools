@@ -361,7 +361,7 @@ export default {
         const iStep = iIncrement / aProjectResources.length;
 
         const oLoggerProgress = deepmerge(oLogger, {
-          log: (sText) => {
+          log: (sText: string) => {
             if (sText.indexOf('file ') === 0) {
               progress?.report({ increment: iStep * multiplier, message: 'Deploy in process...' });
             }
