@@ -1,13 +1,13 @@
 'use strict';
 
-import path from 'path';
-import CopyPlugin from 'copy-webpack-plugin';
+const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
 
 /**@type {import('webpack').Configuration}*/
 module.exports = {
   target: 'node',
 
-  entry: './src/extension.js',
+  entry: './src/extension.ts',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'extension.js',
@@ -26,18 +26,10 @@ module.exports = {
     alias: {
       handlebars: 'handlebars/dist/handlebars',
     },
-    extensions: ['.js', '.json', '.hbs'],
+    extensions: ['.ts', '.js', '.json', '.hbs'],
   },
   module: {
     rules: [
-      // {
-      //   test: /\.tsx?$/,
-      //   loader: 'esbuild-loader',
-      //   options: {
-      //     loader: 'tsx', // Or 'ts' if you don't need tsx
-      //     target: 'es2015',
-      //   },
-      // },
       {
         test: /\.ts$/,
         exclude: /(node_modules)/,
@@ -47,9 +39,9 @@ module.exports = {
         test: /\.js$/,
         exclude: /(node_modules)/,
         use: 'babel-loader',
-        options: {
-          presets: ['@babel/preset-env'],
-        },
+        // options: {
+        //   presets: ['@babel/preset-env'],
+        // },
       },
       {
         test: /\.node$/,

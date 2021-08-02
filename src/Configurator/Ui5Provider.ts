@@ -4,6 +4,7 @@ import Config from '../Utils/Config';
 import Utils from '../Utils/Utils';
 import Log from '../Utils/Log';
 import Server from '../Server/Server';
+import { Level } from '../Types/Types';
 
 export default {
   async wizard() {
@@ -14,7 +15,7 @@ export default {
         try {
           await this.configureGWVersion(sGatewayUri);
         } catch (oError) {
-          Log.logConfigurator(oError, 'ERROR');
+          Log.logConfigurator(oError, Level.ERROR);
           await this.setUi5Version();
         }
       }
@@ -29,7 +30,7 @@ export default {
 
   async quickPickUi5Provider() {
     return new Promise(async (resolve, reject) => {
-      let ui5ProviderValue = Config.server('resourcesProxy');
+      let ui5ProviderValue = String(Config.server('resourcesProxy'));
 
       let quickpick = await window.createQuickPick();
       quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 provider';
@@ -56,6 +57,7 @@ export default {
       quickpick.onDidAccept(async () => {
         if (quickpick.selectedItems.length) {
           let value = quickpick.selectedItems[0].label;
+          //@ts-ignore
           await Config.server().update('resourcesProxy', value, ConfigurationTarget.Workspace);
           Log.logConfigurator(`Set resourcesProxy value to ${value}`);
           resolve(value);
@@ -70,10 +72,10 @@ export default {
     });
   },
 
-  async inputBoxGatewayUri() {
+  async inputBoxGatewayUri(): Promise<string> {
     return new Promise(async (resolve, reject) => {
-      let gatewayUri = Config.server('resourcesUri');
-      let inputBox = await window.createInputBox();
+      let gatewayUri = String(Config.server('resourcesUri'));
+      let inputBox = window.createInputBox();
       inputBox.title = 'ui5-tools > Configurator > Ui5Provider: Enter gateway url';
       inputBox.step = 1;
       inputBox.totalSteps = 1;
@@ -82,6 +84,7 @@ export default {
       inputBox.ignoreFocusOut = true;
       inputBox.onDidAccept(async () => {
         if (inputBox.value) {
+          //@ts-ignore
           await Config.server().update('resourcesUri', inputBox.value, ConfigurationTarget.Workspace);
           Log.logConfigurator(`Set resourcesUri value to ${inputBox.value}`);
           resolve(inputBox.value);
@@ -97,7 +100,7 @@ export default {
   },
 
   async setUi5Version() {
-    let versions;
+    let versions: Array<any>;
     try {
       versions = await this.getUi5Versions();
     } catch (error) {
@@ -112,19 +115,20 @@ export default {
         } else {
           ui5Version = await this.inputBoxUi5Version();
         }
+        //@ts-ignore
         await Config.general().update('ui5Version', ui5Version, ConfigurationTarget.Workspace);
 
         Log.logConfigurator(`Set ui5Version value ${ui5Version}`);
         resolve(ui5Version);
       } catch (sError) {
-        Log.logConfigurator(sError, 'ERROR');
+        Log.logConfigurator(sError, Level.ERROR);
         reject(sError);
       }
       resolve(ui5Version);
     });
   },
 
-  async quickPickUi5Version(versionsMajor) {
+  async quickPickUi5Version(versionsMajor: Array<any>) {
     return new Promise(async (resolve, reject) => {
       try {
         let major = await this.quickPickUi5VersionMajor(versionsMajor);
@@ -140,9 +144,9 @@ export default {
     });
   },
 
-  async quickPickUi5VersionMajor(versionsMajor) {
+  async quickPickUi5VersionMajor(versionsMajor: Array<any>) {
     return new Promise(async (resolve, reject) => {
-      let ui5Version = Config.general('ui5Version');
+      let ui5Version = String(Config.general('ui5Version'));
 
       let quickpick = await window.createQuickPick();
       quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 major version';
@@ -164,9 +168,9 @@ export default {
     });
   },
 
-  async quickPickUi5VersionMinor(versionsMinor) {
+  async quickPickUi5VersionMinor(versionsMinor: Array<any>) {
     return new Promise(async (resolve, reject) => {
-      let ui5Version = Config.general('ui5Version');
+      let ui5Version = String(Config.general('ui5Version'));
 
       let quickpick = await window.createQuickPick();
       quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 minor version';
@@ -189,18 +193,18 @@ export default {
   },
 
   async inputBoxUi5Version() {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       let framework = Utils.getFramework();
-      let ui5Version = Config.general('ui5Version');
+      let ui5Version = String(Config.general('ui5Version'));
 
-      let inputBox = await window.createInputBox();
+      let inputBox = window.createInputBox();
       inputBox.title = `ui5-tools > Configurator > Ui5Provider: Enter ${framework} versions`;
       inputBox.step = 1;
       inputBox.totalSteps = 1;
       inputBox.placeholder = ui5Version;
       inputBox.value = ui5Version;
       inputBox.ignoreFocusOut = true;
-      inputBox.onDidAccept(async () => {
+      inputBox.onDidAccept(() => {
         if (inputBox.value) {
           resolve(inputBox.value);
         } else {
@@ -213,12 +217,12 @@ export default {
   },
 
   async getUi5Versions(framework = Utils.getFramework()) {
-    let versions = [];
+    let versions: Array<any> = [];
     try {
       if (framework !== 'None') {
         let versionsValues = await Promise.all([this.getVersionOverview(framework), this.getNeoApp(framework)]);
-        let mapVersions = {};
-        versionsValues[0].versions.forEach((versionData) => {
+        let mapVersions: Record<string, any> = {};
+        versionsValues[0].versions.forEach((versionData: Record<string, any>) => {
           if (versionData.version.length > 1) {
             let cleanVersion = versionData.version.replace('.*', '');
             let description = versionData.eom ? versionData.eom : versionData.support;
@@ -234,7 +238,7 @@ export default {
             versions.push(cVersion);
           }
         });
-        versionsValues[1].routes.forEach((versionData) => {
+        versionsValues[1].routes.forEach((versionData: Record<string, any>) => {
           if (versionData.path.length > 1) {
             let cleanVersion = versionData.path.replace('/', '');
             let cleanVersionArray = cleanVersion.split('.');
@@ -281,14 +285,15 @@ export default {
     return JSON.parse(sFile);
   },
 
-  async configureGWVersion(sGatewayUri) {
+  async configureGWVersion(sGatewayUri: string) {
     Log.logConfigurator(`Fetching ui5Version from Gateway...`);
     let gatewayVersion = await this.getGatewayVersion(sGatewayUri);
+    //@ts-ignore
     await Config.general().update('ui5Version', gatewayVersion.version, ConfigurationTarget.Workspace);
     Log.logConfigurator(`Set ui5version value to ${gatewayVersion.version}`);
   },
 
-  async getGatewayVersion(sGatewayUri) {
+  async getGatewayVersion(sGatewayUri: string): Promise<Record<string, any>> {
     let url = `${sGatewayUri}/sap/public/bc/ui5_ui5/1/resources/sap-ui-version.json`;
     let sFile = await Utils.fetchFile(url);
     return JSON.parse(sFile);

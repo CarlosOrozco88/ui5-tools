@@ -42,8 +42,10 @@ export default {
         const protocol = Config.server('protocol');
 
         if (protocol === 'http') {
+          //@ts-ignore
           liveServer = http.createServer(this.serveLiveReloadScript);
         } else {
+          //@ts-ignore
           liveServer = https.createServer(Utils.getHttpsCert(), this.serveLiveReloadScript);
         }
         liveServer.listen(portLiveReload);
@@ -142,7 +144,7 @@ export default {
       /(.*)\/resources\/(.*)/,
     ];
 
-    const odataMountPath = Config.server('odataMountPath')?.toString() || '';
+    const odataMountPath = String(Config.server('odataMountPath'));
     const mpaths = odataMountPath.replace(/\\s/g, '').split(',');
     mpaths.forEach((path) => {
       const re = new RegExp(`^${path}`, 'g');

@@ -23,7 +23,7 @@ export default {
       watchApps.close();
       watchApps = undefined;
     }
-    const distFolder: string = Config.general('distFolder')?.toString() || '';
+    const distFolder: string = String(Config.general('distFolder'));
     const sWorkspaceRootPath = Utils.getWorkspaceRootPath();
     watchApps = chokidar.watch([sWorkspaceRootPath], {
       ignoreInitial: true,
@@ -58,7 +58,7 @@ export default {
         delete awaiter[sKey];
       }
       awaiter[sKey] = setTimeout(async () => {
-        const watchExtensions = (Config.server('watchExtensions')?.toString() || '').replace(/\\s/g, '');
+        const watchExtensions = String(Config.server('watchExtensions')).replace(/\\s/g, '');
         const watchExtensionsArray = watchExtensions.split(',');
         const bWatchedExtension = watchExtensionsArray.includes(fileExtension);
         let bRefreshedServer = false;

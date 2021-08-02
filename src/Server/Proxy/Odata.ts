@@ -7,13 +7,13 @@ import { ServerOptions } from '../../Types/Types';
 
 export default {
   async set({ serverApp }: ServerOptions): Promise<void> {
-    const odataMountPath = Config.server('odataMountPath')?.toString() || '';
+    const odataMountPath = String(Config.server('odataMountPath'));
     let proxy, targetUri;
     const odataProxy = Config.server('odataProxy');
     // Options: Gateway, None
     switch (odataProxy) {
       case 'Gateway':
-        targetUri = Config.server('odataUri')?.toString() || '';
+        targetUri = String(Config.server('odataUri'));
 
         if (targetUri) {
           Log.logServer(`Creating odataProxy to Gateway ${targetUri}`);
@@ -33,7 +33,7 @@ export default {
         }
         break;
       case 'Other':
-        targetUri = Config.server('odataUri')?.toString() || '';
+        targetUri = String(Config.server('odataUri'));
 
         if (targetUri) {
           const targets = targetUri.replace(/\\s/g, '').split(',');

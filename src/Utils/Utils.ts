@@ -1,4 +1,4 @@
-import { workspace, RelativePattern, Uri, extensions, commands } from 'vscode';
+import { workspace, RelativePattern, Uri, extensions, commands, Extension } from 'vscode';
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
@@ -7,11 +7,11 @@ import http from 'http';
 
 import Config from './Config';
 import Log from './Log';
-import { Ui5Apps } from '../Types/Types';
+import { Level, Ui5App, Ui5Apps, Ui5ToolsConfiguration } from '../Types/Types';
 
 let ui5Apps: Ui5Apps = [];
 let getUi5AppsPromise: Promise<Ui5Apps>;
-let sPromiseStatus;
+let sPromiseStatus: 'loading' | undefined;
 
 const Utils = {
   async getAllUI5Apps(bRefresh = false): Promise<Ui5Apps> {
@@ -21,12 +21,13 @@ const Utils = {
           sPromiseStatus = 'loading';
           ui5Apps = [];
 
-          const srcFolder = Config.general('srcFolder');
-          const libraryFolder = Config.general('libraryFolder');
-          const distFolder = Config.general('distFolder');
+          const srcFolder = String(Config.general('srcFolder'));
+          const libraryFolder = String(Config.general('libraryFolder'));
+          const distFolder = String(Config.general('distFolder'));
 
           const aWorkspacesPromises = [];
-          for (const wsUri of workspace.workspaceFolders) {
+          const workspaceFolders = workspace.workspaceFolders || [];
+          for (const wsUri of workspaceFolders) {
             const aManifestList = await workspace.findFiles(
               new RelativePattern(wsUri, `**/{${srcFolder},${libraryFolder}}/manifest.json`),
               new RelativePattern(wsUri, `**/{node_modules,.git}/`)
@@ -49,7 +50,7 @@ const Utils = {
               const manifestPromise = workspace.fs.readFile(manifestUri);
               aManifestPromises.push(manifestPromise);
             } catch (oError) {
-              Log.logGeneral(oError.message, 'ERROR');
+              Log.logGeneral(oError.message, Level.ERROR);
             }
           }
 
@@ -63,7 +64,7 @@ const Utils = {
               try {
                 manifest = JSON.parse(manifestPromise.value.toString());
               } catch (oError) {
-                Log.logGeneral(oError.message, 'ERROR');
+                Log.logGeneral(oError.message, Level.ERROR);
               }
 
               if (manifest?.['sap.app']?.id) {
@@ -108,7 +109,7 @@ const Utils = {
                 Log.logGeneral(
                   `Manifest found in ${manifestFsPath} path. If this manifest refers to an ui5 app, ` +
                     `check if it well formatted and has sap.app.type and sap.app.id properties filled`,
-                  'ERROR'
+                  Level.ERROR
                 );
               }
             }
@@ -132,7 +133,7 @@ const Utils = {
     return getUi5AppsPromise;
   },
 
-  fsPathToServerPath(appFsPath) {
+  fsPathToServerPath(appFsPath: string) {
     const workspaceRootPath = Utils.getWorkspaceRootPath();
     const libraryFolder = Config.general('libraryFolder');
     const distFolder = Config.general('distFolder');
@@ -146,25 +147,21 @@ const Utils = {
     return appServerPath;
   },
 
-  getWorkspaceRootPath() {
+  getWorkspaceRootPath(): string {
     let baseDirWorkspace = '';
     const workspaceFileUri = workspace.workspaceFile;
     if (workspaceFileUri) {
       baseDirWorkspace = path.dirname(workspaceFileUri.fsPath);
     } else {
       // only 1 workspace folder
-      const workspaceFolders = workspace.workspaceFolders;
-      baseDirWorkspace = workspaceFolders[0].uri.fsPath;
+      const workspaceFolders = workspace.workspaceFolders || [];
+      baseDirWorkspace = workspaceFolders.length ? workspaceFolders[0].uri.fsPath : '';
     }
     return baseDirWorkspace;
   },
 
-  getExtensionInfo() {
-    return extensions.getExtension('carlosorozcojimenez.ui5-tools');
-  },
-
-  getExtensionFsPath() {
-    return Utils.getExtensionInfo().extensionUri.fsPath;
+  getExtensionFsPath(): string {
+    return extensions.getExtension('carlosorozcojimenez.ui5-tools')?.extensionUri?.fsPath || '';
   },
 
   loadEnv() {
@@ -176,7 +173,7 @@ const Utils = {
   },
 
   getHttpsCert() {
-    const ui5ToolsPath = Utils.getExtensionFsPath();
+    const ui5ToolsPath = Utils.getExtensionFsPath() || '';
     return {
       key: fs.readFileSync(path.join(ui5ToolsPath, 'static', 'cert', 'server.key')),
       cert: fs.readFileSync(path.join(ui5ToolsPath, 'static', 'cert', 'server.cert')),
@@ -184,7 +181,7 @@ const Utils = {
   },
 
   getFramework() {
-    const resourcesProxy = Config.server('resourcesProxy');
+    const resourcesProxy = String(Config.server('resourcesProxy'));
     let framework = '';
     if (resourcesProxy.indexOf('OpenUI5') >= 0) {
       framework = 'openui5';
@@ -194,7 +191,7 @@ const Utils = {
     return framework;
   },
 
-  async getUi5ToolsFile(ui5App) {
+  async getUi5ToolsFile(ui5App: Ui5App): Promise<Ui5ToolsConfiguration> {
     let ui5AppConfig = undefined;
     if (ui5App) {
       try {
@@ -207,57 +204,14 @@ const Utils = {
     return ui5AppConfig;
   },
 
-  async setUi5ToolsFile(ui5App, oConfigFile) {
-    if (ui5App && typeof oConfigFile === 'object') {
-      try {
-        const sConfigFile = JSON.stringify(oConfigFile, undefined, 2);
-        await workspace.fs.writeFile(Uri.file(ui5App.appConfigPath), Buffer.from(sConfigFile));
-      } catch (oError) {
-        throw oError;
-      }
+  async setUi5ToolsFile(ui5App: Ui5App, oConfigFile: Ui5ToolsConfiguration): Promise<Ui5ToolsConfiguration> {
+    try {
+      const sConfigFile = JSON.stringify(oConfigFile, undefined, 2);
+      await workspace.fs.writeFile(Uri.file(ui5App.appConfigPath), Buffer.from(sConfigFile));
+    } catch (oError) {
+      throw oError;
     }
     return oConfigFile;
-  },
-
-  async getManifest(uriOrManifest) {
-    let manifest = undefined;
-    if (uriOrManifest) {
-      if (typeof uriOrManifest === 'string') {
-        const libraryFolder = Config.general('libraryFolder');
-        const distFolder = Config.general('distFolder');
-        const manifestString = await workspace.findFiles(
-          new RelativePattern(uriOrManifest, `**/manifest.json`),
-          `**/{${distFolder},${libraryFolder},node_modules}/**`,
-          1
-        );
-        if (manifestString.length) {
-          const uri = Uri.file(manifestString[0].fsPath);
-          const file = await workspace.fs.readFile(uri);
-          manifest = JSON.parse(file.toString());
-        }
-      } else {
-        manifest = uriOrManifest;
-      }
-    }
-    return manifest;
-  },
-
-  async getManifestLibrary(uriOrManifest) {
-    let isLib = false;
-    const manifest = await Utils.getManifest(uriOrManifest);
-    if (manifest?.['sap.app']?.type === 'library') {
-      isLib = true;
-    }
-    return isLib;
-  },
-
-  async getManifestId(uriOrManifest) {
-    let manifestId = undefined;
-    const manifest = await Utils.getManifest(uriOrManifest);
-    if (manifest?.['sap.app']?.id) {
-      manifestId = manifest['sap.app'].id;
-    }
-    return manifestId;
   },
 
   getOptionsVersion() {
@@ -304,45 +258,56 @@ const Utils = {
     return resourcesProxy === 'CDN SAPUI5' || resourcesProxy === 'Gateway';
   },
 
-  isUi5AppFsPath(ui5App, sFsFilePath) {
+  isUi5AppFsPath(ui5App: Ui5App, sFsFilePath: string) {
     return sFsFilePath.indexOf(ui5App.appFsPath) === 0;
   },
-  isUi5AppFsPathSrc(ui5App, sFsFilePath) {
+  isUi5AppFsPathSrc(ui5App: Ui5App, sFsFilePath: string) {
     return sFsFilePath.indexOf(ui5App.srcFsPath) === 0;
   },
-  isUi5AppFsPathDist(ui5App, sFsFilePath) {
+  isUi5AppFsPathDist(ui5App: Ui5App, sFsFilePath: string) {
     return sFsFilePath.indexOf(ui5App.distFsPath) === 0;
   },
 
-  async findUi5AppForFsPath(sFsFilePath) {
+  async findUi5AppForFsPath(sFsFilePath: string) {
     const ui5Apps = await Utils.getAllUI5Apps();
     const oUi5App = ui5Apps.find((ui5App) => this.isUi5AppFsPath(ui5App, sFsFilePath));
 
     return oUi5App;
   },
 
-  getMethods(obj): Array<string> {
-    const properties: Set<string> = new Set();
-    let currentObj = obj;
-    const aExclude = [
-      'constructor',
-      '__defineGetter__',
-      '__defineSetter__',
-      'hasOwnProperty',
-      '__lookupGetter__',
-      '__lookupSetter__',
-      'isPrototypeOf',
-      'propertyIsEnumerable',
+  getDateMethods() {
+    return [
+      'getDate',
+      'getDay',
+      'getFullYear',
+      'getHours',
+      'getMilliseconds',
+      'getMinutes',
+      'getMonth',
+      'getSeconds',
+      'getTime',
+      'getTimezoneOffset',
+      'getUTCDate',
+      'getUTCDay',
+      'getUTCFullYear',
+      'getUTCHours',
+      'getUTCMilliseconds',
+      'getUTCMinutes',
+      'getUTCMonth',
+      'getUTCSeconds',
+      'getYear',
+      'toGMTString',
+      'toLocaleDateString',
+      'toLocaleFormat',
+      'toLocaleString',
+      'toLocaleTimeString',
+      'toString',
+      'toTimeString',
+      'toUTCString',
     ];
-    do {
-      Object.getOwnPropertyNames(currentObj).map((item) => properties.add(item));
-    } while ((currentObj = Object.getPrototypeOf(currentObj)));
-    return [...properties.keys()].filter((item) => {
-      return typeof obj[item] === 'function' && item.indexOf('set') !== 0 && aExclude.indexOf(item) === -1;
-    });
   },
 
-  fetchFile(url, options = { timeout: 5000 }): Promise<string> {
+  fetchFile(url: string, options = { timeout: 5000 }): Promise<string> {
     return new Promise((resolve, reject) => {
       url = url.split('//').join('/');
 
@@ -370,7 +335,7 @@ const Utils = {
             });
           }
         })
-        .on('error', (e) => {
+        .on(Level.ERROR, (e) => {
           reject(e);
         });
     });

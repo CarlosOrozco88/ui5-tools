@@ -11,10 +11,12 @@ import {
 import path from 'path';
 
 import os from 'os';
+//@ts-ignore
 import preload from 'openui5-preload';
 import { minify, MinifyOutput } from 'terser';
 import { pd as prettyData } from 'pretty-data';
 import less from 'less';
+//@ts-ignore
 import lessOpenUI5 from 'less-openui5';
 
 const lessOpenUI5Builder = new lessOpenUI5.Builder({});
@@ -328,7 +330,7 @@ export default {
     const files: Array<Uri> = await workspace.findFiles(pattern);
 
     const calculedKeys: Record<string, string> = this.replaceStringsValue();
-    const aCalculedKeys: Array<string> = Object.entries(calculedKeys);
+    const aCalculedKeys: [string, string][] = Object.entries(calculedKeys);
 
     if (files.length) {
       Log.logBuilder(`Replacing strings from ${folderPath}`);
@@ -342,7 +344,7 @@ export default {
     }
   },
 
-  async replaceStringsFile(file: Uri, aCalculedKeys: Array<string>): Promise<void> {
+  async replaceStringsFile(file: Uri, aCalculedKeys: [string, string][]): Promise<void> {
     if (file) {
       const rawFile = await workspace.fs.readFile(file);
       const stringfile = rawFile.toString();
@@ -359,15 +361,16 @@ export default {
   },
 
   replaceStringsValue(): Record<string, string> {
-    let keysValues: Array<string> = Config.builder('replaceKeysValues');
+    let keysValues: Array<any> = new Array(Config.builder('replaceKeysValues'));
     const calculedKeys: Record<string, string> = {};
 
-    const oDate: Date = new Date();
+    const oDate = new Date();
     const sComputedDateKeyBegin = 'COMPUTED_Date_';
-    const aDateMethods = Utils.getMethods(oDate);
+    const aDateMethods = Utils.getDateMethods();
     const aDateValues = aDateMethods.map((sMethod: string) => {
       const sKey = `${sComputedDateKeyBegin}${sMethod}`;
-      const sValue = '' + oDate[sMethod]().toString();
+      //@ts-ignore
+      const sValue = '' + oDate[sMethod]();
       return { key: sKey, value: sValue };
     });
     keysValues = keysValues.concat(aDateValues);
@@ -375,8 +378,10 @@ export default {
     keysValues.forEach(({ key, value }) => {
       if (value.indexOf(sComputedDateKeyBegin) === 0) {
         const sFn = value.replace(sComputedDateKeyBegin, '');
+        //@ts-ignore
         if (typeof oDate[sFn] == 'function') {
           if (!calculedKeys[key]) {
+            //@ts-ignore
             calculedKeys[key] = oDate[sFn]();
           }
         }
@@ -480,11 +485,13 @@ export default {
         Log.logBuilder(`Babelify files from ${folderPath}`);
         // Create -dbg files
         const patternJs = new RelativePattern(folderPath, `**/*.js`);
-        const babelSourcesExclude = Config.builder(`babelSourcesExclude`)?.toString() || '';
+        const babelSourcesExclude = String(Config.builder(`babelSourcesExclude`));
         const jsFiles = await workspace.findFiles(patternJs, babelSourcesExclude);
 
         const babelCore = await import('@babel/core');
+        //@ts-ignore
         const transformAsyncToPromises = await import('babel-plugin-transform-async-to-promises');
+        //@ts-ignore
         const transformRemoveConsole = await import('babel-plugin-transform-remove-console');
         const presetEnv = await import('@babel/preset-env');
 
@@ -573,7 +580,7 @@ export default {
   async compressJs(ui5App: Ui5App, fsPath: string): Promise<void> {
     // Compress js files
     const patternJs = new RelativePattern(fsPath, `**/*.js`);
-    const uglifySourcesExclude = Config.builder(`uglifySourcesExclude`)?.toString() || '';
+    const uglifySourcesExclude = String(Config.builder(`uglifySourcesExclude`));
     const jsFiles = await workspace.findFiles(patternJs, uglifySourcesExclude);
 
     for (let i = 0; i < jsFiles.length; i++) {

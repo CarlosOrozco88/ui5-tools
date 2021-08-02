@@ -4,6 +4,7 @@ import Utils from '../../Utils/Utils';
 import Log from '../../Utils/Log';
 import ResourcesProxy from '../Proxy/Resources';
 import { ServerOptions } from '../../Types/Types';
+import { NextFunction, Request, Response } from 'express';
 
 export default {
   async set(oConfigParams: ServerOptions): Promise<void> {
@@ -20,7 +21,7 @@ export default {
       const ui5toolsData = Utils.getOptionsVersion();
       const flpPath = path.join(ui5ToolsPath, 'static', 'index', 'flp');
 
-      const indexFLP = (req, res, next) => {
+      const indexFLP = (req: Request, res: Response, next: NextFunction) => {
         res.render(path.join(flpPath, 'index'), { theme: ui5toolsData.theme });
       };
       serverApp.get('/flp/', indexFLP);
@@ -32,6 +33,7 @@ export default {
       };
       ui5Apps.forEach((ui5App) => {
         const hash = 'ui5tools-' + ui5App.folderName.toLowerCase();
+        //@ts-ignore
         fioriSandboxConfig.applications[hash] = {
           additionalInformation: `SAPUI5.Component=${ui5App.namespace}`,
           applicationType: 'SAPUI5',

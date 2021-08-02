@@ -1,29 +1,30 @@
-import { window, StatusBarAlignment } from 'vscode';
+import { window, StatusBarAlignment, StatusBarItem } from 'vscode';
 import Config from '../Utils/Config';
 import Utils from '../Utils/Utils';
 import Log from '../Utils/Log';
 import Server from '../Server/Server';
 
+let serverNavBar: StatusBarItem;
 export default {
   serverNavBar: undefined,
 
-  async init(subscriptions) {
+  async init(subscriptions: Array<any>) {
     Log.logGeneral(`Exploring ui5 projects...`);
-    if (!this.serverNavBar && subscriptions) {
-      this.serverNavBar = window.createStatusBarItem(StatusBarAlignment.Left, 100);
-      this.serverNavBar.command = 'ui5-tools.server.toggle';
-      subscriptions.push(this.serverNavBar);
+    if (!serverNavBar && subscriptions) {
+      serverNavBar = window.createStatusBarItem(StatusBarAlignment.Left, 100);
+      serverNavBar.command = 'ui5-tools.server.toggle';
+      subscriptions.push(serverNavBar);
       this.startText();
       await this.checkVisibility();
     }
   },
 
   async checkVisibility(bRefresh = true) {
-    let sOriginalText = this.serverNavBar.text;
-    this.serverNavBar.text = `$(loading~spin) Exploring ui5 projects...`;
+    let sOriginalText = serverNavBar.text;
+    serverNavBar.text = `$(loading~spin) Exploring ui5 projects...`;
     this.show();
     let ui5Apps = await Utils.getAllUI5Apps(bRefresh);
-    this.serverNavBar.text = sOriginalText;
+    serverNavBar.text = sOriginalText;
 
     if (!ui5Apps.length) {
       this.hide();
@@ -32,17 +33,17 @@ export default {
   },
 
   show() {
-    this.serverNavBar.show();
+    serverNavBar.show();
   },
 
   hide() {
-    this.serverNavBar.hide();
+    serverNavBar.hide();
   },
 
-  setText(text) {
-    this.serverNavBar.text = text
-      .replace('<serverName>', Config.server('name'))
-      .replace('<serverMode>', Server.serverMode);
+  setText(text: string) {
+    let serverName = String(Config.server('name'));
+    let serverMode = Server.getServerMode();
+    serverNavBar.text = text.replace('<serverName>', serverName).replace('<serverMode>', serverMode);
   },
 
   startingText() {
@@ -58,7 +59,7 @@ export default {
     this.setText(`$(loading~spin) Stopping <serverName>...`);
   },
 
-  stopText(port) {
+  stopText(port: number) {
     this.setText(`$(broadcast) <serverName> live at port ${port} | <serverMode>`);
   },
 };

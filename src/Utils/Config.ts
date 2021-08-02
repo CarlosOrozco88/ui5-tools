@@ -1,33 +1,35 @@
 import { workspace, WorkspaceConfiguration } from 'vscode';
 
 export default {
-  get(tool = ''): WorkspaceConfiguration {
+  getConfig(tool = ''): WorkspaceConfiguration {
     if (tool) {
       tool = '.' + tool;
     }
     return workspace.getConfiguration('ui5-tools' + tool);
   },
 
-  property(property?: string, tool = ''): string | number | undefined | Array<any> | WorkspaceConfiguration {
-    if (property) {
-      return this.get(tool).get(property);
+  property(property?: string, tool = ''): WorkspaceConfiguration | unknown {
+    if (typeof property === 'string') {
+      let value = this.getConfig(tool).get(property);
+      return value;
+    } else {
+      return this.getConfig(tool);
     }
-    return this.get(tool);
   },
 
-  general(property?: string): string | number | undefined | Array<any> | WorkspaceConfiguration {
+  general(property?: string): WorkspaceConfiguration | unknown {
     return this.property(property);
   },
 
-  server(property?: string): string | number | undefined | Array<any> | WorkspaceConfiguration {
+  server(property?: string): WorkspaceConfiguration | unknown {
     return this.property(property, 'server');
   },
 
-  builder(property?: string): string | number | undefined | Array<any> | WorkspaceConfiguration {
+  builder(property?: string): WorkspaceConfiguration | unknown {
     return this.property(property, 'builder');
   },
 
-  deployer(property?: string): string | number | undefined | Array<any> | WorkspaceConfiguration {
+  deployer(property?: string): WorkspaceConfiguration | unknown {
     return this.property(property, 'deployer');
   },
 };

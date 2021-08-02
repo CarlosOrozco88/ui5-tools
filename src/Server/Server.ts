@@ -238,4 +238,8 @@ export default {
   isStartedProduction() {
     return this.isStarted() && serverMode === ServerMode.PROD;
   },
+
+  getServerMode() {
+    return serverMode;
+  },
 };

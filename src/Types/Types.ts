@@ -81,3 +81,48 @@ export interface BuildTasks {
   cleanFiles: boolean;
   createPreload: boolean;
 }
+
+export interface DeployOptions {
+  conn: {
+    server: string;
+    client: number;
+    useStrictSSL?: boolean;
+    proxy?: string;
+    customQueryParams?: object;
+  };
+  auth: {
+    user?: string;
+    pwd?: string;
+  };
+  ui5: {
+    language: string;
+    transportno?: string;
+    package: string;
+    bspcontainer: string;
+    bspcontainer_text?: string;
+    create_transport?: boolean;
+    transport_text?: string;
+    transport_use_user_match?: boolean;
+    transport_use_locked?: boolean;
+    calc_appindex?: boolean;
+  };
+}
+
+export interface DeployMassive {
+  transportno?: string;
+  deployWorkspace?: boolean;
+}
+
+export enum DeployStatus {
+  Error = 0,
+  Skipped = 1,
+  Success = 2,
+}
+
+export interface Ui5ToolsConfiguration {
+  deployer: {
+    type: 'Gateway';
+    globalDeploy?: boolean;
+    options: DeployOptions;
+  };
+}

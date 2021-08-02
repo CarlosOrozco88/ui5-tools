@@ -466,7 +466,7 @@
     "webpack": "webpack --mode development",
     "webpack-dev": "webpack --mode development --watch",
     "webpack-prod": "webpack --mode production",
-    "lint": "eslint . --ext .ts,.tsx",
+    "lint": "eslint . --ext .ts",
     "pretest": "npm run lint",
     "test-compile": "tsc -p ./",
     "test": "node ./test/runTest.js"
@@ -492,7 +492,6 @@
     "@typescript-eslint/parser": "4.28.5",
     "babel-loader": "^8.2.2",
     "copy-webpack-plugin": "^9.0.1",
-    "esbuild-loader": "^2.13.1",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",

@@ -25,8 +25,8 @@ const cacheResources = apicache
   .middleware();
 
 const onProxyRes: RequestHandler = function (req: Request, res: Response, next: NextFunction): void {
-  const oRes: ServerResponse = res;
-  onHeaders(oRes, () => {
+  //@ts-ignore
+  onHeaders(res, () => {
     res.setHeader('cache-control', 'no-cache');
   });
   next();
@@ -43,13 +43,13 @@ export default {
   async set({ serverApp }: ServerOptions): Promise<void> {
     const framework = Utils.getFramework();
     let targetUri, proxy;
-    const resourcesProxy = Config.server('resourcesProxy')?.toString() || '';
+    const resourcesProxy = String(Config.server('resourcesProxy'));
     let ui5Version = Config.general('ui5Version');
 
     // Options: Gateway, CDN SAPUI5, CDN OpenUI5, None
     switch (resourcesProxy) {
       case 'Gateway':
-        targetUri = Config.server('resourcesUri')?.toString() || '';
+        targetUri = String(Config.server('resourcesUri'));
         try {
           await Ui5Provider.configureGWVersion(targetUri); // Upadate for correct version
           ui5Version = Config.general('ui5Version');
@@ -123,7 +123,7 @@ export default {
     let basePath = '';
     switch (resourcesProxy) {
       case 'Gateway':
-        targetUri = Config.server('resourcesUri')?.toString() || '';
+        targetUri = String(Config.server('resourcesUri'));
         basePath = '/sap/public/bc/ui5_ui5/1';
         serverApp.get('/flp/test-resources/sap/ushell/bootstrap/sandbox.js', async (req, res) => {
           const sCdnTargetUri = `https://sapui5.hana.ondemand.com/${ui5Version}/`;

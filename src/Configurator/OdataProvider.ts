@@ -22,7 +22,7 @@ export default {
 
   async quickPickOdataProxy(): Promise<string> {
     return new Promise(async (resolve, reject) => {
-      const odataProviderValue = Config.server('odataProxy')?.toString() || '';
+      const odataProviderValue = String(Config.server('odataProxy'));
       const quickpick: QuickPick<QuickPickItem> = await window.createQuickPick();
       quickpick.title = 'ui5-tools > Configurator > oDataProvider: Select odata provider';
       quickpick.items = [
@@ -44,6 +44,7 @@ export default {
       quickpick.onDidAccept(async () => {
         if (quickpick.selectedItems.length) {
           const value = quickpick.selectedItems[0].label;
+          //@ts-ignore
           await Config.server()?.update('odataProxy', value, ConfigurationTarget.Workspace);
 
           Log.logConfigurator(`Set odataProxy value to ${value}`);
@@ -61,8 +62,8 @@ export default {
 
   async inputBoxGatewayUri(): Promise<string> {
     return new Promise(async (resolve, reject) => {
-      const odataUri = Config.server('odataUri')?.toString() || '';
-      const inputBox: InputBox = await window.createInputBox();
+      const odataUri = String(Config.server('odataUri'));
+      const inputBox: InputBox = window.createInputBox();
       inputBox.title = 'ui5-tools > Configurator > oDataProvider: Enter gateway url';
       inputBox.step = 1;
       inputBox.totalSteps = 1;
@@ -71,6 +72,7 @@ export default {
       inputBox.ignoreFocusOut = true;
       inputBox.onDidAccept(async () => {
         if (inputBox.value) {
+          //@ts-ignore
           await Config.server()?.update('odataUri', inputBox.value, ConfigurationTarget.Workspace);
           Log.logConfigurator(`Set odataUri value to ${inputBox.value}`);
           resolve(inputBox.value);
@@ -87,8 +89,8 @@ export default {
 
   async inputBoxOtherUri(): Promise<string> {
     return new Promise(async (resolve, reject) => {
-      const odataUri = Config.server('odataUri')?.toString() || '';
-      const inputBox = await window.createInputBox();
+      const odataUri = String(Config.server('odataUri'));
+      const inputBox = window.createInputBox();
       inputBox.title = 'ui5-tools > Configurator > oDataProvider: Enter destination url/s separated by comma';
       inputBox.step = 1;
       inputBox.totalSteps = 2;
@@ -97,6 +99,7 @@ export default {
       inputBox.ignoreFocusOut = true;
       inputBox.onDidAccept(async () => {
         if (inputBox.value) {
+          //@ts-ignore
           await Config.server()?.update('odataUri', inputBox.value, ConfigurationTarget.Workspace);
           Log.logConfigurator(`Set odataUri value to ${inputBox.value}`);
           resolve(inputBox.value);
@@ -113,8 +116,8 @@ export default {
 
   async inputBoxOdataMountPath() {
     return new Promise(async (resolve, reject) => {
-      const odataMountPath = Config.server('odataMountPath')?.toString() || '';
-      const inputBox: InputBox = await window.createInputBox();
+      const odataMountPath = String(Config.server('odataMountPath'));
+      const inputBox: InputBox = window.createInputBox();
       inputBox.title = 'ui5-tools > Configurator > oDataProvider: Enter mountpath/s separated by comma';
       inputBox.step = 2;
       inputBox.totalSteps = 2;
@@ -123,6 +126,7 @@ export default {
       inputBox.ignoreFocusOut = true;
       inputBox.onDidAccept(async () => {
         if (inputBox.value) {
+          //@ts-ignore
           await Config.server()?.update('odataMountPath', inputBox.value, ConfigurationTarget.Workspace);
           Log.logConfigurator(`Set odataMountPath to ${inputBox.value}`);
           resolve(inputBox.value);

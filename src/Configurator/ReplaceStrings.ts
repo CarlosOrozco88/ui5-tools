@@ -15,7 +15,8 @@ export default {
 
   async quickPickAddRemoveStrings(): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      const replaceKeysValues: Array<object> = Config.builder('replaceKeysValues');
+      //@ts-ignore
+      const replaceKeysValues: Array<{ key: string; value: string }> = Config.builder('replaceKeysValues');
 
       const options = replaceKeysValues.map((keyValue) => {
         return {
@@ -42,6 +43,7 @@ export default {
               value: item.description,
             };
           });
+          //@ts-ignore
           await Config.builder()?.update('replaceKeysValues', newKeyValues, ConfigurationTarget.Workspace);
           quickPickValueKey.hide();
           resolve(true);
@@ -52,24 +54,31 @@ export default {
         if (introData) {
           const keyValue = /(?<key>\S+)\s*={1}\s*(?<value>.+)/g.exec(introData);
           if (keyValue) {
-            const newReplaceKeysValues = Config.builder('replaceKeysValues');
+            const newReplaceKeysValues: Array<{ key: string; value: string }> = Config.builder('replaceKeysValues');
             const mapKeys = newReplaceKeysValues.map((keyValue) => keyValue.key);
-            if (mapKeys.includes(keyValue.groups.key)) {
-              window.showErrorMessage(`${keyValue.groups.key} already exists`);
-              quickPickValueKey.hide();
-              resolve(true);
-            } else if (keyValue.groups.key.indexOf('COMPUTED_') === 0) {
-              window.showErrorMessage(`The key should not start with COMPUTED_`);
-              quickPickValueKey.hide();
-              resolve(true);
-            } else {
-              newReplaceKeysValues.push({
-                key: keyValue.groups.key,
-                value: keyValue.groups.value,
-              });
-              await Config.builder()?.update('replaceKeysValues', newReplaceKeysValues, ConfigurationTarget.Workspace);
-              quickPickValueKey.hide();
-              resolve(true);
+            if (keyValue.groups?.key) {
+              if (mapKeys.includes(keyValue.groups.key)) {
+                window.showErrorMessage(`${keyValue.groups?.key} already exists`);
+                quickPickValueKey.hide();
+                resolve(true);
+              } else if (keyValue.groups.key.indexOf('COMPUTED_') === 0) {
+                window.showErrorMessage(`The key should not start with COMPUTED_`);
+                quickPickValueKey.hide();
+                resolve(true);
+              } else {
+                newReplaceKeysValues.push({
+                  key: keyValue.groups.key,
+                  value: keyValue.groups.value,
+                });
+                //@ts-ignore
+                await Config.builder()?.update(
+                  'replaceKeysValues',
+                  newReplaceKeysValues,
+                  ConfigurationTarget.Workspace
+                );
+                quickPickValueKey.hide();
+                resolve(true);
+              }
             }
           } else {
             quickPickValueKey.hide();
