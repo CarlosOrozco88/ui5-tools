@@ -469,7 +469,7 @@ export default {
    * @param {string} folderPath folder uri
    */
   async babelifyJSFiles(ui5App, folderPath) {
-    if (Config.builder('babelSources') || true) {
+    if (Config.builder('babelSources')) {
       try {
         Log.logBuilder(`Babelify files from ${folderPath}`);
         // Create -dbg files
