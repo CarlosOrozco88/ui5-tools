@@ -138,9 +138,10 @@ export default {
           server = http.createServer(serverApp);
         }
 
-        if (oConfigParams.timeout > 0) {
-          server.timeout = oConfigParams.timeout;
-        }
+        server.setTimeout(oConfigParams.timeout, () => {
+          Log.logServer('Connection timeout', Level.ERROR);
+        });
+
         server.listen(oConfigParams.port, () => {
           Log.logServer('Started!');
           const openBrowser = Config.server('openBrowser');
@@ -150,6 +151,7 @@ export default {
             open(`${oConfigParams.protocol}://localhost:${oConfigParams.port}/${ui5ToolsIndex}/`);
           }
         });
+
         status = ServerStatus.STARTED;
         StatusBar.stopText(oConfigParams.port);
       } catch (e: any) {
