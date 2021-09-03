@@ -139,7 +139,7 @@ export default {
             if (bShowMessage) {
               window.showInformationMessage(sMessage);
             }
-          } catch (error) {
+          } catch (error: any) {
             throw new Error(error);
           }
         }
@@ -287,7 +287,7 @@ export default {
       }
 
       // End build
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error);
     }
   },
@@ -304,7 +304,7 @@ export default {
           recursive: true,
           useTrash: true,
         });
-      } catch (error) {
+      } catch (error: any) {
         if (error.code !== 'FileNotFound') {
           throw new Error(error);
         }
@@ -329,7 +329,7 @@ export default {
         for (let i = 0; i < files.length; i++) {
           await this.replaceStringsFile(files[i], aCalculedKeys);
         }
-      } catch (error) {
+      } catch (error: any) {
         throw new Error(error);
       }
     }
@@ -394,7 +394,7 @@ export default {
       await workspace.fs.copy(uriSrc, uriDest, {
         overwrite: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error);
     }
   },
@@ -520,7 +520,7 @@ export default {
             await workspace.fs.writeFile(uriOrigJs, Buffer.from(babelifiedCode));
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         throw new Error(error);
       }
     }
@@ -544,7 +544,7 @@ export default {
             overwrite: true,
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         throw new Error(error);
       }
     }
@@ -562,7 +562,7 @@ export default {
         await this.compressJson(ui5App, fsPath);
         await this.compressXml(ui5App, fsPath);
         await this.compressCss(ui5App, fsPath);
-      } catch (error) {
+      } catch (error: any) {
         throw new Error(error);
       }
     }
@@ -643,7 +643,7 @@ export default {
         const uriLess = Uri.file(lessFiles[i].fsPath);
         await workspace.fs.delete(uriLess);
       }
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error);
     }
   },

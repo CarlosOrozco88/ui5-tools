@@ -152,7 +152,7 @@ export default {
         });
         status = ServerStatus.STARTED;
         StatusBar.stopText(oConfigParams.port);
-      } catch (e) {
+      } catch (e: any) {
         this.stopAll();
         throw new Error(e);
       }
