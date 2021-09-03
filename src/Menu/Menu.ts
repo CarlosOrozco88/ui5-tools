@@ -14,7 +14,7 @@ export default {
     });
     try {
       await Builder.buildProject(ui5App);
-    } catch (oError) {
+    } catch (oError: any) {
       Log.logBuilder(oError.message, Level.ERROR);
     }
   },
@@ -28,7 +28,7 @@ export default {
     if (ui5App) {
       try {
         await Deployer.askCreateReuseTransport(ui5App);
-      } catch (oError) {
+      } catch (oError: any) {
         Log.logDeployer(oError.message, Level.ERROR);
       }
     }

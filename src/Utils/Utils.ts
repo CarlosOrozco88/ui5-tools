@@ -49,7 +49,7 @@ const Utils = {
             try {
               const manifestPromise = workspace.fs.readFile(manifestUri);
               aManifestPromises.push(manifestPromise);
-            } catch (oError) {
+            } catch (oError: any) {
               Log.logGeneral(oError.message, Level.ERROR);
             }
           }
@@ -63,7 +63,7 @@ const Utils = {
             if (manifestPromise.status === 'fulfilled') {
               try {
                 manifest = JSON.parse(manifestPromise.value.toString());
-              } catch (oError) {
+              } catch (oError: any) {
                 Log.logGeneral(oError.message, Level.ERROR);
               }
 
@@ -326,7 +326,7 @@ const Utils = {
             res.on('end', () => {
               try {
                 resolve(rawData);
-              } catch (e) {
+              } catch (e: any) {
                 reject(e.message);
               }
             });

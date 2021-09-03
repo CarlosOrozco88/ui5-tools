@@ -23,7 +23,7 @@ export default {
         await this.setUi5Version();
       }
       Server.restart();
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error);
     }
   },
@@ -103,7 +103,7 @@ export default {
     let versions: Array<any>;
     try {
       versions = await this.getUi5Versions();
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error);
     }
     return new Promise(async (resolve, reject) => {
@@ -266,7 +266,7 @@ export default {
           }
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       throw new Error(err);
     }
 

@@ -62,7 +62,7 @@ export default {
       if (ui5App) {
         await this.askCreateReuseTransport(ui5App);
       }
-    } catch (oError) {
+    } catch (oError: any) {
       Log.logDeployer(oError.message, Level.ERROR);
     }
   },
@@ -203,7 +203,7 @@ export default {
         }
         await this.deployProject(ui5App, oDeployOptions, oMassiveOptions);
       }
-    } catch (oError) {
+    } catch (oError: any) {
       Log.logDeployer(oError.message, Level.ERROR);
       window.showErrorMessage(oError.message);
       throw oError;
@@ -375,7 +375,7 @@ export default {
 
         await ui5DeployerCore.deployUI5toNWABAP(oDeployOptions, aProjectResources, oLoggerProgress);
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = processReject;
-      } catch (oError) {
+      } catch (oError: any) {
         progress?.report({ increment: 100 * multiplier, message: oError.message });
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = processReject;
         throw new Error(oError);

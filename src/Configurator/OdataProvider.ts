@@ -15,7 +15,7 @@ export default {
         await this.inputBoxOdataMountPath();
       }
       Server.restart();
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error);
     }
   },

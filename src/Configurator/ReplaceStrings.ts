@@ -8,7 +8,7 @@ export default {
       while (askMore) {
         askMore = await this.quickPickAddRemoveStrings();
       }
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error);
     }
   },
