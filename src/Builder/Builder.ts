@@ -367,7 +367,7 @@ export default {
     keysValues = keysValues.concat(aDateValues);
 
     keysValues.forEach(({ key, value }) => {
-      if (value.indexOf(sComputedDateKeyBegin) === 0) {
+      if (value && value.indexOf(sComputedDateKeyBegin) === 0) {
         const sFn = value.replace(sComputedDateKeyBegin, '');
         //@ts-ignore
         if (typeof oDate[sFn] == 'function') {

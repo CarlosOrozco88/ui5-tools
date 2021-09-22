@@ -295,7 +295,6 @@ const Utils = {
       'getYear',
       'toGMTString',
       'toLocaleDateString',
-      'toLocaleFormat',
       'toLocaleString',
       'toLocaleTimeString',
       'toString',
