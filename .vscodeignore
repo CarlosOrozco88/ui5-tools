@@ -4,12 +4,13 @@
 .gitignore
 .prettierrc.json
 .prettierignore
-jsconfig.json
 node_modules
-test/**
+babel.config.json
+tsconfig.json
 webpack.config.js
 workspaceExample
 src
+FUNDING.yml
 .github
 .vscode
 

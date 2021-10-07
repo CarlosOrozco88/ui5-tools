@@ -17,6 +17,7 @@ const Utils = {
   async getAllUI5Apps(bRefresh = false): Promise<Ui5Apps> {
     if (!getUi5AppsPromise || (bRefresh && !sPromiseStatus)) {
       getUi5AppsPromise = new Promise(async (resolve, reject) => {
+        Log.general(`Exploring ui5 projects...`);
         try {
           sPromiseStatus = 'loading';
           ui5Apps = [];
@@ -50,7 +51,7 @@ const Utils = {
               const manifestPromise = workspace.fs.readFile(manifestUri);
               aManifestPromises.push(manifestPromise);
             } catch (oError: any) {
-              Log.logGeneral(oError.message, Level.ERROR);
+              Log.general(oError.message, Level.ERROR);
             }
           }
 
@@ -64,7 +65,7 @@ const Utils = {
               try {
                 manifest = JSON.parse(manifestPromise.value.toString());
               } catch (oError: any) {
-                Log.logGeneral(oError.message, Level.ERROR);
+                Log.general(oError.message, Level.ERROR);
               }
 
               if (manifest?.['sap.app']?.id) {
@@ -106,7 +107,7 @@ const Utils = {
                   });
                 }
               } else {
-                Log.logGeneral(
+                Log.general(
                   `Manifest found in ${manifestFsPath} path. If this manifest refers to an ui5 app, ` +
                     `check if it well formatted and has sap.app.type and sap.app.id properties filled`,
                   Level.ERROR
@@ -116,7 +117,7 @@ const Utils = {
             i++;
           }
 
-          Log.logGeneral(`${ui5Apps.length} ui5 projects found!`);
+          Log.general(`${ui5Apps.length} ui5 projects found!`);
 
           const aResourcesDirname = ui5Apps.map((app) => app.appResourceDirname);
           commands.executeCommand('setContext', 'ui5-tools:resourcesPath', aResourcesDirname);
@@ -155,7 +156,7 @@ const Utils = {
     } else {
       // only 1 workspace folder
       const workspaceFolders = workspace.workspaceFolders || [];
-      baseDirWorkspace = workspaceFolders.length ? workspaceFolders[0].uri.fsPath : '';
+      baseDirWorkspace = workspaceFolders[0]?.uri?.fsPath || '';
     }
     return baseDirWorkspace;
   },
@@ -303,9 +304,13 @@ const Utils = {
     ];
   },
 
-  fetchFile(url: string, options = { timeout: 5000 }): Promise<string> {
+  fetchFile(url: string, options = { timeout: 5000 }): Promise<Buffer> {
     return new Promise((resolve, reject) => {
-      url = url.split('//').join('/');
+      const splitted = url.split('://');
+      if (splitted.length > 1) {
+        splitted[1] = splitted[1].split('//').join('/');
+      }
+      url = splitted.join('://');
 
       let httpModule;
       if (url.indexOf('https') == 0) {
@@ -318,20 +323,20 @@ const Utils = {
           if (res.statusCode !== 200) {
             reject();
           } else {
-            let rawData = '';
+            const aData: Uint8Array[] = [];
             res.on('data', (chunk) => {
-              rawData += chunk;
+              aData.push(chunk);
             });
             res.on('end', () => {
               try {
-                resolve(rawData);
+                resolve(Buffer.concat(aData));
               } catch (e: any) {
                 reject(e.message);
               }
             });
           }
         })
-        .on(Level.ERROR, (e) => {
+        .on('error', (e) => {
           reject(e);
         });
     });

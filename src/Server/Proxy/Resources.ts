@@ -9,17 +9,19 @@ import Config from '../../Utils/Config';
 import Utils from '../../Utils/Utils';
 import Log from '../../Utils/Log';
 import { Level, ServerOptions } from '../../Types/Types';
-import { NextFunction, Request, Response, RequestHandler } from 'express';
+import { RequestHandler } from 'express';
 
 const cacheResources = apicache
   .options({
     defaultDuration: '1 day',
     statusCodes: {
-      exclude: [404, 403],
+      include: [200],
     },
     headers: {
       'cache-control': 'no-cache',
     },
+    //@ts-ignore
+    respectCacheControl: false,
   })
   .middleware();
 
@@ -34,7 +36,7 @@ const onProxyRes: RequestHandler = function (req, res, next): void {
 export default {
   resetCache(): void {
     if (apicache.clear) {
-      Log.logServer(`Clear resources cache`);
+      Log.server(`Clear resources cache`);
       apicache.clear('');
     }
   },
@@ -57,7 +59,7 @@ export default {
         }
 
         if (targetUri) {
-          Log.logServer(`Creating resourcesProxy with ui5Version ${ui5Version} to Gateway ${targetUri}`);
+          Log.server(`Creating resourcesProxy with ui5Version ${ui5Version} to Gateway ${targetUri}`);
           proxy = createProxyMiddleware({
             pathRewrite(path) {
               const basePath = '/sap/public/bc/ui5_ui5/1';
@@ -80,7 +82,7 @@ export default {
         targetUri = `https://${framework}.hana.ondemand.com/${ui5Version}/`;
 
         if (ui5Version) {
-          Log.logServer(`Creating resourcesProxy with ui5Version ${ui5Version} to CDN ${targetUri}`);
+          Log.server(`Creating resourcesProxy with ui5Version ${ui5Version} to CDN ${targetUri}`);
           proxy = createProxyMiddleware({
             pathRewrite(path, req) {
               const resourcesPath = path.slice(path.indexOf('/resources/'), path.length);
@@ -103,7 +105,7 @@ export default {
         } catch (oError) {
           const sError = `Error: Unable to get sap-ui-core.js, framework ${framework} does not have ${ui5Version} available at CDN.`;
 
-          Log.logServer(sError, Level.ERROR);
+          Log.server(sError, Level.ERROR);
           window.showErrorMessage(sError);
         }
         break;
@@ -128,8 +130,8 @@ export default {
         serverApp.get('/flp/test-resources/sap/ushell/bootstrap/sandbox.js', async (req, res) => {
           const sCdnTargetUri = `https://sapui5.hana.ondemand.com/${ui5Version}/`;
           const url = `${sCdnTargetUri}test-resources/sap/ushell/bootstrap/sandbox.js`;
-          const sFile = await Utils.fetchFile(url);
-          res.send(sFile);
+          const fileBuffer = await Utils.fetchFile(url);
+          res.send(fileBuffer.toString());
         });
         break;
       case 'CDN SAPUI5':
@@ -139,7 +141,7 @@ export default {
         break;
     }
     if (targetUri) {
-      Log.logServer(`Creating testProxy with ui5Version ${ui5Version} to ${targetUri}`);
+      Log.server(`Creating testProxy with ui5Version ${ui5Version} to ${targetUri}`);
       const proxy = createProxyMiddleware({
         pathRewrite(path, req) {
           const resourcesPath = path.slice(path.indexOf('/test-resources/'), path.length);

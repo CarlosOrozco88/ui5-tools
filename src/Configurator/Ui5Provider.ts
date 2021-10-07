@@ -15,7 +15,7 @@ export default {
         try {
           await this.configureGWVersion(sGatewayUri);
         } catch (oError) {
-          Log.logConfigurator(oError, Level.ERROR);
+          Log.configurator(oError, Level.ERROR);
           await this.setUi5Version();
         }
       }
@@ -59,11 +59,10 @@ export default {
           const value = quickpick.selectedItems[0].label;
           //@ts-ignore
           await Config.server().update('resourcesProxy', value, ConfigurationTarget.Workspace);
-          Log.logConfigurator(`Set resourcesProxy value to ${value}`);
+          Log.configurator(`Set resourcesProxy value to ${value}`);
           resolve(value);
         } else {
-          const sMessage = 'No ui5 provider configured';
-          Log.logConfigurator(sMessage);
+          const sMessage = Log.configurator('No ui5 provider configured');
           reject(sMessage);
         }
         quickpick.hide();
@@ -86,11 +85,10 @@ export default {
         if (inputBox.value) {
           //@ts-ignore
           await Config.server().update('resourcesUri', inputBox.value, ConfigurationTarget.Workspace);
-          Log.logConfigurator(`Set resourcesUri value to ${inputBox.value}`);
+          Log.configurator(`Set resourcesUri value to ${inputBox.value}`);
           resolve(inputBox.value);
         } else {
-          const sMessage = 'No gateway url configured';
-          Log.logConfigurator(sMessage);
+          const sMessage = Log.configurator('No gateway url configured');
           reject(sMessage);
         }
         inputBox.hide();
@@ -118,10 +116,10 @@ export default {
         //@ts-ignore
         await Config.general().update('ui5Version', ui5Version, ConfigurationTarget.Workspace);
 
-        Log.logConfigurator(`Set ui5Version value ${ui5Version}`);
+        Log.configurator(`Set ui5Version value ${ui5Version}`);
         resolve(ui5Version);
       } catch (sError) {
-        Log.logConfigurator(sError, Level.ERROR);
+        Log.configurator(sError, Level.ERROR);
         reject(sError);
       }
       resolve(ui5Version);
@@ -275,27 +273,27 @@ export default {
 
   async getVersionOverview(framework = 'sapui5') {
     const url = `https://${framework}.hana.ondemand.com/versionoverview.json`;
-    const sFile = await Utils.fetchFile(url);
-    return JSON.parse(sFile);
+    const fileBuffer = await Utils.fetchFile(url);
+    return JSON.parse(fileBuffer.toString());
   },
 
   async getNeoApp(framework = 'sapui5') {
     const url = `https://${framework}.hana.ondemand.com/neo-app.json`;
-    const sFile = await Utils.fetchFile(url);
-    return JSON.parse(sFile);
+    const fileBuffer = await Utils.fetchFile(url);
+    return JSON.parse(fileBuffer.toString());
   },
 
   async configureGWVersion(sGatewayUri: string) {
-    Log.logConfigurator(`Fetching ui5Version from Gateway...`);
+    Log.configurator(`Fetching ui5Version from Gateway...`);
     const gatewayVersion = await this.getGatewayVersion(sGatewayUri);
     //@ts-ignore
     await Config.general().update('ui5Version', gatewayVersion.version, ConfigurationTarget.Workspace);
-    Log.logConfigurator(`Set ui5version value to ${gatewayVersion.version}`);
+    Log.configurator(`Set ui5version value to ${gatewayVersion.version}`);
   },
 
   async getGatewayVersion(sGatewayUri: string): Promise<Record<string, any>> {
     const url = `${sGatewayUri}/sap/public/bc/ui5_ui5/1/resources/sap-ui-version.json`;
-    const sFile = await Utils.fetchFile(url);
-    return JSON.parse(sFile);
+    const fileBuffer = await Utils.fetchFile(url);
+    return JSON.parse(fileBuffer.toString());
   },
 };

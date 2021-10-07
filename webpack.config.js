@@ -1,7 +1,8 @@
 'use strict';
 
 const path = require('path');
-const CopyPlugin = require('copy-webpack-plugin');
+const webpack = require('webpack');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 /**@type {import('webpack').Configuration}*/
 module.exports = {
@@ -14,7 +15,7 @@ module.exports = {
     libraryTarget: 'commonjs2',
     devtoolModuleFilenameTemplate: '../[resource-path]',
   },
-  devtool: 'source-map',
+  devtool: process.env.NODE_ENV === 'production' ? undefined : 'eval-source-map',
   externals: {
     vscode: 'commonjs vscode',
     bufferutil: 'commonjs bufferutil',
@@ -23,10 +24,8 @@ module.exports = {
     babylon: 'commonjs babylon',
   },
   resolve: {
-    alias: {
-      handlebars: 'handlebars/dist/handlebars',
-    },
-    extensions: ['.ts', '.js', '.json', '.hbs'],
+    alias: {},
+    extensions: ['.ts', '.js', '.json'],
   },
   module: {
     rules: [
@@ -39,9 +38,6 @@ module.exports = {
         test: /\.js$/,
         exclude: /(node_modules)/,
         use: 'babel-loader',
-        // options: {
-        //   presets: ['@babel/preset-env'],
-        // },
       },
       {
         test: /\.node$/,
@@ -49,9 +45,5 @@ module.exports = {
       },
     ],
   },
-  plugins: [
-    new CopyPlugin({
-      patterns: [path.resolve(__dirname, 'node_modules', 'ttf2woff2', 'jssrc', 'ttf2woff2.wasm')],
-    }),
-  ],
+  plugins: [new webpack.ProgressPlugin(), new CleanWebpackPlugin()],
 };

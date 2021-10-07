@@ -16,7 +16,7 @@ export default {
         targetUri = String(Config.server('odataUri'));
 
         if (targetUri) {
-          Log.logServer(`Creating odataProxy to Gateway ${targetUri}`);
+          Log.server(`Creating odataProxy to Gateway ${targetUri}`);
           const targets = targetUri.replace(/\\s/g, '').split(',');
           const oAuth = this.getODATAAuth();
 
@@ -40,7 +40,7 @@ export default {
           const mpaths = odataMountPath.replace(/\\s/g, '').split(',');
           for (let i = 0; i < targets.length; i++) {
             if (mpaths && mpaths[i]) {
-              Log.logServer(`Creating resourcesProxy to Other ${targets[i]}`);
+              Log.server(`Creating resourcesProxy to Other ${targets[i]}`);
 
               proxy = createProxyMiddleware({
                 pathRewrite: function (i: number, path: string) {

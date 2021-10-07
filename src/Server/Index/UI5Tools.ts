@@ -1,14 +1,12 @@
 import { workspace, RelativePattern, Uri } from 'vscode';
 import express, { NextFunction, Request, Response } from 'express';
 import path from 'path';
-import showdown from 'showdown';
+import marked from 'marked';
 
 import Utils from '../../Utils/Utils';
 import Config from '../../Utils/Config';
 import Log from '../../Utils/Log';
 import { ServerOptions, Ui5ToolsData } from '../../Types/Types';
-
-const converter = new showdown.Converter();
 
 export default {
   // SERVER INDEX
@@ -20,7 +18,7 @@ export default {
     ui5ToolsPath,
     isLaunchpadMounted,
   }: ServerOptions): Promise<void> {
-    Log.logServer('Mounting ui5-tools root page');
+    Log.server('Mounting ui5-tools root page');
 
     const existBasePathInApp = ui5Apps.find((ui5App) => {
       return ui5App.appServerPath === '/';
@@ -79,9 +77,9 @@ export default {
 
     // Serve app data
     serverApp.get(`/${ui5ToolsIndex}/ui5tools.json`, async (req, res) => {
-      ui5toolsData.readme = converter.makeHtml((await this.readFile(path.join(baseDir, 'README.md'))) || '');
-      ui5toolsData.about = converter.makeHtml((await this.readFile(path.join(ui5ToolsPath, 'README.md'))) || '');
-      ui5toolsData.changelog = converter.makeHtml((await this.readFile(path.join(ui5ToolsPath, 'CHANGELOG.md'))) || '');
+      ui5toolsData.readme = marked((await this.readFile(path.join(baseDir, 'README.md'))) || '');
+      ui5toolsData.about = marked((await this.readFile(path.join(ui5ToolsPath, 'README.md'))) || '');
+      ui5toolsData.changelog = marked((await this.readFile(path.join(ui5ToolsPath, 'CHANGELOG.md'))) || '');
       ui5toolsData.links = JSON.parse((await this.readFile(path.join(baseDir, 'links.json'))) || '[]');
       ui5toolsData.docs = await this.findDocs(baseDir, ui5toolsData.showTree);
       ui5toolsData.contributors = [
@@ -145,7 +143,7 @@ export default {
             oFolders[sPath] = {
               folder: bIsFolder,
               name: sFolderFile,
-              markdown: bIsFolder ? undefined : '<div>' + converter.makeHtml(sFile) + '</div>',
+              markdown: bIsFolder ? undefined : '<div>' + marked(sFile) + '</div>',
               path: sPath,
               hash: sHash,
               nodes: [],

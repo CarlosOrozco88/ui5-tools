@@ -10,7 +10,7 @@ export default {
   async set(oConfigParams: ServerOptions): Promise<void> {
     const { serverApp, ui5Apps = [], baseDir, ui5ToolsPath, isLaunchpadMounted } = oConfigParams;
     if (isLaunchpadMounted) {
-      Log.logServer('Mounting launchpad');
+      Log.server('Mounting launchpad');
       // LAUNCHPAD IN /flp/
 
       // DONT MOUNT RESOURCE ROOTS TO SIMULATE LAUNCHPAD

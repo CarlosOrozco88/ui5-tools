@@ -9,7 +9,6 @@ export default {
   serverNavBar: undefined,
 
   async init(subscriptions: Array<any>) {
-    Log.logGeneral(`Exploring ui5 projects...`);
     if (!serverNavBar && subscriptions) {
       serverNavBar = window.createStatusBarItem(StatusBarAlignment.Left, 100);
       serverNavBar.command = 'ui5-tools.server.toggle';

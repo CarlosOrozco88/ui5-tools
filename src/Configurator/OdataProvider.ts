@@ -47,11 +47,10 @@ export default {
           //@ts-ignore
           await Config.server()?.update('odataProxy', value, ConfigurationTarget.Workspace);
 
-          Log.logConfigurator(`Set odataProxy value to ${value}`);
+          Log.configurator(`Set odataProxy value to ${value}`);
           resolve(value);
         } else {
-          const sMessage = 'No odata proxy configured';
-          Log.logConfigurator(sMessage);
+          const sMessage = Log.configurator('No odata proxy configured');
           reject(sMessage);
         }
         quickpick.hide();
@@ -74,11 +73,10 @@ export default {
         if (inputBox.value) {
           //@ts-ignore
           await Config.server()?.update('odataUri', inputBox.value, ConfigurationTarget.Workspace);
-          Log.logConfigurator(`Set odataUri value to ${inputBox.value}`);
+          Log.configurator(`Set odataUri value to ${inputBox.value}`);
           resolve(inputBox.value);
         } else {
-          const sMessage = 'No gateway url configured';
-          Log.logConfigurator(sMessage);
+          const sMessage = Log.configurator('No gateway url configured');
           reject(sMessage);
         }
         inputBox.hide();
@@ -101,11 +99,10 @@ export default {
         if (inputBox.value) {
           //@ts-ignore
           await Config.server()?.update('odataUri', inputBox.value, ConfigurationTarget.Workspace);
-          Log.logConfigurator(`Set odataUri value to ${inputBox.value}`);
+          Log.configurator(`Set odataUri value to ${inputBox.value}`);
           resolve(inputBox.value);
         } else {
-          const sMessage = 'No destination url configured';
-          Log.logConfigurator(sMessage);
+          const sMessage = Log.configurator('No destination url configured');
           reject(sMessage);
         }
         inputBox.hide();
@@ -128,11 +125,10 @@ export default {
         if (inputBox.value) {
           //@ts-ignore
           await Config.server()?.update('odataMountPath', inputBox.value, ConfigurationTarget.Workspace);
-          Log.logConfigurator(`Set odataMountPath to ${inputBox.value}`);
+          Log.configurator(`Set odataMountPath to ${inputBox.value}`);
           resolve(inputBox.value);
         } else {
-          const sMessage = 'No mountpath url configured';
-          Log.logConfigurator(sMessage);
+          const sMessage = Log.configurator('No mountpath url configured');
           reject(sMessage);
         }
         inputBox.hide();

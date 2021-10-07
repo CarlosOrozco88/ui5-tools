@@ -2,7 +2,7 @@ import express from 'express';
 import open from 'open';
 import http from 'http';
 import https from 'https';
-import portfinder from 'portfinder';
+import getPort from 'get-port';
 
 import Apps from './Apps';
 import LiveServer from './LiveServer';
@@ -62,7 +62,7 @@ export default {
       }
       ResourcesProxy.resetCache();
 
-      Log.logServer('Starting...');
+      Log.server('Starting...');
       try {
         serverApp = express();
         serverApp.set('view engine', 'ejs');
@@ -85,10 +85,10 @@ export default {
           sServerMode: sServerMode,
           watch: Boolean(Config.server('watch')),
           protocol: Protocols[protocol],
-          port: await portfinder.getPortPromise({
+          port: await getPort({
             port: Number(Config.server('port')),
           }),
-          portLiveReload: await portfinder.getPortPromise({
+          portLiveReload: await getPort({
             port: 35729,
           }),
           timeout: Number(Config.server('timeout')),
@@ -104,7 +104,7 @@ export default {
           try {
             await LiveServer.start(oConfigParams);
           } catch (oError) {
-            Log.logServer(oError, Level.ERROR);
+            Log.server(oError, Level.ERROR);
           }
         }
 
@@ -113,23 +113,23 @@ export default {
         try {
           await OdataProxy.set(oConfigParams);
         } catch (oError) {
-          Log.logServer(oError, Level.ERROR);
+          Log.server(oError, Level.ERROR);
         }
         try {
           await ResourcesProxy.set(oConfigParams);
         } catch (oError) {
-          Log.logServer(oError, Level.ERROR);
+          Log.server(oError, Level.ERROR);
         }
 
         try {
           await IndexUI5Tools.set(oConfigParams);
         } catch (oError) {
-          Log.logServer(oError, Level.ERROR);
+          Log.server(oError, Level.ERROR);
         }
         try {
           await IndexLaunchpad.set(oConfigParams);
         } catch (oError) {
-          Log.logServer(oError, Level.ERROR);
+          Log.server(oError, Level.ERROR);
         }
 
         if (oConfigParams.protocol === 'https') {
@@ -139,11 +139,11 @@ export default {
         }
 
         server.setTimeout(oConfigParams.timeout, () => {
-          Log.logServer('Connection timeout', Level.ERROR);
+          Log.server('Connection timeout', Level.ERROR);
         });
 
         server.listen(oConfigParams.port, () => {
-          Log.logServer('Started!');
+          Log.server('Started!');
           const openBrowser = Config.server('openBrowser');
           const ui5ToolsIndex = Utils.getUi5ToolsIndexFolder();
 
@@ -159,8 +159,7 @@ export default {
         throw new Error(e);
       }
     } else {
-      const sMessage = 'Error during server startup';
-      Log.logServer(sMessage);
+      const sMessage = Log.server('Error during server startup');
       throw new Error(sMessage);
     }
   },
@@ -168,9 +167,9 @@ export default {
   stopServer(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (server && server.listening) {
-        Log.logServer('Stopping...');
+        Log.server('Stopping...');
         server.close(() => {
-          Log.logServer('Stopped!');
+          Log.server('Stopped!');
           //server.unref();
           resolve();
         });
@@ -206,7 +205,7 @@ export default {
 
   async restart() {
     if (status === ServerStatus.STARTED) {
-      Log.logServer('Restarting...');
+      Log.server('Restarting...');
       await this.stop();
       try {
         await this.start({

@@ -8,51 +8,49 @@ const Log: Record<string, any> = {
     ui5toolsOutput.show();
   },
 
-  log(sText: string, sLevel: Level = Level.LOG): void {
+  log(sPrev: string, sText: string, sLevel: Level = Level.LOG): string {
     const oDate = new Date();
     const sDate = oDate.toLocaleTimeString();
-    const sNewLine = `[${sLevel} ${sDate}] ${sText}`;
+    const sLevelExpanded = sLevel + '       '.slice(0, 7 - sLevel.length);
+    const sNewLine = `[${sLevelExpanded} - ${sDate}] ${sPrev}: ${sText}`;
     ui5toolsOutput.appendLine(sNewLine);
-    return console.log(sNewLine);
+    console.log(sNewLine);
+    return sText;
   },
 
-  logGeneral(sText: string, sLevel?: Level): void {
-    return Log.log(`General: ${sText}`, sLevel);
+  general(sText: string, sLevel?: Level): string {
+    return Log.log(`General`, sText, sLevel);
   },
 
-  logConfigurator(sText: string, sLevel?: Level): void {
-    return Log.log(`Configurator: ${sText}`, sLevel);
+  configurator(sText: string, sLevel?: Level): string {
+    return Log.log(`Configurator`, sText, sLevel);
   },
 
-  logBuilder(sText: string, sLevel?: Level): void {
-    return Log.log(`Builder: ${sText}`, sLevel);
+  builder(sText: string, sLevel?: Level): string {
+    return Log.log(`Builder`, sText, sLevel);
   },
 
-  logDeployer(sText: string, sLevel?: Level): void {
-    return Log.log(`Deployer: ${sText}`, sLevel);
+  deployer(sText: string, sLevel?: Level): string {
+    return Log.log(`Deployer`, sText, sLevel);
   },
 
-  logServer(sText: string, sLevel?: Level): void {
-    return Log.log(`Server: ${sText}`, sLevel);
+  server(sText: string, sLevel?: Level): string {
+    return Log.log(`Server`, sText, sLevel);
   },
 
-  logProxy(sText: string, sLevel?: Level): void {
-    return Log.log(`Server > Proxy: ${sText}`, sLevel);
-  },
-
-  logFont(sText: string, sLevel?: Level): void {
-    return Log.log(`Server > Font: ${sText}`, sLevel);
+  proxy(sText: string, sLevel?: Level): string {
+    return Log.log(`Server > Proxy`, sText, sLevel);
   },
 
   newLogProviderProxy(): LogType {
-    return Log.newLogProvider(Log.logProxy);
+    return Log.newLogProvider(Log.proxy);
   },
 
   newLogProviderDeployer(): LogType {
-    return Log.newLogProvider(Log.logDeployer);
+    return Log.newLogProvider(Log.deployer);
   },
 
-  newLogProvider(fnLogger = Log.logGeneral): LogType {
+  newLogProvider(fnLogger = Log.general): LogType {
     return {
       log: (sMessage: string) => {
         fnLogger(sMessage, Level.LOG);

@@ -38,7 +38,7 @@ export default {
   async askProjectToBuild(): Promise<void> {
     let ui5App: Ui5App | undefined;
     try {
-      Log.logBuilder(`Asking project to build`);
+      Log.builder(`Asking project to build`);
       const ui5Apps = await Utils.getAllUI5Apps();
       if (ui5Apps.length > 1) {
         const qpOptions: Array<QuickPickItem> = [];
@@ -85,7 +85,7 @@ export default {
    * Build all workspace projects
    */
   async buildAllProjects(): Promise<void> {
-    Log.logBuilder(`Build all ui5 projects`);
+    Log.builder(`Build all ui5 projects`);
     const ui5Apps = await Utils.getAllUI5Apps();
     await window.withProgress(
       {
@@ -119,7 +119,7 @@ export default {
   async buildProject(ui5App: Ui5App | undefined, oTasks = DEFAULT_TASKS_BUILD, bShowMessage = true): Promise<void> {
     if (ui5App) {
       const folderName = ui5App.folderName;
-      Log.logBuilder(`Building project ${folderName}`);
+      Log.builder(`Building project ${folderName}`);
       await window.withProgress(
         {
           location: ProgressLocation.Notification,
@@ -134,8 +134,7 @@ export default {
           try {
             await this.build({ ui5App, oTasks, progress });
 
-            const sMessage = `Project ${ui5App.folderName} builded!`;
-            Log.logBuilder(sMessage);
+            const sMessage = Log.builder(`Project ${ui5App.folderName} builded!`);
             if (bShowMessage) {
               window.showInformationMessage(sMessage);
             }
@@ -298,7 +297,7 @@ export default {
   async cleanFolder(ui5App: Ui5App, fsPath: string): Promise<void> {
     if (fsPath) {
       const uriToDelete = Uri.file(fsPath);
-      Log.logBuilder(`Deleting folder ${fsPath}`);
+      Log.builder(`Deleting folder ${fsPath}`);
       try {
         await workspace.fs.delete(uriToDelete, {
           recursive: true,
@@ -324,7 +323,7 @@ export default {
     const aCalculedKeys: [string, string][] = Object.entries(calculedKeys);
 
     if (files.length) {
-      Log.logBuilder(`Replacing strings from ${folderPath}`);
+      Log.builder(`Replacing strings from ${folderPath}`);
       try {
         for (let i = 0; i < files.length; i++) {
           await this.replaceStringsFile(files[i], aCalculedKeys);
@@ -389,7 +388,7 @@ export default {
   async copyFolder(ui5App: Ui5App, srcPath: string, destPath: string): Promise<void> {
     const uriSrc = Uri.file(srcPath);
     const uriDest = Uri.file(destPath);
-    Log.logBuilder(`Copying folder from ${srcPath} to ${destPath}`);
+    Log.builder(`Copying folder from ${srcPath} to ${destPath}`);
     try {
       await workspace.fs.copy(uriSrc, uriDest, {
         overwrite: true,
@@ -418,7 +417,7 @@ export default {
       const lessFilesLibrary = await workspace.findFiles(patternLessLibrary);
       if (lessFilesLibrary.length) {
         for (let i = 0; i < lessFilesLibrary.length; i++) {
-          Log.logBuilder(`Compiling less theme from ${lessFilesLibrary[i].fsPath}`);
+          Log.builder(`Compiling less theme from ${lessFilesLibrary[i].fsPath}`);
           const output = await lessOpenUI5Builder.build({
             lessInputPath: lessFilesLibrary[i].fsPath,
             library: {
@@ -452,7 +451,7 @@ export default {
 
       if (lessFilesComponent.length) {
         for (let i = 0; i < lessFilesComponent.length; i++) {
-          Log.logBuilder(`Compiling less file from ${lessFilesComponent[i].fsPath}`);
+          Log.builder(`Compiling less file from ${lessFilesComponent[i].fsPath}`);
           const lessFile = await workspace.fs.readFile(Uri.file(lessFilesComponent[i].fsPath));
           const output = await less.render(lessFile.toString(), {
             filename: lessFilesComponent[i].fsPath,
@@ -473,7 +472,7 @@ export default {
   async babelifyJSFiles(ui5App: Ui5App, folderPath: string): Promise<void> {
     if (Config.builder('babelSources')) {
       try {
-        Log.logBuilder(`Babelify files from ${folderPath}`);
+        Log.builder(`Babelify files from ${folderPath}`);
         // Create -dbg files
         const patternJs = new RelativePattern(folderPath, `**/*.js`);
         const babelSourcesExclude = String(Config.builder(`babelSourcesExclude`));
@@ -532,7 +531,7 @@ export default {
   async createDebugFiles(ui5App: Ui5App, srcPath: string, folderPath: string): Promise<void> {
     if (Config.builder('debugSources')) {
       try {
-        Log.logBuilder(`Create dbg files ${folderPath}`);
+        Log.builder(`Create dbg files ${folderPath}`);
         // Create -dbg files
         const patternJs = new RelativePattern(srcPath, `**/*.js`);
         const jsFiles = await workspace.findFiles(patternJs);
@@ -556,7 +555,7 @@ export default {
   async compressFiles(ui5App: Ui5App, fsPath: string): Promise<void> {
     if (Config.builder('uglifySources')) {
       try {
-        Log.logBuilder(`Compress files from ${fsPath}`);
+        Log.builder(`Compress files from ${fsPath}`);
 
         await this.compressJs(ui5App, fsPath);
         await this.compressJson(ui5App, fsPath);
@@ -634,7 +633,7 @@ export default {
    */
   async cleanFiles(ui5App: Ui5App, folderPath: string): Promise<void> {
     try {
-      Log.logBuilder(`Clean files from ${folderPath}`);
+      Log.builder(`Clean files from ${folderPath}`);
       // delete .less
       const patternLess = new RelativePattern(folderPath, `**/*.less`);
       const lessFiles = await workspace.findFiles(patternLess);
@@ -654,14 +653,14 @@ export default {
   async createPreload(ui5App: Ui5App, srcPath: string, destPath: string): Promise<void> {
     const { isLibrary, namespace } = ui5App;
 
-    Log.logBuilder(`Create preload into ${destPath}`);
+    Log.builder(`Create preload into ${destPath}`);
     const sFile = isLibrary ? 'library.js' : 'Component.js';
     const sComponentPath = Uri.file(path.join(srcPath, sFile));
 
     try {
       await workspace.fs.readFile(sComponentPath);
     } catch (oError) {
-      Log.logBuilder(`${sFile} not found in path ${srcPath}, skiping preload creation...`);
+      Log.builder(`${sFile} not found in path ${srcPath}, skiping preload creation...`);
       return;
     }
 

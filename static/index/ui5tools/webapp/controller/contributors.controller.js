@@ -1,7 +1,7 @@
 sap.ui.define(['sap/ui/core/mvc/Controller'], function (Controller) {
   'use strict';
 
-  return Controller.extend('ui5tools.controller.sponsors', {
+  return Controller.extend('ui5tools.controller.contributors', {
     selectLink: function (oEvt) {
       var oSrc = oEvt.getSource();
       var oData = oSrc.data();

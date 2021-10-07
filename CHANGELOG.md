@@ -1,7 +1,8 @@
 ## 1.1.0
 - Extension migrated to typescript
-- Removed font generator (check new extension Icon Font Bundler)
+- Removed font generator: check new extension [Icon Font Bundler](https://marketplace.visualstudio.com/items?itemName=carlosorozcojimenez.icon-font-bundler)
 - Added tests
+- Some bugs solved
 
 ## 1.0.3 (02-08-2021)
 

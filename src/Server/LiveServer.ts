@@ -23,7 +23,7 @@ export default {
   async start(oConfigParams: ServerOptions): Promise<void> {
     return new Promise(async (resolve, reject) => {
       try {
-        Log.logServer('LiveServer > Starting...');
+        Log.server('LiveServer > Starting...');
         this.middleware(oConfigParams);
         if (!oConfigParams.restarting) {
           await this.createServer(oConfigParams);
@@ -58,7 +58,7 @@ export default {
         liveServerWS.on('error', (error) => this.onError(error.message));
 
         liveServerWS.once('listening', () => {
-          Log.logServer('LiveServer > Started!');
+          Log.server('LiveServer > Started!');
           resolve();
         });
       } catch (error) {
@@ -173,7 +173,7 @@ export default {
   sendAllClients(data: string): void {
     clearTimeout(timeout);
     timeout = setTimeout(() => {
-      Log.logServer('Refreshing browser...');
+      Log.server('Refreshing browser...');
       if (liveServerWS) {
         liveServerWS.clients.forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
@@ -196,10 +196,10 @@ export default {
       liveServerWS = undefined;
     }
     if (liveServer) {
-      Log.logServer('LiveServer > Stopping...');
+      Log.server('LiveServer > Stopping...');
       liveServer.close();
       liveServer = undefined;
-      Log.logServer('LiveServer > Stopped!');
+      Log.server('LiveServer > Stopped!');
     }
   },
 

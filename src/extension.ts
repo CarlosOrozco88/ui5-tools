@@ -56,7 +56,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   LiveBuilder.attachWatch();
 
   if (Config.server('startOnLaunch')) {
-    Log.logGeneral(`Start on launch`);
+    Log.general(`Start on launch`);
     Server.start();
   }
 }

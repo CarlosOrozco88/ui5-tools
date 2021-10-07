@@ -15,7 +15,7 @@ export default {
     try {
       await Builder.buildProject(ui5App);
     } catch (oError: any) {
-      Log.logBuilder(oError.message, Level.ERROR);
+      Log.builder(oError.message, Level.ERROR);
     }
   },
 
@@ -29,7 +29,7 @@ export default {
       try {
         await Deployer.askCreateReuseTransport(ui5App);
       } catch (oError: any) {
-        Log.logDeployer(oError.message, Level.ERROR);
+        Log.deployer(oError.message, Level.ERROR);
       }
     }
   },
