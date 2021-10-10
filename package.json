@@ -212,7 +212,7 @@
         },
         "ui5-tools.ui5Version": {
           "type": "string",
-          "default": "1.71.35",
+          "default": "1.71.42",
           "description": "UI5 library version for CDN proxy in server and build correct preload files"
         },
         "ui5-tools.server.name": {
@@ -520,8 +520,9 @@
     "dotenv": "^10.0.0",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
-    "get-port": "^6.0.0",
+    "express-timeout-handler": "^2.2.2",
     "http-proxy-middleware": "^2.0.1",
+    "http-terminator": "^3.0.3",
     "less": "^4.1.2",
     "less-openui5": "^0.11.2",
     "livereload": "^0.9.3",
@@ -529,6 +530,7 @@
     "on-headers": "^1.0.2",
     "open": "^8.2.1",
     "openui5-preload": "4.0.0",
+    "portfinder": "^1.0.28",
     "pretty-data": "^0.40.0",
     "terser": "^5.9.0",
     "ts-loader": "^9.2.6",
