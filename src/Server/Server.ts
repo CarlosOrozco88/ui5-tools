@@ -1,8 +1,11 @@
 import express from 'express';
+// @ts-ignore
+import expressTimeout from 'express-timeout-handler';
+
 import open from 'open';
 import http from 'http';
 import https from 'https';
-import getPort from 'get-port';
+import portfinder from 'portfinder';
 
 import Apps from './Apps';
 import LiveServer from './LiveServer';
@@ -15,6 +18,7 @@ import ResourcesProxy from './Proxy/Resources';
 import IndexUI5Tools from './Index/UI5Tools';
 import IndexLaunchpad from './Index/Launchpad';
 import ejs from 'ejs';
+import { createHttpTerminator } from 'http-terminator';
 import { ServerParameter, ServerOptions, ServerMode, ServerStatus, Protocols, Level } from '../Types/Types';
 
 let serverApp: express.Express;
@@ -85,10 +89,10 @@ export default {
           sServerMode: sServerMode,
           watch: Boolean(Config.server('watch')),
           protocol: Protocols[protocol],
-          port: await getPort({
+          port: await portfinder.getPortPromise({
             port: Number(Config.server('port')),
           }),
-          portLiveReload: await getPort({
+          portLiveReload: await portfinder.getPortPromise({
             port: 35729,
           }),
           timeout: Number(Config.server('timeout')),
@@ -99,6 +103,21 @@ export default {
           bCacheBuster: Config.server('cacheBuster') === sServerMode,
           restarting: Boolean(oParameters?.restarting),
         };
+
+        if (oConfigParams.timeout) {
+          serverApp.use(
+            expressTimeout.handler({
+              timeout: oConfigParams.timeout,
+              onTimeout(req: any, res: any) {
+                const message = Log.server('UI5 Tools server timeout', Level.ERROR);
+                res.status(503).send(message);
+              },
+              onDelayedResponse(req: any, method: any, args: any, requestTime: any) {
+                Log.server('Attempted to call ${method} after timeout', Level.ERROR);
+              },
+            })
+          );
+        }
 
         if (oConfigParams.watch) {
           try {
@@ -138,10 +157,6 @@ export default {
           server = http.createServer(serverApp);
         }
 
-        server.setTimeout(oConfigParams.timeout, () => {
-          Log.server('Connection timeout', Level.ERROR);
-        });
-
         server.listen(oConfigParams.port, () => {
           Log.server('Started!');
           const openBrowser = Config.server('openBrowser');
@@ -164,19 +179,17 @@ export default {
     }
   },
 
-  stopServer(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (server && server.listening) {
-        Log.server('Stopping...');
-        server.close(() => {
-          Log.server('Stopped!');
-          //server.unref();
-          resolve();
-        });
-      } else {
-        resolve();
-      }
-    });
+  async stopServer(): Promise<void> {
+    if (server && server.listening) {
+      Log.server('Stopping...');
+
+      const httpTerminator = createHttpTerminator({
+        server,
+      });
+      httpTerminator.terminate();
+      Log.server('Stopped!');
+    }
+    return;
   },
 
   async stop() {

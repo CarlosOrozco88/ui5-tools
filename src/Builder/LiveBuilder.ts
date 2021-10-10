@@ -14,18 +14,21 @@ import { Ui5App } from '../Types/Types';
 
 let watchApps: chokidar.FSWatcher | undefined;
 
-let awaiter: Record<string, ReturnType<typeof setTimeout>>;
-let timeouts: Record<string, ReturnType<typeof setTimeout>>;
+const awaiter: Record<string, ReturnType<typeof setTimeout>> = {};
+const timeouts: Record<string, ReturnType<typeof setTimeout>> = {};
 
 export default {
+  watchApps,
+  awaiter,
+  timeouts,
   async attachWatch(): Promise<void> {
-    if (watchApps) {
-      watchApps.close();
-      watchApps = undefined;
+    if (this.watchApps) {
+      this.watchApps.close();
+      this.watchApps = undefined;
     }
     const distFolder = String(Config.general('distFolder'));
     const sWorkspaceRootPath = Utils.getWorkspaceRootPath();
-    watchApps = chokidar.watch([sWorkspaceRootPath], {
+    this.watchApps = chokidar.watch([sWorkspaceRootPath], {
       ignoreInitial: true,
       ignored: (sPath: string) => {
         let bIgnore = false;
@@ -38,12 +41,11 @@ export default {
       },
       usePolling: false,
     });
-    watchApps.on('add', (sFilePath) => this.fileChanged(sFilePath));
-    watchApps.on('change', (sFilePath) => this.fileChanged(sFilePath));
-    watchApps.on('unlink', (sFilePath) => this.fileChanged(sFilePath));
+    this.watchApps.on('add', (sFilePath) => this.fileChanged(sFilePath));
+    this.watchApps.on('change', (sFilePath) => this.fileChanged(sFilePath));
+    this.watchApps.on('unlink', (sFilePath) => this.fileChanged(sFilePath));
   },
 
-  awaiter: {},
   async fileChanged(sFilePath: string): Promise<void> {
     const fileExtension = path.extname(sFilePath).replace('.', '');
     const bIsLessFile = fileExtension === 'less';
@@ -53,40 +55,44 @@ export default {
 
     if (ui5App) {
       const sKey = `${ui5App.srcFsPath}-${bIsLessFile}`;
-      if (awaiter[sKey]) {
-        clearTimeout(awaiter[sKey]);
-        delete awaiter[sKey];
+      if (this.awaiter[sKey]) {
+        clearTimeout(this.awaiter[sKey]);
       }
-      awaiter[sKey] = setTimeout(async () => {
-        const watchExtensions = String(Config.server('watchExtensions')).replace(/\\s/g, '');
-        const watchExtensionsArray = watchExtensions.split(',');
-        const bWatchedExtension = watchExtensionsArray.includes(fileExtension);
-        let bRefreshedServer = false;
+      this.awaiter[sKey] = setTimeout(
+        async (sKey) => {
+          const watchExtensions = String(Config.server('watchExtensions')).replace(/\\s/g, '');
+          const watchExtensionsArray = watchExtensions.split(',');
+          const bWatchedExtension = watchExtensionsArray.includes(fileExtension);
+          let bRefreshedServer = false;
 
-        const bChangedSrc = Utils.isUi5AppFsPathSrc(ui5App, sFilePath);
-        if (bChangedSrc) {
-          // Production
-          if (Server.isStartedProduction()) {
-            if (bIsLessFile) {
-              await this.liveCompileLess(ui5App, ui5App.srcFsPath, [ui5App.srcFsPath, ui5App.distFsPath]);
-              await Builder.compressCss(ui5App, ui5App.distFsPath);
-            } else if (bWatchedExtension && !bIsCssFile) {
-              await Builder.buildProject(ui5App, undefined, false);
+          const bChangedSrc = Utils.isUi5AppFsPathSrc(ui5App, sFilePath);
+          if (bChangedSrc) {
+            // Production
+            if (Server.isStartedProduction()) {
+              if (bIsLessFile) {
+                await this.liveCompileLess(ui5App, ui5App.srcFsPath, [ui5App.srcFsPath, ui5App.distFsPath]);
+                await Builder.compressCss(ui5App, ui5App.distFsPath);
+              } else if (bWatchedExtension && !bIsCssFile) {
+                await Builder.buildProject(ui5App, undefined, false);
+              }
+            } else {
+              // Allways except when production
+              if (bIsLessFile) {
+                await this.liveCompileLess(ui5App, ui5App.srcFsPath, ui5App.srcFsPath);
+              }
             }
-          } else {
-            // Allways except when production
-            if (bIsLessFile) {
-              await this.liveCompileLess(ui5App, ui5App.srcFsPath, ui5App.srcFsPath);
-            }
+
+            bRefreshedServer = await this.checkRefreshApps(sFilePath);
           }
 
-          bRefreshedServer = await this.checkRefreshApps(sFilePath);
-        }
-
-        if (!bRefreshedServer && bWatchedExtension) {
-          LiveServer.refresh(sFilePath);
-        }
-      }, 500);
+          if (!bRefreshedServer && bWatchedExtension) {
+            LiveServer.refresh(sFilePath);
+          }
+          delete this.awaiter[sKey];
+        },
+        500,
+        sKey
+      );
     } else {
       this.checkRefreshApps(sFilePath);
     }
@@ -113,21 +119,26 @@ export default {
       const buildLess = Config.builder('buildLess');
       if (buildLess && ui5App) {
         const sTimeoutKey = `_liveCompileTimeout${ui5App.folderName}`;
-        clearTimeout(timeouts[sTimeoutKey]);
-        timeouts[sTimeoutKey] = setTimeout(async () => {
-          await window.withProgress(
-            {
-              location: ProgressLocation.Notification,
-              title: `ui5-tools > Building css files for`,
-              cancellable: true,
-            },
-            async (progress, token) => {
-              progress.report({ message: ui5App.folderName });
-              await Builder.compileLess(ui5App, srcFsPath, aDistFsPath);
-              resolve();
-            }
-          );
-        }, DELAY_LESS);
+        clearTimeout(this.timeouts[sTimeoutKey]);
+        this.timeouts[sTimeoutKey] = setTimeout(
+          async (sTimeoutKey) => {
+            await window.withProgress(
+              {
+                location: ProgressLocation.Notification,
+                title: `ui5-tools > Building css files for`,
+                cancellable: true,
+              },
+              async (progress, token) => {
+                progress.report({ message: ui5App.folderName });
+                await Builder.compileLess(ui5App, srcFsPath, aDistFsPath);
+                resolve();
+              }
+            );
+            delete this.timeouts[sTimeoutKey];
+          },
+          DELAY_LESS,
+          sTimeoutKey
+        );
       } else {
         resolve();
       }

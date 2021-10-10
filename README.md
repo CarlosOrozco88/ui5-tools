@@ -64,7 +64,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 
 - `ui5-tools.srcFolder`: Source folder in your app | default: `webapp,src`
 - `ui5-tools.distFolder`: Source folder in your app | default: `dist`
-- `ui5-tools.ui5Version`: UI5 library version for CDN proxy in server and build correct preload files: `1.71.35`
+- `ui5-tools.ui5Version`: UI5 library version for CDN proxy in server and build correct preload files: `1.71.42`
 
 #### Server Settings
 
@@ -78,6 +78,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - `ui5-tools.server.protocol`: Should use http or https | default: `http`
 - `ui5-tools.server.odataProxy`: Proxy all odata calls to a server | default: `None`
 - `ui5-tools.server.odataUri`: Your odata server uri url (example: `http://srvaspgwd.com:8080/`). odataProxy `Other` accepts multiple uris (example: `http://srvaspgwd.com:8080/, http://srvaspgwd.com:8080/`)
+- `ui5-tools.server.odataQuery`: Query for the gateway server (example: sap-client=100) | default: ` `
 - `ui5-tools.server.odataSecure`: Verify odataProxy SSL Certs | default: `false`
 - `ui5-tools.server.odataMountPath`: The mountpath for 'Other' odataProxy. Accepts multiple paths, respecting the same order that odataUri for odataProxy type `Other` | default: `/odata`
 - `ui5-tools.server.resourcesProxy`: Proxy all odata calls to a gateway, cdn or local folder (proxy all url begining with /resources) | default: `CDN SAPUI5`
