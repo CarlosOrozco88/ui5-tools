@@ -469,7 +469,7 @@
     "webpack-prod": "webpack --mode production",
     "lint": "eslint . --ext .ts",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run lint",
+    "pretest": "pnpm run lint",
     "test": "node ./test/runTest.js"
   },
   "devDependencies": {
