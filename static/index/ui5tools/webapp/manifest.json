@@ -63,9 +63,9 @@
           "target": "info"
         },
         {
-          "pattern": "sponsors",
-          "name": "sponsors",
-          "target": "sponsors"
+          "pattern": "contributors",
+          "name": "contributors",
+          "target": "contributors"
         },
         {
           "pattern": "about",
@@ -109,9 +109,9 @@
           "viewId": "info",
           "viewLevel": 0
         },
-        "sponsors": {
-          "viewName": "sponsors",
-          "viewId": "sponsors",
+        "contributors": {
+          "viewName": "contributors",
+          "viewId": "contributors",
           "viewLevel": 0
         },
         "about": {

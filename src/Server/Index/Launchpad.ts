@@ -2,13 +2,15 @@ import path from 'path';
 
 import Utils from '../../Utils/Utils';
 import Log from '../../Utils/Log';
-import ResourcesProxy from '../../Server/Proxy/Resources';
+import ResourcesProxy from '../Proxy/Resources';
+import { ServerOptions } from '../../Types/Types';
+import { NextFunction, Request, Response } from 'express';
 
 export default {
-  async set(oConfigParams) {
-    let { serverApp, ui5Apps = [], baseDir, ui5ToolsPath, isLaunchpadMounted } = oConfigParams;
+  async set(oConfigParams: ServerOptions): Promise<void> {
+    const { serverApp, ui5Apps = [], baseDir, ui5ToolsPath, isLaunchpadMounted } = oConfigParams;
     if (isLaunchpadMounted) {
-      Log.logServer('Mounting launchpad');
+      Log.server('Mounting launchpad');
       // LAUNCHPAD IN /flp/
 
       // DONT MOUNT RESOURCE ROOTS TO SIMULATE LAUNCHPAD
@@ -16,21 +18,22 @@ export default {
       //   fioriSandboxConfig.modulePaths[manifest['sap.app'].id] = `../${folder}`;
       // });
 
-      let ui5toolsData = Utils.getOptionsVersion();
-      let flpPath = path.join(ui5ToolsPath, 'static', 'index', 'flp');
+      const ui5toolsData = Utils.getOptionsVersion();
+      const flpPath = path.join(ui5ToolsPath, 'static', 'index', 'flp');
 
-      let indexFLP = (req, res, next) => {
+      const indexFLP = (req: Request, res: Response, next: NextFunction) => {
         res.render(path.join(flpPath, 'index'), { theme: ui5toolsData.theme });
       };
       serverApp.get('/flp/', indexFLP);
       serverApp.get('/flp/index.html', indexFLP);
 
-      let fioriSandboxConfig = {
+      const fioriSandboxConfig = {
         modulePaths: {},
         applications: {},
       };
       ui5Apps.forEach((ui5App) => {
-        let hash = 'ui5tools-' + ui5App.folderName.toLowerCase();
+        const hash = 'ui5tools-' + ui5App.folderName.toLowerCase();
+        //@ts-ignore
         fioriSandboxConfig.applications[hash] = {
           additionalInformation: `SAPUI5.Component=${ui5App.namespace}`,
           applicationType: 'SAPUI5',
@@ -49,6 +52,5 @@ export default {
 
       ResourcesProxy.setTest(oConfigParams);
     }
-    return;
   },
 };

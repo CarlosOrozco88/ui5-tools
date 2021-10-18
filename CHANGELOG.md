@@ -1,3 +1,9 @@
+## 1.1.0 (18/10/2021)
+- Extension migrated to typescript
+- Removed font generator: check new extension [Icon Font Bundler](https://marketplace.visualstudio.com/items?itemName=carlosorozcojimenez.icon-font-bundler)
+- Some bugs solved
+- Updated default UI5 to version from 1.71.35 to 1.71.42
+
 ## 1.0.4 (28-07-2021)
 
 - Delete dist folder bug solved

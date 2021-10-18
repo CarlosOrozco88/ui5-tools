@@ -2,7 +2,7 @@
   "name": "ui5-tools",
   "displayName": "UI5 Tools",
   "description": "Local development tools for UI5",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
@@ -19,7 +19,7 @@
   "license": "Apache-2.0",
   "icon": "static/images/logo_blue.png",
   "engines": {
-    "vscode": "^1.58.1"
+    "vscode": "^1.61.0"
   },
   "categories": [
     "Other"
@@ -125,16 +125,6 @@
         "mac": "alt+d alt+a"
       },
       {
-        "command": "ui5-tools.fonts.generate",
-        "key": "alt+f alt+f",
-        "mac": "alt+f alt+f"
-      },
-      {
-        "command": "ui5-tools.fonts.generateAll",
-        "key": "alt+f alt+a",
-        "mac": "alt+f alt+a"
-      },
-      {
         "command": "ui5-tools.showOutput",
         "key": "alt+v alt+o",
         "mac": "alt+v alt+o"
@@ -198,20 +188,12 @@
         "title": "UI5 Tools: Deploy UI5 project"
       },
       {
-        "command": "ui5-tools.fonts.generate",
-        "title": "UI5 Tools: Fonts > Generate font"
-      },
-      {
-        "command": "ui5-tools.fonts.generateAll",
-        "title": "UI5 Tools: Fonts > Generate all fonts"
-      },
-      {
         "command": "ui5-tools.showOutput",
         "title": "UI5 Tools: Show Output"
       }
     ],
     "configuration": {
-      "title": "ui5-tools",
+      "title": "ui5-Tools",
       "properties": {
         "ui5-tools.srcFolder": {
           "type": "string",
@@ -230,7 +212,7 @@
         },
         "ui5-tools.ui5Version": {
           "type": "string",
-          "default": "1.71.35",
+          "default": "1.71.42",
           "description": "UI5 library version for CDN proxy in server and build correct preload files"
         },
         "ui5-tools.server.name": {
@@ -480,70 +462,82 @@
     }
   },
   "scripts": {
+    "vscode:prepackage": "webpack --mode production",
     "vscode:prepublish": "webpack --mode production",
     "webpack": "webpack --mode development",
     "webpack-dev": "webpack --mode development --watch",
     "webpack-prod": "webpack --mode production",
-    "watch": "webpack --mode none",
-    "lint": "eslint .",
-    "pretest": "npm run lint",
+    "lint": "eslint . --ext .ts",
+    "watch": "tsc -watch -p ./",
+    "pretest": "pnpm run lint",
     "test": "node ./test/runTest.js"
   },
   "devDependencies": {
-    "@types/apicache": "^1.2.3",
+    "@types/apicache": "^1.6.0",
+    "@types/babel__core": "^7.1.16",
+    "@types/babel__preset-env": "^7.9.2",
+    "@types/connect-livereload": "^0.5.32",
+    "@types/ejs": "^3.1.0",
     "@types/express": "^4.17.13",
     "@types/glob": "^7.1.4",
+    "@types/less": "^3.0.3",
+    "@types/marked": "^3.0.1",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^16.4.4",
-    "@types/terser": "^3.12.0",
-    "@types/vscode": "^1.58.1",
+    "@types/node": "^16.11.1",
+    "@types/on-headers": "^1.0.0",
+    "@types/pretty-data": "^0.40.0",
+    "@types/vscode": "^1.61.0",
+    "@types/ws": "^8.2.0",
+    "@typescript-eslint/eslint-plugin": "5.0.0",
+    "@typescript-eslint/parser": "5.0.0",
     "babel-loader": "^8.2.2",
-    "copy-webpack-plugin": "^9.0.1",
-    "eslint": "^7.31.0",
+    "clean-webpack-plugin": "^4.0.0",
+    "eslint": "^8.0.1",
     "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^3.4.0",
-    "glob": "^7.1.7",
+    "eslint-plugin-prettier": "^4.0.0",
+    "glob": "^7.2.0",
     "html-loader": "^2.1.2",
-    "mocha": "^9.0.3",
+    "mocha": "^9.1.3",
     "node-loader": "^2.0.0",
-    "prettier": "^2.3.2",
-    "tslint": "^6.1.3",
-    "typescript": "^4.3.5",
+    "prettier": "^2.4.1",
+    "typescript": "^4.4.4",
     "vscode-test": "^1.6.1",
     "webassembly-loader": "^1.1.0",
-    "webpack": "^5.47.0",
-    "webpack-cli": "^4.7.2"
+    "webpack": "^5.58.2",
+    "webpack-cli": "^4.9.0"
   },
   "dependencies": {
-    "@babel/core": "^7.14.8",
-    "@babel/plugin-transform-modules-commonjs": "7.14.5",
-    "@babel/preset-env": "^7.14.8",
+    "@babel/core": "^7.15.8",
+    "@babel/plugin-transform-modules-commonjs": "7.15.4",
+    "@babel/preset-env": "^7.15.8",
     "apicache": "^1.6.2",
     "babel-plugin-transform-async-to-promises": "^0.8.15",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "chokidar": "^3.5.2",
     "connect-livereload": "^0.6.1",
-    "core-js": "^3.15.2",
+    "core-js": "^3.18.3",
     "deepmerge": "^4.2.2",
     "dotenv": "^10.0.0",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
-    "fantasticon": "^1.2.2",
+    "express-timeout-handler": "^2.2.2",
     "http-proxy-middleware": "^2.0.1",
-    "less": "^4.1.1",
+    "http-terminator": "^3.0.3",
+    "less": "^4.1.2",
     "less-openui5": "^0.11.2",
     "livereload": "^0.9.3",
+    "marked": "^3.0.7",
     "on-headers": "^1.0.2",
+    "open": "^8.3.0",
     "openui5-preload": "4.0.0",
-    "opn": "^6.0.0",
     "portfinder": "^1.0.28",
     "pretty-data": "^0.40.0",
-    "showdown": "^1.9.1",
-    "terser": "^5.7.1",
+    "terser": "^5.9.0",
+    "ts-loader": "^9.2.6",
     "ui5-nwabap-deployer-core": "^1.0.23",
-    "utf-8-validate": "^5.0.5",
+    "utf-8-validate": "^5.0.7",
     "wasm-loader": "^1.3.0",
-    "ws": "^7.5.3",
+    "ws": "^8.2.3",
     "xmldoc": "^1.1.2"
   }
 }

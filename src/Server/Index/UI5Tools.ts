@@ -1,20 +1,26 @@
 import { workspace, RelativePattern, Uri } from 'vscode';
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import path from 'path';
-import showdown from 'showdown';
+import marked from 'marked';
 
 import Utils from '../../Utils/Utils';
 import Config from '../../Utils/Config';
 import Log from '../../Utils/Log';
-
-const converter = new showdown.Converter();
+import { ServerOptions, Ui5ToolsData } from '../../Types/Types';
 
 export default {
   // SERVER INDEX
-  async set({ serverApp, ui5Apps, ui5ToolsIndex, baseDir, ui5ToolsPath, isLaunchpadMounted }) {
-    Log.logServer('Mounting ui5-tools root page');
+  async set({
+    serverApp,
+    ui5Apps,
+    ui5ToolsIndex,
+    baseDir,
+    ui5ToolsPath,
+    isLaunchpadMounted,
+  }: ServerOptions): Promise<void> {
+    Log.server('Mounting ui5-tools root page');
 
-    let existBasePathInApp = ui5Apps.find((ui5App) => {
+    const existBasePathInApp = ui5Apps.find((ui5App) => {
       return ui5App.appServerPath === '/';
     });
     if (!existBasePathInApp) {
@@ -23,7 +29,7 @@ export default {
       });
     }
 
-    let ui5toolsData = {
+    const ui5toolsData: Ui5ToolsData = {
       ...Utils.getOptionsVersion(),
       readme: '',
       about: '',
@@ -38,11 +44,12 @@ export default {
         library: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'library'),
         card: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'card'),
       },
+      //@ts-ignore
       config: Config.general(),
     };
 
-    let indexPath = path.join(ui5ToolsPath, 'static', 'index', 'ui5tools', 'webapp');
-    let indexHTML = (req, res, next) => {
+    const indexPath = path.join(ui5ToolsPath, 'static', 'index', 'ui5tools', 'webapp');
+    const indexHTML = (req: Request, res: Response, next: NextFunction) => {
       res.render(path.join(indexPath, 'index'), {
         theme: ui5toolsData.theme,
         edge: ui5toolsData.theme === 'sap_fiori_3',
@@ -70,10 +77,10 @@ export default {
 
     // Serve app data
     serverApp.get(`/${ui5ToolsIndex}/ui5tools.json`, async (req, res) => {
-      ui5toolsData.readme = converter.makeHtml(await this.readFile(path.join(baseDir, 'README.md'), ''));
-      ui5toolsData.about = converter.makeHtml(await this.readFile(path.join(ui5ToolsPath, 'README.md'), ''));
-      ui5toolsData.changelog = converter.makeHtml(await this.readFile(path.join(ui5ToolsPath, 'CHANGELOG.md'), ''));
-      ui5toolsData.links = JSON.parse(await this.readFile(path.join(baseDir, 'links.json'), '[]'));
+      ui5toolsData.readme = marked((await this.readFile(path.join(baseDir, 'README.md'))) || '');
+      ui5toolsData.about = marked((await this.readFile(path.join(ui5ToolsPath, 'README.md'))) || '');
+      ui5toolsData.changelog = marked((await this.readFile(path.join(ui5ToolsPath, 'CHANGELOG.md'))) || '');
+      ui5toolsData.links = JSON.parse((await this.readFile(path.join(baseDir, 'links.json'))) || '[]');
       ui5toolsData.docs = await this.findDocs(baseDir, ui5toolsData.showTree);
       ui5toolsData.contributors = [
         {
@@ -93,50 +100,50 @@ export default {
     return;
   },
 
-  async readFile(sPath, defaultValue = undefined) {
-    let oFile = defaultValue;
+  async readFile(sPath: string): Promise<undefined | string> {
+    let oFile: undefined | string;
     try {
-      let oFileBuffer = await workspace.fs.readFile(Uri.file(sPath));
+      const oFileBuffer = await workspace.fs.readFile(Uri.file(sPath));
       oFile = oFileBuffer.toString();
     } catch (oError) {
-      oFile = defaultValue;
+      // err
     }
     return oFile;
   },
 
-  async findDocs(sBaseDirPath, bTree) {
-    let aMDFilesPaths = await workspace.findFiles(
+  async findDocs(sBaseDirPath: string, bTree: boolean): Promise<{ aTree: Array<any>; oHashes: Record<string, any> }> {
+    const aMDFilesPaths = await workspace.findFiles(
       new RelativePattern(sBaseDirPath, `**/*.{md,MD}`),
       new RelativePattern(sBaseDirPath, `**/{node_modules,.git}/`)
     );
-    let aMDFilesPromises = [];
+    const aMDFilesPromises: Array<Thenable<Uint8Array>> = [];
     aMDFilesPaths.forEach((oManifest) => {
-      let oMDFile = workspace.fs.readFile(Uri.file(oManifest.fsPath));
+      const oMDFile = workspace.fs.readFile(Uri.file(oManifest.fsPath));
       aMDFilesPromises.push(oMDFile);
     });
-    let aMDFilesBuffers = await Promise.all(aMDFilesPromises);
-    let aMDFiles = aMDFilesBuffers.map((oBuffer) => oBuffer.toString());
+    const aMDFilesBuffers = await Promise.all(aMDFilesPromises);
+    const aMDFiles = aMDFilesBuffers.map((oBuffer) => oBuffer.toString());
 
-    let oFolders = {};
-    let aTree = [];
-    let oHashes = {};
+    const oFolders: Record<string, any> = {};
+    const aTree: Array<Record<string, any>> = [];
+    const oHashes: Record<string, any> = {};
     aMDFiles.forEach((sFile, i) => {
-      let oPath = aMDFilesPaths[i];
-      let sPath = oPath.fsPath.replace(sBaseDirPath, '');
-      let aPaths = sPath.split(path.sep);
-      let iLength = aPaths.length - 1;
+      const oPath = aMDFilesPaths[i];
+      const sPath = oPath.fsPath.replace(sBaseDirPath, '');
+      const aPaths = sPath.split(path.sep);
+      const iLength = aPaths.length - 1;
       let sFolderPath = '';
       aPaths.forEach((sFolderFile, j) => {
         if (sFolderFile) {
-          let sPath = sFolderPath + path.sep + sFolderFile;
-          let sHash = sPath.split(path.sep).join('-');
+          const sPath = sFolderPath + path.sep + sFolderFile;
+          const sHash = sPath.split(path.sep).join('-');
 
           if (!oFolders[sPath]) {
-            let bIsFolder = j != iLength;
+            const bIsFolder = j != iLength;
             oFolders[sPath] = {
               folder: bIsFolder,
               name: sFolderFile,
-              markdown: bIsFolder ? undefined : '<div>' + converter.makeHtml(sFile) + '</div>',
+              markdown: bIsFolder ? undefined : '<div>' + marked(sFile) + '</div>',
               path: sPath,
               hash: sHash,
               nodes: [],
