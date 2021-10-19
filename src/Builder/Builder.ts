@@ -17,7 +17,14 @@ import Log from '../Utils/Log';
 import Utils from '../Utils/Utils';
 import Config from '../Utils/Config';
 import { Ui5App, BuildTasks } from '../Types/Types';
-import { BabelFileResult } from '@babel/core';
+
+import { transformAsync, BabelFileResult } from '@babel/core';
+import presetEnv from '@babel/preset-env';
+
+// @ts-ignore
+import transformAsyncToPromises from 'babel-plugin-transform-async-to-promises';
+// @ts-ignore
+import transformRemoveConsole from 'babel-plugin-transform-remove-console';
 
 const DEFAULT_TASKS_BUILD: BuildTasks = {
   cleanFolder: true,
@@ -478,13 +485,6 @@ export default {
         const babelSourcesExclude = String(Config.builder(`babelSourcesExclude`));
         const jsFiles = await workspace.findFiles(patternJs, babelSourcesExclude);
 
-        const babelCore = await import('@babel/core');
-        //@ts-ignore
-        const transformAsyncToPromises = await import('babel-plugin-transform-async-to-promises');
-        //@ts-ignore
-        const transformRemoveConsole = await import('babel-plugin-transform-remove-console');
-        const presetEnv = await import('@babel/preset-env');
-
         //require('core-js');
 
         for (let i = 0; i < jsFiles.length; i++) {
@@ -492,7 +492,7 @@ export default {
           const jsFileRaw = await workspace.fs.readFile(uriOrigJs);
           const jsFileString = jsFileRaw.toString();
 
-          const babelified: BabelFileResult | null = await babelCore.transformAsync(jsFileString, {
+          const babelified: BabelFileResult | null = await transformAsync(jsFileString, {
             plugins: [
               [
                 transformAsyncToPromises,
