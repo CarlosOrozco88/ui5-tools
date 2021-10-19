@@ -1,3 +1,7 @@
+## 1.1.1 (19/10/2021)
+- Babelify bug solved
+- Dependencies upgrade
+
 ## 1.1.0 (18/10/2021)
 - Extension migrated to typescript
 - Removed font generator: check new extension [Icon Font Bundler](https://marketplace.visualstudio.com/items?itemName=carlosorozcojimenez.icon-font-bundler)
