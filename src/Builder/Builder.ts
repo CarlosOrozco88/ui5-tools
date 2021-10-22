@@ -488,34 +488,9 @@ export default {
         //require('core-js');
 
         for (let i = 0; i < jsFiles.length; i++) {
-          const uriOrigJs = Uri.file(jsFiles[i].fsPath);
-          const jsFileRaw = await workspace.fs.readFile(uriOrigJs);
-          const jsFileString = jsFileRaw.toString();
-
-          const babelified: BabelFileResult | null = await transformAsync(jsFileString, {
-            plugins: [
-              [
-                transformAsyncToPromises,
-                {
-                  inlineHelpers: true,
-                },
-              ],
-              [transformRemoveConsole],
-            ],
-            presets: [
-              [
-                presetEnv,
-                {
-                  targets: {
-                    browsers: 'last 2 versions, ie 11',
-                  },
-                },
-              ],
-            ],
-          });
-          if (babelified && babelified.code && babelified.code !== jsFileString) {
-            const babelifiedCode = babelified.code.replace(/\r\n|\r|\n/g, os.EOL);
-
+          const babelifiedCode: string = await this.babelifyFile(ui5App, jsFiles[i]);
+          if (babelifiedCode) {
+            const uriOrigJs = jsFiles[i];
             await workspace.fs.writeFile(uriOrigJs, Buffer.from(babelifiedCode));
           }
         }
@@ -523,6 +498,41 @@ export default {
         throw new Error(error);
       }
     }
+  },
+
+  async babelifyFile(ui5App: Ui5App, fsUri: Uri): Promise<string> {
+    let babelifiedCode = '';
+
+    const jsFileRaw = await workspace.fs.readFile(fsUri);
+    const jsFileString = jsFileRaw.toString();
+    const filename = fsUri.fsPath.replace(ui5App.srcFsPath, '').replace(ui5App.distFsPath, '');
+    const babelified: BabelFileResult | null = await transformAsync(jsFileString, {
+      filename: filename,
+      plugins: [
+        [
+          transformAsyncToPromises,
+          {
+            inlineHelpers: true,
+          },
+        ],
+        [transformRemoveConsole],
+      ],
+      presets: [
+        [
+          presetEnv,
+          {
+            targets: {
+              browsers: 'last 2 versions, ie 11',
+            },
+          },
+        ],
+      ],
+    });
+    if (babelified && babelified.code && babelified.code !== jsFileString) {
+      babelifiedCode = babelified.code.replace(/\r\n|\r|\n/g, os.EOL);
+    }
+
+    return babelifiedCode;
   },
 
   /**

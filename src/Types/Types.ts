@@ -21,6 +21,8 @@ export interface ServerOptions {
   isLaunchpadMounted: boolean;
   bCacheBuster: boolean;
   restarting: boolean;
+  bBabelSourcesLive: boolean;
+  sBabelSourcesExclude: string;
 }
 
 export type Ui5Apps = Array<Ui5App>;

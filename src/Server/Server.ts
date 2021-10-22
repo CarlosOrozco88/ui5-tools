@@ -1,4 +1,5 @@
 import express from 'express';
+// import cookieParser from 'cookie-parser';
 // @ts-ignore
 import expressTimeout from 'express-timeout-handler';
 
@@ -71,6 +72,7 @@ export default {
         serverApp = express();
         serverApp.set('view engine', 'ejs');
         serverApp.disable('x-powered-by');
+        // serverApp.use(cookieParser());
 
         serverApp.engine('ejs', ejs.renderFile);
 
@@ -100,8 +102,10 @@ export default {
           ui5ToolsPath: Utils.getExtensionFsPath(),
           ui5ToolsIndex: Utils.getUi5ToolsIndexFolder(),
           isLaunchpadMounted: Utils.isLaunchpadMounted(),
-          bCacheBuster: Config.server('cacheBuster') === sServerMode,
+          bCacheBuster: [sServerMode, 'Allways'].includes('' + Config.server('cacheBuster')),
           restarting: Boolean(oParameters?.restarting),
+          bBabelSourcesLive: Boolean(Config.server('babelSourcesLive')),
+          sBabelSourcesExclude: String(Config.builder('babelSourcesExclude')),
         };
 
         if (oConfigParams.timeout) {

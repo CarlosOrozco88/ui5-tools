@@ -10,6 +10,7 @@ import Utils from '../../Utils/Utils';
 import Log from '../../Utils/Log';
 import { Level, ServerOptions } from '../../Types/Types';
 import { RequestHandler } from 'express';
+// import { URL } from 'url';
 
 const cacheResources = apicache
   .options({
@@ -59,6 +60,7 @@ export default {
         }
 
         if (targetUri) {
+          // const baseUriParts = new URL(targetUri);
           Log.server(`Creating resourcesProxy with ui5Version ${ui5Version} to Gateway ${targetUri}`);
           proxy = createProxyMiddleware({
             pathRewrite(path) {
@@ -66,6 +68,21 @@ export default {
               const resourcesPath = path.slice(path.indexOf('/resources/'), path.length);
               return `${basePath}${resourcesPath}`;
             },
+            // onProxyReq(proxyReq, req, res) {
+            //   const gatewayQuery = '' + Config.server('gatewayQuery');
+            //   if (gatewayQuery) {
+            //     const currentUrl = new URL(`${baseUriParts.origin}${proxyReq.path}?${gatewayQuery}`);
+            //     const aQuery = gatewayQuery.split('&');
+            //     aQuery.forEach((sQuery: string) => {
+            //       const [key, value] = sQuery.split('=');
+            //       currentUrl.searchParams.set(key, value);
+            //     });
+
+            //     const path = currentUrl.toString().replace(baseUriParts.origin, '');
+
+            //     proxyReq.path = path;
+            //   }
+            // },
             target: targetUri,
             secure: Boolean(Config.server('resourcesSecure')),
             changeOrigin: true,

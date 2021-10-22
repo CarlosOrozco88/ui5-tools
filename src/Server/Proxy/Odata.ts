@@ -4,7 +4,7 @@ import Config from '../../Utils/Config';
 import Utils from '../../Utils/Utils';
 import Log from '../../Utils/Log';
 import { ServerOptions } from '../../Types/Types';
-// import { URL } from 'url';
+// import { URL, URLSearchParams } from 'url';
 // import { ClientRequest, IncomingMessage } from 'http';
 
 export default {
@@ -12,7 +12,6 @@ export default {
     const odataMountPath = String(Config.server('odataMountPath'));
     let proxy, targetUri;
     const odataProxy = Config.server('odataProxy');
-    // const odataQuery = '' + Config.server('odataQuery');
     // Options: Gateway, None
     switch (odataProxy) {
       case 'Gateway':
@@ -26,54 +25,53 @@ export default {
 
           proxy = createProxyMiddleware({
             pathRewrite: {},
-            // pathRewrite: (path, req) => {
-            //   let newPath = path;
-
-            //   const newQuery = { ...req.query };
-            //   const currentUrl = new URL(`${baseUriParts.origin}${path}`);
-            //   const aQuery = odataQuery.split('&');
-            //   aQuery.forEach((query) => {
-            //     const keyValue = query.split('=');
-            //     if (keyValue.length === 2) {
-            //       currentUrl.searchParams.set(keyValue[0], keyValue[1]);
-            //     }
-            //   });
-            //   const aQuery = odataQuery.split('&');
-            //   aQuery.forEach((query) => {
-            //     const keyValue = query.split('=');
-            //     if (keyValue.length === 2) {
-            //       const key = keyValue[0];
-            //       const value = keyValue[1];
-            //       newQuery[key] = value;
-            //     }
-            //   });
-
-            //   if (Object.keys(newQuery).length) {
-            //     // There were more query parameters than just _csrf
-            //     newPath = `${newPath.split('?')[0]}?${newQuery.stringify(newQuery)}`;
-            //   } else {
-            //     // _csrf was the only query parameter
-            //     newPath = `${newPath.split('?')[0]}`;
-            //   }
-
-            //   return newPath;
-            // },
             target: targets[0],
             secure: Boolean(Config.server('odataSecure')),
-            // onProxyReq(proxyRex, req) {
-            //   console.log(baseUriParts);
-            //   if (odataQuery) {
-            //     const currentUrl = new URL(`${baseUriParts.origin}${proxyRex.path}?${odataQuery}`);
-            //     const aQuery = odataQuery.split('&');
-            //     aQuery.forEach((query) => {
-            //       const keyValue = query.split('=');
-            //       if (keyValue.length === 2) {
-            //         currentUrl.searchParams.set(keyValue[0], keyValue[1]);
-            //       }
+            // onProxyReq(proxyReq, req, res) {
+            //   const gatewayQuery = '' + Config.server('gatewayQuery');
+            //   if (gatewayQuery) {
+            //     //@ts-ignore
+            //     // const oOriginalCookies = req.cookies;
+            //     // let sContextCookie = oOriginalCookies['sap-usercontext'];
+            //     // const oContextCookie = new URLSearchParams(sContextCookie);
+
+            //     const currentUrl = new URL(`${baseUriParts.origin}${proxyReq.path}?${gatewayQuery}`);
+            //     const aQuery = gatewayQuery.split('&');
+            //     aQuery.forEach((sQuery: string) => {
+            //       const [key, value] = sQuery.split('=');
+            //       currentUrl.searchParams.set(key, value);
+            //       // if (oContextCookie.has(key)) {
+            //       //   oContextCookie.set(key, value);
+            //       // }
             //     });
+            //     // sContextCookie = oContextCookie.toString();
+            //     // const oNewCookies = {
+            //     //   ...oOriginalCookies,
+            //     //   'sap-usercontext': sContextCookie,
+            //     // };
+
+            //     // const oContextCookie = sContextCookie
+            //     //   .split(';')
+            //     //   .map((cookie: string) => cookie.split('='))
+            //     //   .reduce((oObject: Record<string, any>, aKeyValue: Array<any>) => {
+            //     //     const [key, value] = aKeyValue;
+            //     //     oObject[decodeURIComponent(key.trim())] = decodeURIComponent(value.trim());
+            //     //     return oObject;
+            //     //   });
+            //     // const oNewCookiesParams = Object.entries(oNewCookies)
+            //     //   .map((aKeyValue) => aKeyValue.join('='))
+            //     //   .join('; ');
+            //     // const sNewCookies = decodeURI(oNewCookiesParams.toString());
+            //     // proxyReq.setHeader('cookie', sNewCookies);
+            //     // res.setHeader('cookie', sNewCookies);
+            //     //@ts-ignore
+            //     // res.cookie('sap-usercontext', sNewCookies);
+
+            //     // console.log(sNewCookies);
+
             //     const path = currentUrl.toString().replace(baseUriParts.origin, '');
-            //     Log.proxy(path);
-            //     proxyRex.path = path;
+
+            //     proxyReq.path = path;
             //   }
             // },
             changeOrigin: true,
@@ -90,7 +88,7 @@ export default {
         if (targetUri) {
           const targets = targetUri.replace(/\\s/g, '').split(',');
           const mpaths = odataMountPath.replace(/\\s/g, '').split(',');
-          // const querys = odataQuery.replace(/\\s/g, '').split(',');
+          // const querys = gatewayQuery.replace(/\\s/g, '').split(',');
           for (let i = 0; i < targets.length; i++) {
             if (mpaths && mpaths[i]) {
               Log.server(`Creating resourcesProxy to Other ${targets[i]}`);
@@ -105,7 +103,7 @@ export default {
                 // onProxyReq: function (query: string, proxyRex: ClientRequest, req: IncomingMessage) {
                 //   let url = req.url;
                 //   if (query) {
-                //     url = `${proxyRex.path}?${odataQuery}`;
+                //     url = `${proxyRex.path}?${gatewayQuery}`;
                 //   }
                 //   return url;
                 // }.bind(this, querys[i]),

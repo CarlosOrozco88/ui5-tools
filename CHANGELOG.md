@@ -1,3 +1,7 @@
+## 1.1.2 (22/10/2021)
+- New configuration property `ui5-tools.server.babelSourcesLive`. Live transpile js.
+- AppcacheBuster is changed default value: `None`.
+
 ## 1.1.1 (19/10/2021)
 - Babelify bug solved
 - Dependencies upgrade

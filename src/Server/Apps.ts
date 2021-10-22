@@ -1,23 +1,36 @@
 import express from 'express';
 import Utils from '../Utils/Utils';
-import { workspace, RelativePattern, FileStat } from 'vscode';
+import { workspace, RelativePattern, FileStat, Uri } from 'vscode';
+import minimatch from 'minimatch';
 import { ServerOptions } from '../Types/Types';
+import Builder from '../Builder/Builder';
+import Log from '../Utils/Log';
+import path from 'path';
+import { LogLevel } from 'ts-loader/dist/logger';
 
 export default {
   /**
    * Starts server in development mode (serving srcFolder)
    * @param {object} object params
    */
-  async serve({ serverApp, ui5Apps = [], bServeProduction = false, bCacheBuster }: ServerOptions): Promise<void> {
+  async serve({
+    serverApp,
+    ui5Apps = [],
+    bServeProduction = false,
+    bCacheBuster,
+    bBabelSourcesLive,
+    sBabelSourcesExclude,
+  }: ServerOptions): Promise<void> {
     // Static serve all apps
     ui5Apps.forEach((ui5App) => {
       const staticPath = bServeProduction ? ui5App.distFsPath : ui5App.srcFsPath;
 
+      const aBabelExclude = sBabelSourcesExclude ? sBabelSourcesExclude.split(',') : [];
       serverApp.use(
         ui5App.appServerPath,
-        (req, res, next) => {
+        async (req, res, next) => {
+          const sInnerPath = req.url;
           if (bCacheBuster) {
-            const sInnerPath = req.url;
             if (sInnerPath.indexOf('/resources') < 0 && sInnerPath.indexOf('/sap/public/') < 0) {
               // Not loading ui5 resources or public resources from gateway like themes
               const oRegex = new RegExp('(/~).*(~)', 'g');
@@ -26,6 +39,28 @@ export default {
                 req.url = req.url.replace(oRegex, '');
                 // Will save cache for local sources with same timestamp 8h
                 res.set('Cache-control', 'public, max-age=28800');
+              }
+            }
+          }
+          if (bBabelSourcesLive) {
+            if (sInnerPath.endsWith('.js') && !sInnerPath.includes('resources/')) {
+              try {
+                let bTranspile = true;
+                for (let i = 0; i < aBabelExclude.length && bTranspile; i++) {
+                  const sExclude = aBabelExclude[i];
+                  bTranspile = !minimatch(sInnerPath, sExclude);
+                }
+                if (bTranspile) {
+                  const fsPath = Uri.parse(path.join(staticPath + req.path));
+                  const babelifiedCode = await Builder.babelifyFile(ui5App, fsPath);
+                  res.type('.js');
+                  // Log.server(`LiveTranspile: ${req.path} transpiled successfully`, LogLevel.INFO);
+                  res.end(babelifiedCode);
+                } else {
+                  // Log.server(`LiveTranspile: ${req.path} skipped babelify`, LogLevel.INFO);
+                }
+              } catch (error: any) {
+                // Log.server(`LiveTranspile: ${error.message}`, LogLevel.WARN);
               }
             }
           }
