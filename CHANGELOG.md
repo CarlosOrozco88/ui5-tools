@@ -1,3 +1,7 @@
+## 1.1.3 (29/10/2021)
+- Fixed: `ui5-tools.server.babelSourcesLive` fixed in windows systems
+- Dependencies upgrade
+
 ## 1.1.2 (22/10/2021)
 - New configuration property `ui5-tools.server.babelSourcesLive`. Live transpile js.
 - AppcacheBuster is changed default value: `None`.

@@ -2,11 +2,10 @@ import express from 'express';
 import Utils from '../Utils/Utils';
 import { workspace, RelativePattern, FileStat, Uri } from 'vscode';
 import minimatch from 'minimatch';
-import { ServerOptions } from '../Types/Types';
+import { Level, ServerOptions } from '../Types/Types';
 import Builder from '../Builder/Builder';
 import Log from '../Utils/Log';
 import path from 'path';
-import { LogLevel } from 'ts-loader/dist/logger';
 
 export default {
   /**
@@ -42,32 +41,46 @@ export default {
               }
             }
           }
+          let bTranspile = false;
           if (bBabelSourcesLive) {
-            if (sInnerPath.endsWith('.js') && !sInnerPath.includes('resources/')) {
+            if (
+              sInnerPath.endsWith('.js') &&
+              !sInnerPath.includes('resources/') &&
+              !sInnerPath.endsWith('-preload.js')
+            ) {
               try {
-                let bTranspile = true;
+                bTranspile = true;
                 for (let i = 0; i < aBabelExclude.length && bTranspile; i++) {
                   const sExclude = aBabelExclude[i];
                   bTranspile = !minimatch(sInnerPath, sExclude);
                 }
                 if (bTranspile) {
-                  const fsPath = Uri.parse(path.join(staticPath + req.path));
+                  const fsPath = Uri.file(path.join(staticPath, req.path));
                   const babelifiedCode = await Builder.babelifyFile(ui5App, fsPath);
                   res.type('.js');
-                  // Log.server(`LiveTranspile: ${req.path} transpiled successfully`, LogLevel.INFO);
-                  res.end(babelifiedCode);
+                  // Log.server(
+                  //   `LiveTranspile: ${path.join(req.baseUrl, req.baseUrl)} transpiled successfully`,
+                  //   Level.INFO
+                  // );
+
+                  res.set('Cache-Control', 'no-store');
+                  res.send(babelifiedCode);
                 } else {
-                  // Log.server(`LiveTranspile: ${req.path} skipped babelify`, LogLevel.INFO);
+                  // Log.server(`LiveTranspile: ${req.path} skipped babelify`, Level.INFO);
                 }
               } catch (error: any) {
-                // Log.server(`LiveTranspile: ${error.message}`, LogLevel.WARN);
+                Log.server(`LiveTranspile: ${error.message}`, Level.WARNING);
+                bTranspile = false;
               }
             }
           }
-
-          next();
+          if (!bTranspile) {
+            next();
+          }
         },
-        express.static(staticPath)
+        express.static(staticPath, {
+          maxAge: '0',
+        })
       );
 
       // CacheBuster
