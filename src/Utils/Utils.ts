@@ -273,37 +273,6 @@ const Utils = {
     return oUi5App;
   },
 
-  getDateMethods() {
-    return [
-      'getDate',
-      'getDay',
-      'getFullYear',
-      'getHours',
-      'getMilliseconds',
-      'getMinutes',
-      'getMonth',
-      'getSeconds',
-      'getTime',
-      'getTimezoneOffset',
-      'getUTCDate',
-      'getUTCDay',
-      'getUTCFullYear',
-      'getUTCHours',
-      'getUTCMilliseconds',
-      'getUTCMinutes',
-      'getUTCMonth',
-      'getUTCSeconds',
-      'getYear',
-      'toGMTString',
-      'toLocaleDateString',
-      'toLocaleString',
-      'toLocaleTimeString',
-      'toString',
-      'toTimeString',
-      'toUTCString',
-    ];
-  },
-
   fetchFile(url: string, options = { timeout: 5000 }): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       const splitted = url.split('://');

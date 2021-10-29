@@ -1,5 +1,6 @@
 ## 1.1.3 (29/10/2021)
 - Fixed: `ui5-tools.server.babelSourcesLive` fixed in windows systems
+- Changed: computed date replaced changed due to speed improvements. Check [readme file](README.md)
 - Dependencies upgrade
 
 ## 1.1.2 (22/10/2021)

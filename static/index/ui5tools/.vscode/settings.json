@@ -1,10 +1,4 @@
 {
     "ui5-tools.server.resourcesProxy": "CDN SAPUI5",
-    "ui5-tools.ui5Version": "1.71.17",
-    "ui5-tools.builder.replaceKeysValues": [
-        {
-            "key": "TIMESTAMP",
-            "value": "COMPUTED_TIMESTAMP"
-        }
-    ]
+    "ui5-tools.ui5Version": "1.71.17"
 }

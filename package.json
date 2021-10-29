@@ -430,11 +430,23 @@
           "default": [
             {
               "key": "TIMESTAMP",
-              "value": "COMPUTED_Date_getTime"
+              "value": "COMPUTED_DATE_TIMESTAMP"
             },
             {
               "key": "ISODATE",
-              "value": "COMPUTED_Date_toISOString"
+              "value": "COMPUTED_DATE_ISO"
+            },
+            {
+              "key": "DMY",
+              "value": "COMPUTED_DATE_DMY"
+            },
+            {
+              "key": "YMD",
+              "value": "COMPUTED_DATE_YMD"
+            },
+            {
+              "key": "MYD",
+              "value": "COMPUTED_DATE_MYD"
             }
           ],
           "description": "Key/Value pair list. Replace <% key %> with 'value' while building the app"
@@ -523,6 +535,7 @@
     "connect-livereload": "^0.6.1",
     "cookie-parser": "^1.4.5",
     "core-js": "^3.19.0",
+    "dayjs": "^1.10.7",
     "deepmerge": "^4.2.2",
     "dotenv": "^10.0.0",
     "ejs": "^3.1.6",

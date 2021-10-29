@@ -54,9 +54,19 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 
 ### String replacer
 
-- **Replace pattern** `<% TIMESTAMP %>`, `<% ISODATE %>`
+- **Default replace patterns** `<% TIMESTAMP %>`, `<% ISODATE %>`, `<% DMY %>`, `<% YMD %>`, `<% MYD %>`
 - **Create custom replacements** like `<% CUSTOMKEY %>` in workspace environment (configurable with command `alt+c alt+r`)
-- **Suports computed date functions**, replacements during the build process `<% COMPUTED_Date_toLocaleString %>`, `<% COMPUTED_Date_toLocaleDateString %>`, `<% COMPUTED_Date_fnDate %>`
+- **Computed values** `COMPUTED_DATE_TIMESTAMP`, `COMPUTED_DATE_ISO`, `COMPUTED_DATE_DMY`, `COMPUTED_DATE_YMD`, `COMPUTED_DATE_MYD` and the special value `COMPUTED_DATE_FORMATTED`
+- **Suports custom computed date format**, replacements using dayjs during the build process:
+```json
+"ui5-tools.builder.replaceKeysValues": [
+  {
+    "key": "DATE_FORMATED_EXAMPLE",
+    "value": "COMPUTED_DATE_FORMAT",
+    "param": "DD/MM/YYYY HH:mm:SS"
+  }
+]
+```
 
 ## Settings
 
@@ -98,7 +108,31 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - `ui5-tools.builder.buildLess`: Auto build less files into css when saving changes | default: `true`
 - `ui5-tools.builder.replaceStrings`: Replace strings when building | default: `true`
 - `ui5-tools.builder.replaceExtensions`: File extensions to look for keys to replace | default: `xml,js,json,properties`
-- `ui5-tools.builder.replaceKeysValues`: Key/Value pair list. Replace <% key %> with 'value' while building the app | default: `[{'key':'TIMESTAMP','value':'ISODATE'}]`
+- `ui5-tools.builder.replaceKeysValues`: Key/Value pair list. Replace <% key %> with 'value' while building the app | default: 
+`
+[
+  {
+    "key": "TIMESTAMP",
+    "value": "COMPUTED_DATE_TIMESTAMP"
+  },
+  {
+    "key": "ISODATE",
+    "value": "COMPUTED_DATE_ISO"
+  },
+  {
+    "key": "DMY",
+    "value": "COMPUTED_DATE_DMY"
+  },
+  {
+    "key": "YMD",
+    "value": "COMPUTED_DATE_YMD"
+  },
+  {
+    "key": "MYD",
+    "value": "COMPUTED_DATE_MYD"
+  }
+]
+`
 
 #### Deployer Settings
 

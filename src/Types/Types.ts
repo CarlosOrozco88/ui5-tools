@@ -149,3 +149,9 @@ export interface Ui5ToolsData {
   showTree: boolean;
   theme: string;
 }
+
+export interface KeysValuesConfig {
+  key: string;
+  value: string;
+  param?: string;
+}

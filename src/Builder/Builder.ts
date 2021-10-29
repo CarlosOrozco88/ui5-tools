@@ -9,6 +9,7 @@ import { pd as prettyData } from 'pretty-data';
 import less from 'less';
 //@ts-ignore
 import lessOpenUI5 from 'less-openui5';
+import dayjs from 'dayjs';
 
 const lessOpenUI5Builder = new lessOpenUI5.Builder({});
 const xmlHtmlPrePattern = /<(?:\w+:)?pre>/;
@@ -16,7 +17,7 @@ const xmlHtmlPrePattern = /<(?:\w+:)?pre>/;
 import Log from '../Utils/Log';
 import Utils from '../Utils/Utils';
 import Config from '../Utils/Config';
-import { Ui5App, BuildTasks } from '../Types/Types';
+import { Ui5App, BuildTasks, KeysValuesConfig } from '../Types/Types';
 
 import { transformAsync, BabelFileResult } from '@babel/core';
 import presetEnv from '@babel/preset-env';
@@ -358,35 +359,41 @@ export default {
   },
 
   replaceStringsValue(): Record<string, string> {
-    let keysValues: Array<any> = new Array(Config.builder('replaceKeysValues'));
-    const calculedKeys: Record<string, string> = {};
+    // @ts-ignore
+    const keysValues: Array<any> = Config.builder('replaceKeysValues');
+    const computedKeys: Record<string, string> = {};
 
-    const oDate = new Date();
-    const sComputedDateKeyBegin = 'COMPUTED_Date_';
-    const aDateMethods = Utils.getDateMethods();
-    const aDateValues = aDateMethods.map((sMethod: string) => {
-      const sKey = `${sComputedDateKeyBegin}${sMethod}`;
-      //@ts-ignore
-      const sValue = '' + oDate[sMethod]();
-      return { key: sKey, value: sValue };
-    });
-    keysValues = keysValues.concat(aDateValues);
+    const now = dayjs();
 
-    keysValues.forEach(({ key, value }) => {
-      if (value && value.indexOf(sComputedDateKeyBegin) === 0) {
-        const sFn = value.replace(sComputedDateKeyBegin, '');
-        //@ts-ignore
-        if (typeof oDate[sFn] == 'function') {
-          if (!calculedKeys[key]) {
-            //@ts-ignore
-            calculedKeys[key] = oDate[sFn]();
-          }
-        }
-      } else {
-        calculedKeys[key] = value;
+    const aComputedDate = keysValues.filter(({ value }: KeysValuesConfig) => value.indexOf('COMPUTED_DATE_') === 0);
+
+    aComputedDate.forEach(({ key, value, param }) => {
+      const sKey = value.replace('COMPUTED_DATE_', '');
+      let sValue = '';
+      switch (sKey) {
+        case 'TIMESTAMP':
+          sValue = String(now.valueOf());
+          break;
+        case 'ISO':
+          sValue = now.toISOString();
+          break;
+        case 'DMY':
+          sValue = now.format('DD/MM/YYYY HH:mm');
+          break;
+        case 'YMD':
+          sValue = now.format('YYYY/MM/DD HH:mm');
+          break;
+        case 'MYD':
+          sValue = now.format('MM/YYYY/DD HH:mm');
+          break;
+        case 'FORMATTED':
+          sValue = param ? now.format(param) : now.toISOString();
+          break;
       }
+      computedKeys[key] = sValue;
     });
-    return calculedKeys;
+
+    return computedKeys;
   },
 
   /**
