@@ -24,13 +24,21 @@ const Utils = {
 
           const srcFolder = String(Config.general('srcFolder'));
           const libraryFolder = String(Config.general('libraryFolder'));
+          let srcLibFolder = `**/{${srcFolder},${libraryFolder}}`;
+
+          if ((!srcFolder && libraryFolder) || (srcFolder && !libraryFolder)) {
+            srcLibFolder = `**/${srcFolder}${libraryFolder}`;
+          } else if (srcFolder === libraryFolder) {
+            srcLibFolder = !srcFolder ? `**` : `**/${srcFolder}`;
+          }
+
           const distFolder = String(Config.general('distFolder'));
 
           const aWorkspacesPromises = [];
           const workspaceFolders = workspace.workspaceFolders || [];
           for (const wsUri of workspaceFolders) {
             const aManifestList = await workspace.findFiles(
-              new RelativePattern(wsUri, `**/{${srcFolder},${libraryFolder}}/manifest.json`),
+              new RelativePattern(wsUri, `${srcLibFolder}/manifest.json`),
               new RelativePattern(wsUri, `**/{node_modules,.git}/`)
             );
             aWorkspacesPromises.push(aManifestList);

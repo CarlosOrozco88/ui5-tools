@@ -1,3 +1,7 @@
+## 1.1.4 (03/11/2021)
+- Fixed: detection of projects without webapp/src/Webcontent folders and deployment without build
+- Dependencies upgrade
+
 ## 1.1.3 (29/10/2021)
 - Fixed: `ui5-tools.server.babelSourcesLive` fixed in windows systems
 - Changed: computed date replaced changed due to speed improvements. Check [readme file](README.md)

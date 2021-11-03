@@ -172,13 +172,12 @@ export default {
     progress?.report({ increment: 0 });
 
     try {
-      const srcFolder = Config.general('srcFolder');
-      const libraryFolder = Config.general('libraryFolder');
-      const distFolder = Config.general('distFolder');
-
-      if (!srcFolder || !libraryFolder || !distFolder) {
-        throw new Error('Invalid srcFolder or libraryFolder');
-      }
+      // const srcFolder = Config.general('srcFolder');
+      // const libraryFolder = Config.general('libraryFolder');
+      // const distFolder = Config.general('distFolder');
+      // if (!srcFolder || !libraryFolder || !distFolder) {
+      //   throw new Error('Invalid srcFolder or libraryFolder');
+      // }
 
       let increment = 10 * multiplier;
       progress?.report({ increment: increment, message: `${folderName} Reading manifest` });
