@@ -243,16 +243,15 @@ export default {
     oDeployOptions.ui5.transportno = '';
     oDeployOptions.ui5.transport_use_user_match = false;
 
+    const processReject = this.setUnautorized(oDeployOptions);
     const oTransportManager = this.getTransportManager(oDeployOptions);
 
     const transportno: string = await new Promise((resolve, reject) => {
-      const processReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-
       oTransportManager.createTransport(
         oDeployOptions.ui5.package,
         oDeployOptions.ui5.transport_text,
         async function (oError: Error, sTransportNo: string) {
-          process.env.NODE_TLS_REJECT_UNAUTHORIZED = processReject;
+          processReject.restore();
           if (oError) {
             reject(oError);
           }
@@ -347,7 +346,7 @@ export default {
 
       this.autoSaveOrder(ui5App, oDeployOptions);
 
-      const processReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+      const processReject = this.setUnautorized(oDeployOptions);
       try {
         const patternFiles = new RelativePattern(ui5App.deployFsPath, `**/*`);
         const aProjectFiles = await workspace.findFiles(patternFiles);
@@ -371,15 +370,13 @@ export default {
           },
         });
 
-        if (oDeployOptions.conn?.useStrictSSL === false && !Config.deployer('rejectUnauthorized')) {
-          process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-        }
-
         await ui5DeployerCore.deployUI5toNWABAP(oDeployOptions, aProjectResources, oLoggerProgress);
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = processReject;
+
+        processReject.restore();
       } catch (oError: any) {
         progress?.report({ increment: 100 * multiplier, message: oError.message });
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = processReject;
+        processReject.restore();
+
         throw new Error(oError);
       }
     } else {
@@ -662,5 +659,21 @@ export default {
       }
       oDeployOptions.auth.pwd = sPwd;
     }
+  },
+
+  setUnautorized(oDeployOptions: DeployOptions) {
+    const originalReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+    let restore = () => {
+      return;
+    };
+    if (oDeployOptions.conn?.useStrictSSL === false && Config.deployer('rejectUnauthorized')) {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+      restore = () => {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalReject;
+      };
+    }
+    return {
+      restore: restore,
+    };
   },
 };

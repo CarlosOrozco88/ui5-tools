@@ -1,3 +1,6 @@
+## 1.1.5 (18/11/2021)
+- Dependencies upgrade
+
 ## 1.1.4 (03/11/2021)
 - Fixed: detection of projects without webapp/src/Webcontent folders and deployment without build
 - Dependencies upgrade

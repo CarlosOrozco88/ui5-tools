@@ -1,7 +1,7 @@
 import { workspace, RelativePattern, Uri } from 'vscode';
 import express, { NextFunction, Request, Response } from 'express';
 import path from 'path';
-import marked from 'marked';
+import { marked } from 'marked';
 
 import Utils from '../../Utils/Utils';
 import Config from '../../Utils/Config';
