@@ -13,6 +13,7 @@ src
 FUNDING.yml
 .github
 .vscode
+runtime
 
 .DS_Store
 *.vsix

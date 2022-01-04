@@ -1,3 +1,9 @@
+## 1.1.6 (04/01/2022)
+- New `ui5-tools.server.resourcesProxy` option `Runtime`. Download from tools.hana.ondemand.com the Runtime selected. The runtime is downloaded and unzipped in ui5-tools/runtime extension folder.
+- Wizard for `Configurator -> Ui5Provider` updated with `Runtime` options
+- Server start: when using new `Runtime` option, server startup checks if ui5 version is downloaded and download it automatically.
+- Dependencies upgrade
+
 ## 1.1.5 (18/11/2021)
 - Dependencies upgrade
 

@@ -1,3 +1,5 @@
+import { window } from 'vscode';
+
 import express from 'express';
 // import cookieParser from 'cookie-parser';
 // @ts-ignore
@@ -124,36 +126,15 @@ export default {
         }
 
         if (oConfigParams.watch) {
-          try {
-            await LiveServer.start(oConfigParams);
-          } catch (oError) {
-            Log.server(oError, Level.ERROR);
-          }
+          await LiveServer.start(oConfigParams);
         }
 
         Apps.serve(oConfigParams);
 
-        try {
-          await OdataProxy.set(oConfigParams);
-        } catch (oError) {
-          Log.server(oError, Level.ERROR);
-        }
-        try {
-          await ResourcesProxy.set(oConfigParams);
-        } catch (oError) {
-          Log.server(oError, Level.ERROR);
-        }
-
-        try {
-          await IndexUI5Tools.set(oConfigParams);
-        } catch (oError) {
-          Log.server(oError, Level.ERROR);
-        }
-        try {
-          await IndexLaunchpad.set(oConfigParams);
-        } catch (oError) {
-          Log.server(oError, Level.ERROR);
-        }
+        await OdataProxy.set(oConfigParams);
+        await ResourcesProxy.set(oConfigParams);
+        await IndexUI5Tools.set(oConfigParams);
+        await IndexLaunchpad.set(oConfigParams);
 
         if (oConfigParams.protocol === 'https') {
           server = https.createServer(Utils.getHttpsCert(), serverApp);
@@ -174,11 +155,13 @@ export default {
         status = ServerStatus.STARTED;
         StatusBar.stopText(oConfigParams.port);
       } catch (e: any) {
-        this.stopAll();
-        throw new Error(e);
+        Log.server(e.message, Level.ERROR);
+        window.showErrorMessage(e.message);
+        throw e;
       }
     } else {
-      const sMessage = Log.server('Error during server startup');
+      const sMessage = Log.server('Error during server startup', Level.ERROR);
+      window.showErrorMessage(sMessage);
       throw new Error(sMessage);
     }
   },
@@ -197,7 +180,7 @@ export default {
   },
 
   async stop() {
-    if (status === ServerStatus.STARTED) {
+    if (status === ServerStatus.STARTED || status === ServerStatus.STARTING) {
       status = ServerStatus.STOPPING;
       StatusBar.stoppingText();
 
@@ -209,7 +192,7 @@ export default {
   },
 
   async stopAll() {
-    if (status === ServerStatus.STARTED) {
+    if (status === ServerStatus.STARTED || status === ServerStatus.STARTING) {
       status = ServerStatus.STOPPING;
       StatusBar.stoppingText();
 
@@ -221,7 +204,7 @@ export default {
   },
 
   async restart() {
-    if (status === ServerStatus.STARTED) {
+    if (status === ServerStatus.STARTED || status === ServerStatus.STARTING) {
       Log.server('Restarting...');
       await this.stop();
       try {
@@ -237,9 +220,14 @@ export default {
   async toggle() {
     switch (status) {
       case ServerStatus.STOPPED:
-        await this.start();
+        try {
+          await this.start();
+        } catch (oError) {
+          await this.stopAll();
+        }
         break;
       case ServerStatus.STARTED:
+      case ServerStatus.STARTING:
         await this.stopAll();
         break;
     }

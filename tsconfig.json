@@ -14,6 +14,7 @@
 	"exclude": [
 		"node_modules",
 		".vscode-test",
-		"webpack.config.js"
+		"webpack.config.js",
+		"runtime"
 	]
 }

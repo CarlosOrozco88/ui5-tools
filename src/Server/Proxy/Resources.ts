@@ -1,6 +1,7 @@
-import { window } from 'vscode';
+import { Uri, window, workspace } from 'vscode';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
+import express from 'express';
 import apicache from 'apicache';
 import onHeaders from 'on-headers';
 
@@ -27,11 +28,15 @@ const cacheResources = apicache
   .middleware();
 
 const onProxyRes: RequestHandler = function (req, res, next): void {
-  //@ts-ignore
-  onHeaders(res, () => {
-    res.setHeader('cache-control', 'no-cache');
-  });
-  next();
+  if (req.originalUrl.indexOf('-preload') > 0) {
+    res.status(404).render('Preloads avoided by ui5-tools configuration');
+  } else {
+    //@ts-ignore
+    onHeaders(res, () => {
+      res.setHeader('cache-control', 'no-cache');
+    });
+    next();
+  }
 };
 
 export default {
@@ -46,7 +51,7 @@ export default {
     const framework = Utils.getFramework();
     let targetUri, proxy;
     const resourcesProxy = String(Config.server('resourcesProxy'));
-    let ui5Version = Config.general('ui5Version');
+    let ui5Version = String(Config.general('ui5Version'));
 
     // Options: Gateway, CDN SAPUI5, CDN OpenUI5, None
     switch (resourcesProxy) {
@@ -54,7 +59,7 @@ export default {
         targetUri = String(Config.server('resourcesUri'));
         try {
           await Ui5Provider.configureGWVersion(targetUri); // Upadate for correct version
-          ui5Version = Config.general('ui5Version');
+          ui5Version = String(Config.general('ui5Version'));
         } catch (oError) {
           // if it is not possible to update, continue as normal
         }
@@ -127,6 +132,45 @@ export default {
         }
         break;
 
+      case 'Runtime': {
+        Log.server(`Loading SAPUI5 ${ui5Version} Runtime`);
+
+        const runtimeFsPath = Utils.getRuntimeFsPath(true);
+
+        try {
+          await workspace.fs.stat(Uri.file(runtimeFsPath));
+        } catch (oError) {
+          Log.server(`SAPUI5 ${ui5Version} Runtime not found. Starting download...`, Level.WARNING);
+          // Version not downloaded
+          const versions = await Ui5Provider.getRuntimeVersions();
+          const major = versions.find((v) => ui5Version.indexOf(v.version) === 0);
+          if (!major) {
+            const sMessage = Log.server(`Selected SAPUI5 version ${ui5Version} is not available`, Level.ERROR);
+            throw new Error(sMessage);
+          }
+          const minor = major.patches.find((v) => ui5Version === v.version);
+          if (!minor) {
+            const sMessage = Log.server(`Selected SAPUI5 version ${ui5Version} is not available`, Level.ERROR);
+            throw new Error(sMessage);
+          }
+          await Ui5Provider.downloadRuntime(minor);
+        }
+
+        serverApp.use(
+          ['/resources', '/**/resources'],
+          (req, res, next) => {
+            req.originalUrl = req.originalUrl.replace('sap-ui-cachebuster/', '/');
+            req.url = req.url.replace('sap-ui-cachebuster/', '/');
+            next();
+          },
+          onProxyRes,
+          express.static(runtimeFsPath, {
+            maxAge: '0',
+          })
+        );
+        break;
+      }
+
       default:
         break;
     }
@@ -151,6 +195,7 @@ export default {
           res.send(fileBuffer.toString());
         });
         break;
+      case 'Runtime':
       case 'CDN SAPUI5':
         targetUri = `https://${framework}.hana.ondemand.com/${ui5Version}/`;
         break;

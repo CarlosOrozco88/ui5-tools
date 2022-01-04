@@ -155,3 +155,17 @@ export interface KeysValuesConfig {
   value: string;
   param?: string;
 }
+
+export type VersionsTree = Record<string, VersionTree>;
+
+export interface VersionTree {
+  version: string;
+  patches: Array<VersionsItem>;
+}
+
+export interface VersionsItem {
+  version: string;
+  size: string;
+  url: string;
+  oldVersion: boolean;
+}

@@ -1,4 +1,4 @@
-import { workspace, RelativePattern, Uri, extensions, commands, Extension } from 'vscode';
+import { workspace, RelativePattern, Uri, extensions, commands } from 'vscode';
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
@@ -173,6 +173,17 @@ const Utils = {
     return extensions.getExtension('carlosorozcojimenez.ui5-tools')?.extensionUri?.fsPath || '';
   },
 
+  getRuntimeFsPath(bAddResources = false) {
+    const ui5Version = String(Config.general('ui5Version'));
+    const fsPath = path.join(
+      Utils.getExtensionFsPath(),
+      'runtime',
+      ui5Version || 'unknown',
+      bAddResources ? 'resources' : ''
+    );
+    return fsPath;
+  },
+
   loadEnv() {
     const baseDir = Utils.getWorkspaceRootPath();
     const oDotEnv = dotenv.config({
@@ -194,7 +205,7 @@ const Utils = {
     let framework = '';
     if (resourcesProxy.indexOf('OpenUI5') >= 0) {
       framework = 'openui5';
-    } else if (resourcesProxy.indexOf('SAPUI5') >= 0 || resourcesProxy === 'Gateway') {
+    } else if (resourcesProxy.indexOf('SAPUI5') >= 0 || resourcesProxy === 'Gateway' || resourcesProxy === 'Runtime') {
       framework = 'sapui5';
     }
     return framework;
@@ -260,8 +271,8 @@ const Utils = {
   },
 
   isLaunchpadMounted() {
-    const resourcesProxy = Config.server('resourcesProxy');
-    return resourcesProxy === 'CDN SAPUI5' || resourcesProxy === 'Gateway';
+    const resourcesProxy = String(Config.server('resourcesProxy'));
+    return ['CDN SAPUI5', 'Gateway', 'Runtime'].includes(resourcesProxy);
   },
 
   isUi5AppFsPath(ui5App: Ui5App, sFsFilePath: string) {
@@ -281,8 +292,12 @@ const Utils = {
     return oUi5App;
   },
 
-  fetchFile(url: string, options = { timeout: 5000 }): Promise<Buffer> {
+  fetchFile(url: string, options = {}): Promise<Buffer> {
     return new Promise((resolve, reject) => {
+      const mergedOptions = {
+        timeout: 5000,
+        ...options,
+      };
       const splitted = url.split('://');
       if (splitted.length > 1) {
         splitted[1] = splitted[1].split('//').join('/');
@@ -296,7 +311,7 @@ const Utils = {
         httpModule = http;
       }
       httpModule
-        .get(url, options, (res) => {
+        .get(url, mergedOptions, (res) => {
           if (res.statusCode !== 200) {
             reject();
           } else {

@@ -20,12 +20,12 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - **Handles AppCachebuster** in localhost (by default only in PROD mode).
 - Configurable **proxy** to one o multiple **odata service** (Gateway, Other, None). Command `alt+c alt+o`
 - Supports `.env` file for odata service authentication. `UI5TOOLS_ODATA_USER - UI5TOOLS_ODATA_PASSWORD`, `UI5TOOLS_ODATA_USER_2 - UI5TOOLS_ODATA_PASSWORD_2`, etc.
-- Configurable **proxy** to **resources** (Gateway, CDN SAPUI5, CDN OpenUI5, None). Command `alt+c alt+u`
+- Configurable **proxy** to **resources** (Gateway, CDN SAPUI5, CDN OpenUI5, Local Runtime, None). Command `alt+c alt+u`
 - Resources proxy has **built in server cache**, cleaned at every server start.
 - Configurable UI5 version (when using gateway proxy, extension will detect sapui5 version automatically)
 - **Live reload browser**, css and images hot reload
 - **Built in localhost home** page server, with apps launchpad, readme.md, docs (md files), links, server info...
-- **Built in launchpad** for resources: Gateway and CDN SAPUI5. Configurable with file `fioriSandboxConfig.json`
+- **Built in launchpad** for resources: Gateway, CDN SAPUI5 and Runtime. Configurable with file `fioriSandboxConfig.json`
 - Server uses **folder hierarchy**. For product apps and Z apps, is possible to emulate gateway bsp paths
 - Start server in **development mode** `alt+s alt+s` or **production mode** `alt+s alt+p` (launches `srcFolder` or `distFolder` folder of each project)
 - Multiple comands: start `alt+s alt+s`, restart `alt+s alt+r`... (check commands secction)
@@ -90,7 +90,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - `ui5-tools.server.odataUri`: Your odata server uri url (example: `http://srvaspgwd.com:8080/`). odataProxy `Other` accepts multiple uris (example: `http://srvaspgwd.com:8080/, http://srvaspgwd.com:8080/`)
 - `ui5-tools.server.odataSecure`: Verify odataProxy SSL Certs | default: `false`
 - `ui5-tools.server.odataMountPath`: The mountpath for 'Other' odataProxy. Accepts multiple paths, respecting the same order that odataUri for odataProxy type `Other` | default: `/odata`
-- `ui5-tools.server.resourcesProxy`: Proxy all odata calls to a gateway, cdn or local folder (proxy all url begining with /resources) | default: `CDN SAPUI5`
+- `ui5-tools.server.resourcesProxy`: Proxy all odata calls to a Gateway, CDN or Local Runtime (proxy all url begining with /resources) | default: `CDN SAPUI5`
 - `ui5-tools.server.resourcesUri`: Your resources server url (example: http://srvaspgwd.com:8080/)
 - `ui5-tools.server.resourcesSecure`: Verify resourcesProxy SSL Certs | default: `false`
 - `ui5-tools.server.babelSourcesLive`: Live transform es6 to es5 (server in DEV mode), internet explorer 11 compat: `false`

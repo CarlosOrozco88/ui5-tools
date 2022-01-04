@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  ignorePatterns: ['scripts', 'dist'],
+  ignorePatterns: ['scripts', 'dist', 'runtime', 'webpack.config.js'],
   env: {
     browser: false,
     commonjs: true,

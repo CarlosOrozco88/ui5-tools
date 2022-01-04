@@ -1,10 +1,12 @@
-import { window, ConfigurationTarget } from 'vscode';
+import { window, ConfigurationTarget, ProgressLocation } from 'vscode';
+import { parse } from 'node-html-parser';
+import AdmZip from 'adm-zip';
 
 import Config from '../Utils/Config';
 import Utils from '../Utils/Utils';
 import Log from '../Utils/Log';
 import Server from '../Server/Server';
-import { Level } from '../Types/Types';
+import { Level, VersionsItem, VersionsTree, VersionTree } from '../Types/Types';
 
 export default {
   async wizard() {
@@ -18,8 +20,9 @@ export default {
           Log.configurator(oError, Level.ERROR);
           await this.setUi5Version();
         }
-      }
-      if (ui5Provider !== 'None' && ui5Provider !== 'Gateway') {
+      } else if (ui5Provider === 'Runtime') {
+        await this.quickPickUi5RuntimeVersion();
+      } else if (ui5Provider === 'CDN SAPUI5' || ui5Provider === 'CDN OpenUI5') {
         await this.setUi5Version();
       }
       Server.restart();
@@ -46,6 +49,10 @@ export default {
         {
           description: 'Use OpenUI5 CDN',
           label: 'CDN OpenUI5',
+        },
+        {
+          description: 'Use SAPUI5 Local Runtime (Download from tools.hana.ondemand.com)',
+          label: 'Runtime',
         },
         {
           description: 'Without resources proxy',
@@ -295,5 +302,168 @@ export default {
     const url = `${sGatewayUri}/sap/public/bc/ui5_ui5/1/resources/sap-ui-version.json`;
     const fileBuffer = await Utils.fetchFile(url);
     return JSON.parse(fileBuffer.toString());
+  },
+
+  async quickPickUi5RuntimeVersion() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const versions = await this.getRuntimeVersions();
+        const major = await this.quickPickUi5RuntimeVersionMajor(versions);
+
+        const version = await this.quickPickUi5RuntimeVersionMinor(major.patches);
+
+        //@ts-ignore
+        await Config.general().update('ui5Version', version.version, ConfigurationTarget.Workspace);
+        Log.configurator(`Set ui5Version value ${version.version}`);
+
+        await this.downloadRuntime(version);
+        resolve(version);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  },
+
+  async quickPickUi5RuntimeVersionMajor(versions: Array<any>): Promise<VersionTree> {
+    return new Promise(async (resolve, reject) => {
+      const ui5Version = String(Config.general('ui5Version'));
+
+      const quickpick = await window.createQuickPick();
+      quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 major version';
+      quickpick.items = versions.map(({ version }) => {
+        return { label: version };
+      });
+      quickpick.placeholder = ui5Version;
+      quickpick.step = 1;
+      quickpick.totalSteps = 2;
+      quickpick.canSelectMany = false;
+      quickpick.onDidAccept(async () => {
+        if (quickpick.selectedItems.length) {
+          const value = quickpick.selectedItems[0].label;
+          const versionMajor = versions.find((version) => {
+            return version.version === value;
+          });
+          resolve(versionMajor);
+        } else {
+          reject('No major version selected');
+        }
+        quickpick.hide();
+      });
+      quickpick.show();
+    });
+  },
+
+  async quickPickUi5RuntimeVersionMinor(versions: Array<VersionsItem>): Promise<VersionsItem> {
+    return new Promise(async (resolve, reject) => {
+      const ui5Version = String(Config.general('ui5Version'));
+
+      const quickpick = await window.createQuickPick();
+      quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 minor version';
+      quickpick.items = versions.map(({ version, size }) => {
+        return {
+          label: version,
+          description: size,
+        };
+      });
+      quickpick.placeholder = ui5Version;
+      quickpick.step = 2;
+      quickpick.totalSteps = 2;
+      quickpick.canSelectMany = false;
+      quickpick.onDidAccept(async () => {
+        if (quickpick.selectedItems.length) {
+          const value = quickpick.selectedItems[0].label;
+          const versionMinor = versions.find((v) => {
+            return v.version === value;
+          });
+          if (versionMinor) {
+            resolve(versionMinor);
+          }
+        } else {
+          reject('No minor version selected');
+        }
+        quickpick.hide();
+      });
+      quickpick.show();
+    });
+  },
+
+  async getRuntimeVersions() {
+    Log.configurator(`Downloading runtime versions list`);
+    const url = `https://tools.hana.ondemand.com/`; //#sapui5
+
+    const bufferUrl = await Utils.fetchFile(url);
+    const stringUrl = bufferUrl.toString();
+    // @ts-ignore
+    const document = parse(stringUrl);
+    const tables = document.querySelectorAll('table.plain');
+    const table = tables[9];
+    const rows = table.querySelectorAll('tbody tr');
+
+    const versionsTreeArray: Array<VersionTree> = [];
+    const versionsTreeHash: VersionsTree = {};
+
+    rows.forEach((row) => {
+      const firstCol = row.querySelectorAll('td');
+      if (firstCol?.[0]?.innerHTML === 'Runtime') {
+        const ui5Version = firstCol?.[1]?.innerHTML;
+
+        const aVersionMatch = String(ui5Version).match(/^(\d+)\.(\d+)\.(\d+)$/);
+        let parentVersion = '';
+        if (aVersionMatch) {
+          const majorV = parseInt(aVersionMatch[1], 10);
+          const minorV = parseInt(aVersionMatch[2], 10);
+          parentVersion = `${majorV}.${minorV}`;
+        }
+        if (parentVersion) {
+          const url = firstCol?.[3]?.querySelector('a')?.getAttribute('href') || '';
+          if (url) {
+            const size = firstCol?.[2]?.innerHTML;
+            if (!versionsTreeHash[parentVersion]) {
+              versionsTreeHash[parentVersion] = {
+                version: parentVersion,
+                patches: [],
+              };
+              versionsTreeArray.push(versionsTreeHash[parentVersion]);
+            }
+            versionsTreeHash[parentVersion].patches.push({
+              version: ui5Version,
+              size: size,
+              url: `https://tools.hana.ondemand.com/${url}`,
+              oldVersion: row.classList.contains('oldVersionSapui5'),
+            });
+          }
+        }
+      }
+    });
+    Log.configurator(`Runtime list downloaded successfully`, Level.SUCCESS);
+
+    return versionsTreeArray;
+  },
+
+  async downloadRuntime(version: VersionsItem) {
+    Log.configurator(`Downloading SAPUI5 ${version.version} runtime`);
+    await window.withProgress(
+      {
+        title: `Downloading SAPUI5 ${version.version} Runtime`,
+        cancellable: false,
+        location: ProgressLocation.Window,
+      },
+      async (progress) => {
+        progress.report({ increment: 10 });
+        const zipBuffer = await Utils.fetchFile(version.url, {
+          headers: {
+            Cookie: 'eula_3_1_agreed=tools.hana.ondemand.com/developer-license-3_1.txt',
+          },
+        });
+        const zipFile = new AdmZip(zipBuffer);
+
+        zipFile.extractEntryTo('resources/', Utils.getRuntimeFsPath(), true, true);
+        Log.configurator(`Unziping SAPUI5 ${version.version} runtime`);
+
+        progress.report({ increment: 100 });
+        const sMessage = Log.configurator(`Runtime version ${version.version} downloaded successfully`, Level.SUCCESS);
+        window.showInformationMessage(sMessage);
+      }
+    );
   },
 };
