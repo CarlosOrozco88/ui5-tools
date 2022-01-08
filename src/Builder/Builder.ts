@@ -308,7 +308,7 @@ export default {
       try {
         await workspace.fs.delete(uriToDelete, {
           recursive: true,
-          useTrash: true,
+          useTrash: false,
         });
       } catch (error: any) {
         if (error.code !== 'FileNotFound') {

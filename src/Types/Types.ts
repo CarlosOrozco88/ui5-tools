@@ -169,3 +169,9 @@ export interface VersionsItem {
   url: string;
   oldVersion: boolean;
 }
+
+export interface SandboxFile {
+  files: Record<string, string>;
+  versions: Record<string, string>;
+  default: string;
+}

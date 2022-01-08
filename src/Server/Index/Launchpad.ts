@@ -50,7 +50,7 @@ export default {
         res.sendFile(path.join(baseDir, 'fioriSandboxConfig.json'));
       });
 
-      ResourcesProxy.setTest(oConfigParams);
+      await ResourcesProxy.setTest(oConfigParams);
     }
   },
 };

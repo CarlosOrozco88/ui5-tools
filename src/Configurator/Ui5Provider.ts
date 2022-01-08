@@ -1,12 +1,14 @@
-import { window, ConfigurationTarget, ProgressLocation } from 'vscode';
+import { window, workspace, Uri, ConfigurationTarget, ProgressLocation } from 'vscode';
 import { parse } from 'node-html-parser';
 import AdmZip from 'adm-zip';
+import { createHash } from 'crypto';
+import { minify, MinifyOutput } from 'terser';
 
 import Config from '../Utils/Config';
 import Utils from '../Utils/Utils';
 import Log from '../Utils/Log';
 import Server from '../Server/Server';
-import { Level, VersionsItem, VersionsTree, VersionTree } from '../Types/Types';
+import { Level, SandboxFile, VersionsItem, VersionsTree, VersionTree } from '../Types/Types';
 
 export default {
   async wizard() {
@@ -407,12 +409,10 @@ export default {
       if (firstCol?.[0]?.innerHTML === 'Runtime') {
         const ui5Version = firstCol?.[1]?.innerHTML;
 
-        const aVersionMatch = String(ui5Version).match(/^(\d+)\.(\d+)\.(\d+)$/);
+        const { major, minor } = Utils.parseVersion(ui5Version);
         let parentVersion = '';
-        if (aVersionMatch) {
-          const majorV = parseInt(aVersionMatch[1], 10);
-          const minorV = parseInt(aVersionMatch[2], 10);
-          parentVersion = `${majorV}.${minorV}`;
+        if (major && minor) {
+          parentVersion = `${major}.${minor}`;
         }
         if (parentVersion) {
           const url = firstCol?.[3]?.querySelector('a')?.getAttribute('href') || '';
@@ -465,5 +465,65 @@ export default {
         window.showInformationMessage(sMessage);
       }
     );
+  },
+
+  async downloadSandbox() {
+    try {
+      const versions = await this.getUi5Versions('sapui5');
+      const sandboxComplete: SandboxFile = {
+        files: {},
+        versions: {},
+        default: '',
+      };
+
+      for (let i = 0; i < versions.length; i++) {
+        const majorV = versions[i];
+        const lastMinor = majorV.patches[majorV.patches.length - 1];
+
+        for (let j = 0; j < majorV.patches.length; j++) {
+          const minorV = majorV.patches[j];
+
+          const urlSandbox = `https://sapui5.hana.ondemand.com/${minorV.label}/test-resources/sap/ushell/bootstrap/sandbox.js`;
+          const fileSandbox = await Utils.fetchFile(urlSandbox);
+          const fileString = fileSandbox.toString();
+          const fileMinified: MinifyOutput = await minify(fileString, {
+            compress: false,
+          });
+          const fileMinifiedString = fileMinified.code ?? '';
+          const hash = createHash('sha256');
+          hash.update(fileMinifiedString);
+
+          const hex = hash.digest('hex');
+          if (!sandboxComplete.files[hex]) {
+            sandboxComplete.files[hex] = fileMinifiedString;
+          }
+          sandboxComplete.versions[minorV.label] = hex;
+          if (!sandboxComplete.default) {
+            sandboxComplete.default = minorV.label;
+          }
+        }
+
+        // const oVersion = Utils.parseVersion(lastMinor?.label);
+        // const { major, minor, patch } = oVersion;
+        // let emptyVersions = [];
+        // for (let i = patch; i >= 0; i--) {
+        //   const cVersion = `${major}.${minor}.${patch}`;
+        //   if (!sandboxComplete.versions[cVersion]) {
+        //     emptyVersions.push(cVersion);
+        //   } else {
+        //     emptyVersions.forEach((version) => {
+        //       sandboxComplete.versions[version] = sandboxComplete.versions[cVersion];
+        //     });
+        //     emptyVersions = [];
+        //   }
+        // }
+      }
+      const fileStringified = JSON.stringify(sandboxComplete, null, 2);
+      const sandboxFsPath = Utils.getSandboxFsPath();
+      const sandboxUri = Uri.file(sandboxFsPath);
+      await workspace.fs.writeFile(sandboxUri, Buffer.from(fileStringified));
+    } catch (oError) {
+      // Don't do nothing
+    }
   },
 };

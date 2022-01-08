@@ -1,3 +1,9 @@
+## 1.1.7 (09/01/2022)
+- Updated default value for `ui5-tools.ui5Version` to 1.71.44
+- Updated default value for `ui5-tools.server.resourcesProxy` to Runtime
+- File `sandbox.js` is included in the extension bundle. Now it is possible to launch the launchpad in enclosed networks
+- Dependencies upgrade
+
 ## 1.1.6 (04/01/2022)
 - New `ui5-tools.server.resourcesProxy` option `Runtime`. Download from tools.hana.ondemand.com the Runtime selected. The runtime is downloaded and unzipped in ui5-tools/runtime extension folder.
 - Wizard for `Configurator -> Ui5Provider` updated with `Runtime` options

@@ -1,6 +1,5 @@
 import { Uri, window, workspace } from 'vscode';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-
 import express from 'express';
 import apicache from 'apicache';
 import onHeaders from 'on-headers';
@@ -9,9 +8,8 @@ import Ui5Provider from '../../Configurator/Ui5Provider';
 import Config from '../../Utils/Config';
 import Utils from '../../Utils/Utils';
 import Log from '../../Utils/Log';
-import { Level, ServerOptions } from '../../Types/Types';
+import { Level, SandboxFile, ServerOptions } from '../../Types/Types';
 import { RequestHandler } from 'express';
-// import { URL } from 'url';
 
 const cacheResources = apicache
   .options({
@@ -28,15 +26,11 @@ const cacheResources = apicache
   .middleware();
 
 const onProxyRes: RequestHandler = function (req, res, next): void {
-  if (req.originalUrl.indexOf('-preload') > 0) {
-    res.status(404).render('Preloads avoided by ui5-tools configuration');
-  } else {
-    //@ts-ignore
-    onHeaders(res, () => {
-      res.setHeader('cache-control', 'no-cache');
-    });
-    next();
-  }
+  //@ts-ignore
+  onHeaders(res, () => {
+    res.setHeader('cache-control', 'no-cache');
+  });
+  next();
 };
 
 export default {
@@ -164,6 +158,7 @@ export default {
             next();
           },
           onProxyRes,
+          cacheResources,
           express.static(runtimeFsPath, {
             maxAge: '0',
           })
@@ -177,46 +172,27 @@ export default {
     return;
   },
 
-  setTest({ serverApp }: ServerOptions): void {
-    const ui5Version = Config.general('ui5Version');
+  async setTest({ serverApp }: ServerOptions): Promise<void> {
     const resourcesProxy = Config.server('resourcesProxy');
-    const framework = Utils.getFramework();
-    let targetUri = ``;
 
-    let basePath = '';
+    const sandboxFsPath = Utils.getSandboxFsPath();
+    const sandboxUri = Uri.file(sandboxFsPath);
+    const sandboxFile = await workspace.fs.readFile(sandboxUri);
+    const sandboxData: SandboxFile = JSON.parse(sandboxFile.toString());
+
     switch (resourcesProxy) {
       case 'Gateway':
-        targetUri = String(Config.server('resourcesUri'));
-        basePath = '/sap/public/bc/ui5_ui5/1';
-        serverApp.get('/flp/test-resources/sap/ushell/bootstrap/sandbox.js', async (req, res) => {
-          const sCdnTargetUri = `https://sapui5.hana.ondemand.com/${ui5Version}/`;
-          const url = `${sCdnTargetUri}test-resources/sap/ushell/bootstrap/sandbox.js`;
-          const fileBuffer = await Utils.fetchFile(url);
-          res.send(fileBuffer.toString());
-        });
-        break;
-      case 'Runtime':
       case 'CDN SAPUI5':
-        targetUri = `https://${framework}.hana.ondemand.com/${ui5Version}/`;
+      case 'Runtime':
+        serverApp.get('/flp/test-resources/sap/ushell/bootstrap/sandbox.js', async (req, res) => {
+          const ui5Version = '' + Config.general('ui5Version');
+          const hash = sandboxData.versions[ui5Version] || sandboxData.versions[sandboxData.default];
+          const file = sandboxData.files[hash];
+          res.send(file);
+        });
         break;
       default:
         break;
-    }
-    if (targetUri) {
-      Log.server(`Creating testProxy with ui5Version ${ui5Version} to ${targetUri}`);
-      const proxy = createProxyMiddleware({
-        pathRewrite(path, req) {
-          const resourcesPath = path.slice(path.indexOf('/test-resources/'), path.length);
-          return `${basePath}${resourcesPath}`;
-        },
-        target: targetUri,
-        secure: Boolean(Config.server('resourcesSecure')),
-        changeOrigin: true,
-        logLevel: 'error',
-        logProvider: Log.newLogProviderProxy,
-      });
-
-      serverApp.use('/flp/test-resources/**', onProxyRes, cacheResources, proxy);
     }
   },
 };

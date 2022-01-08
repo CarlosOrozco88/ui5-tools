@@ -4,3 +4,4 @@ node_modules
 *.vsix
 .env
 runtime
+.DS_Store

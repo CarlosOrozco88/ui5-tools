@@ -184,6 +184,10 @@ const Utils = {
     return fsPath;
   },
 
+  getSandboxFsPath(): string {
+    return path.join(Utils.getExtensionFsPath(), 'static', 'scripts', 'sandbox.json');
+  },
+
   loadEnv() {
     const baseDir = Utils.getWorkspaceRootPath();
     const oDotEnv = dotenv.config({
@@ -231,35 +235,42 @@ const Utils = {
     return oConfigFile;
   },
 
+  parseVersion(ui5Version: string) {
+    let major = 0;
+    let minor = 0;
+    let patch = 0;
+    const aVersionMatch = String(ui5Version).match(/^(\d+)\.(\d+)\.(\d+)$/);
+    if (aVersionMatch) {
+      major = parseInt(aVersionMatch[1], 10);
+      minor = parseInt(aVersionMatch[2], 10);
+      patch = parseInt(aVersionMatch[3], 10);
+    }
+    return { major, minor, patch };
+  },
+
   getOptionsVersion() {
-    const ui5Version = Config.general('ui5Version');
+    const ui5Version = '' + Config.general('ui5Version');
     const ui5toolsData = {
       compatVersion: 'edge', // for building
       showTree: false, // shows list or tree in docs folder
       theme: 'sap_bluecrystal', // theme to use in index server and flp
     };
 
-    let majorV = 0;
-    let minorV = 0;
-    let patchV = 0;
-    const aVersionMatch = String(ui5Version).match(/^(\d+)\.(\d+)\.(\d+)$/);
-    if (aVersionMatch) {
-      majorV = parseInt(aVersionMatch[1], 10);
-      minorV = parseInt(aVersionMatch[2], 10);
-      patchV = parseInt(aVersionMatch[3], 10);
-      ui5toolsData.compatVersion = `${majorV}.${minorV}`;
+    const { major, minor } = this.parseVersion(ui5Version);
+    if (major && minor) {
+      ui5toolsData.compatVersion = `${major}.${minor}`;
     }
 
-    if (majorV == 1) {
+    if (major === 1) {
       // sap.m.tree
-      if (minorV >= 42) {
+      if (minor >= 42) {
         ui5toolsData.showTree = true;
       }
 
       // theme
-      if (minorV >= 65) {
+      if (minor >= 65) {
         ui5toolsData.theme = 'sap_fiori_3';
-      } else if (minorV >= 44) {
+      } else if (minor >= 44) {
         ui5toolsData.theme = 'sap_belize';
       }
     }
