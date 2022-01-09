@@ -177,6 +177,8 @@ const Utils = {
     const ui5Version = String(Config.general('ui5Version'));
     const fsPath = path.join(
       Utils.getExtensionFsPath(),
+      '..',
+      'carlosorozcojimenez.ui5-tools-support',
       'runtime',
       ui5Version || 'unknown',
       bAddResources ? 'resources' : ''

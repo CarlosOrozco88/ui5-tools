@@ -1,6 +1,9 @@
+## 1.1.8 (09/01/2022)
+- Changed runtime download from `~/.vscode/extensions/carlosorozcojimenez.ui5-tools-${version}/runtime/` to `~/.vscode/extensions/carlosorozcojimenez.ui5-tools-support/runtime/`
+
 ## 1.1.7 (09/01/2022)
 - Updated default value for `ui5-tools.ui5Version` to 1.71.44
-- Updated default value for `ui5-tools.server.resourcesProxy` to Runtime
+- Updated default value for `ui5-tools.server.resourcesProxy` to `Runtime`
 - File `sandbox.js` is included in the extension bundle. Now it is possible to launch the launchpad in enclosed networks
 - Dependencies upgrade
 
