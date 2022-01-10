@@ -1,14 +1,19 @@
-import { window, workspace, Uri, ConfigurationTarget, ProgressLocation } from 'vscode';
-import { parse } from 'node-html-parser';
+import { window, workspace, Uri, ConfigurationTarget, ProgressLocation, ViewColumn, WebviewPanel } from 'vscode';
+import { HTMLElement, parse } from 'node-html-parser';
 import AdmZip from 'adm-zip';
 import { createHash } from 'crypto';
 import { minify, MinifyOutput } from 'terser';
+import ejs from 'ejs';
+import fs from 'fs';
 
 import Config from '../Utils/Config';
 import Utils from '../Utils/Utils';
 import Log from '../Utils/Log';
 import Server from '../Server/Server';
 import { Level, SandboxFile, VersionsItem, VersionsTree, VersionTree } from '../Types/Types';
+import path from 'path';
+
+let panelLicence: WebviewPanel | undefined;
 
 export default {
   async wizard() {
@@ -38,6 +43,7 @@ export default {
       const ui5ProviderValue = String(Config.server('resourcesProxy'));
 
       const quickpick = await window.createQuickPick();
+      quickpick.ignoreFocusOut = true;
       quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 provider';
       quickpick.items = [
         {
@@ -159,6 +165,7 @@ export default {
       quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 major version';
       quickpick.items = versionsMajor;
       quickpick.placeholder = ui5Version;
+      quickpick.ignoreFocusOut = true;
       quickpick.step = 1;
       quickpick.totalSteps = 2;
       quickpick.canSelectMany = false;
@@ -183,6 +190,7 @@ export default {
       quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 minor version';
       quickpick.items = versionsMinor;
       quickpick.placeholder = ui5Version;
+      quickpick.ignoreFocusOut = true;
       quickpick.step = 2;
       quickpick.totalSteps = 2;
       quickpick.canSelectMany = false;
@@ -332,10 +340,11 @@ export default {
 
       const quickpick = await window.createQuickPick();
       quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 major version';
-      quickpick.items = versions.map(({ version }) => {
-        return { label: version };
+      quickpick.items = versions.map(({ version, installed }) => {
+        return { label: version, description: installed ? 'Installed' : '' };
       });
       quickpick.placeholder = ui5Version;
+      quickpick.ignoreFocusOut = true;
       quickpick.step = 1;
       quickpick.totalSteps = 2;
       quickpick.canSelectMany = false;
@@ -361,13 +370,14 @@ export default {
 
       const quickpick = await window.createQuickPick();
       quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 minor version';
-      quickpick.items = versions.map(({ version, size }) => {
+      quickpick.items = versions.map(({ version, size, installed }) => {
         return {
           label: version,
-          description: size,
+          description: `${size}${installed ? ': Installed' : ''}`,
         };
       });
       quickpick.placeholder = ui5Version;
+      quickpick.ignoreFocusOut = true;
       quickpick.step = 2;
       quickpick.totalSteps = 2;
       quickpick.canSelectMany = false;
@@ -389,14 +399,23 @@ export default {
     });
   },
 
-  async getRuntimeVersions() {
-    Log.configurator(`Downloading runtime versions list`);
-    const url = `https://tools.hana.ondemand.com/`; //#sapui5
+  getRuntimeUrl() {
+    return 'https://tools.hana.ondemand.com/';
+  },
+
+  async getRuntimeFile(): Promise<HTMLElement> {
+    const url = this.getRuntimeUrl();
 
     const bufferUrl = await Utils.fetchFile(url);
     const stringUrl = bufferUrl.toString();
-    // @ts-ignore
-    const document = parse(stringUrl);
+
+    return parse(stringUrl);
+  },
+
+  async getRuntimeVersions() {
+    Log.configurator(`Downloading runtime versions list`);
+
+    const document = await this.getRuntimeFile();
     const tables = document.querySelectorAll('table.plain');
     const table = tables[9];
     const rows = table.querySelectorAll('tbody tr');
@@ -404,7 +423,7 @@ export default {
     const versionsTreeArray: Array<VersionTree> = [];
     const versionsTreeHash: VersionsTree = {};
 
-    rows.forEach((row) => {
+    rows.forEach(async (row) => {
       const firstCol = row.querySelectorAll('td');
       if (firstCol?.[0]?.innerHTML === 'Runtime') {
         const ui5Version = firstCol?.[1]?.innerHTML;
@@ -422,12 +441,19 @@ export default {
               versionsTreeHash[parentVersion] = {
                 version: parentVersion,
                 patches: [],
+                installed: false,
               };
               versionsTreeArray.push(versionsTreeHash[parentVersion]);
             }
+
+            const runtimeFsPath = Utils.getRuntimeFsPath(true, ui5Version);
+            const bInstalled = fs.existsSync(runtimeFsPath);
+
+            versionsTreeHash[parentVersion].installed = versionsTreeHash[parentVersion].installed || bInstalled;
             versionsTreeHash[parentVersion].patches.push({
               version: ui5Version,
               size: size,
+              installed: bInstalled,
               url: `https://tools.hana.ondemand.com/${url}`,
               oldVersion: row.classList.contains('oldVersionSapui5'),
             });
@@ -441,30 +467,89 @@ export default {
   },
 
   async downloadRuntime(version: VersionsItem) {
-    Log.configurator(`Downloading SAPUI5 ${version.version} runtime`);
+    const sMessage = Log.configurator(`Installing SAPUI5 ${version.version} runtime`);
     await window.withProgress(
       {
-        title: `Downloading SAPUI5 ${version.version} Runtime`,
+        title: sMessage,
         cancellable: false,
         location: ProgressLocation.Window,
       },
       async (progress) => {
-        progress.report({ increment: 10 });
-        const zipBuffer = await Utils.fetchFile(version.url, {
-          headers: {
-            Cookie: 'eula_3_1_agreed=tools.hana.ondemand.com/developer-license-3_1.txt',
-          },
-        });
-        const zipFile = new AdmZip(zipBuffer);
+        progress.report({ increment: 10, message: 'Accept or reject EULA...' });
+        try {
+          await this.acceptLicence(version.version);
+          progress.report({ increment: 10, message: 'Downloading...' });
+          const zipBuffer = await Utils.fetchFile(version.url, {
+            headers: {
+              Cookie: 'eula_3_1_agreed=tools.hana.ondemand.com/developer-license-3_1.txt',
+            },
+          });
+          const zipFile = new AdmZip(zipBuffer);
 
-        zipFile.extractEntryTo('resources/', Utils.getRuntimeFsPath(), true, true);
-        Log.configurator(`Unziping SAPUI5 ${version.version} runtime`);
+          zipFile.extractEntryTo('resources/', Utils.getRuntimeFsPath(), true, true);
+          Log.configurator(`Unziping SAPUI5 ${version.version} runtime`);
 
-        progress.report({ increment: 100 });
-        const sMessage = Log.configurator(`Runtime version ${version.version} downloaded successfully`, Level.SUCCESS);
-        window.showInformationMessage(sMessage);
+          progress.report({ increment: 100 });
+          const sMessage = Log.configurator(
+            `Runtime version ${version.version} downloaded successfully`,
+            Level.SUCCESS
+          );
+          window.showInformationMessage(sMessage);
+        } catch (oError: any) {
+          const sMessage = Log.configurator(oError.message, Level.ERROR);
+          window.showErrorMessage(oError.message);
+        }
       }
     );
+  },
+
+  async acceptLicence(ui5Version: string): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      const runtimeUrl = this.getRuntimeUrl();
+      const document = await this.getRuntimeFile();
+      const eulaHeader = document.querySelector('#eula-dialog-header');
+      const eulaHeaderHtml = eulaHeader?.innerHTML.replace('src="./', `src="${runtimeUrl}`);
+
+      const eula = document.querySelector('#eula-text');
+      const eulaText = eula?.innerText?.replace(/\n/g, '<br/>') ?? '';
+
+      panelLicence?.dispose();
+
+      panelLicence = window.createWebviewPanel('sapui5Eula', 'SAPUI5 EULA', ViewColumn.One, {
+        enableScripts: true,
+      });
+      const htmlRendered = await ejs.renderFile(
+        path.join(Utils.getExtensionFsPath(), 'static', 'scripts', 'eula.ejs'),
+        {
+          eulaHeaderHtml,
+          eulaText,
+        }
+      );
+      panelLicence.webview.html = htmlRendered;
+
+      let bClosed = false;
+      panelLicence.webview.onDidReceiveMessage((message) => {
+        bClosed = true;
+        if (message.command === 'reject') {
+          const sMessage = Log.configurator('SAPUI5 EULA NOT Accepted', Level.ERROR);
+          reject(new Error(sMessage));
+        } else {
+          Log.configurator('SAPUI5 EULA Accepted', Level.INFO);
+          resolve();
+        }
+        panelLicence?.dispose();
+      });
+
+      panelLicence.onDidDispose((event) => {
+        panelLicence = undefined;
+        if (!bClosed) {
+          const sMessage = Log.configurator('SAPUI5 EULA NOT Accepted', Level.ERROR);
+          reject(new Error(sMessage));
+        }
+      });
+    });
+
+    // }
   },
 
   async downloadSandbox() {
@@ -478,7 +563,7 @@ export default {
 
       for (let i = 0; i < versions.length; i++) {
         const majorV = versions[i];
-        const lastMinor = majorV.patches[majorV.patches.length - 1];
+        // const lastMinor = majorV.patches[majorV.patches.length - 1];
 
         for (let j = 0; j < majorV.patches.length; j++) {
           const minorV = majorV.patches[j];

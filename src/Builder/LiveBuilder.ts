@@ -27,12 +27,16 @@ export default {
       this.watchApps = undefined;
     }
     const distFolder = String(Config.general('distFolder'));
+    const srcFolder = String(Config.general('srcFolder'));
     const sWorkspaceRootPath = Utils.getWorkspaceRootPath();
     this.watchApps = chokidar.watch([sWorkspaceRootPath], {
       ignoreInitial: true,
       ignored: (sPath: string) => {
         let bIgnore = false;
-        const aIgnored: Array<string> = ['.git', '.svn', '.hg', '.node_modules', distFolder];
+        const aIgnored: Array<string> = ['.git', '.svn', '.hg', '.node_modules'];
+        if (distFolder !== srcFolder) {
+          aIgnored.push(distFolder);
+        }
         for (let i = 0; i < aIgnored.length && !bIgnore; i++) {
           const sIgnored = aIgnored[i];
           bIgnore = sPath.includes(sIgnored);

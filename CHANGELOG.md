@@ -1,3 +1,7 @@
+## 1.1.9 (10/01/2022)
+- Fixed: autorefresh when `distFolder === srcFolder`
+- Fixed: showing EULA when downloading SAPUI5 Runtime
+
 ## 1.1.8 (09/01/2022)
 - Changed runtime download from `~/.vscode/extensions/carlosorozcojimenez.ui5-tools-${version}/runtime/` to `~/.vscode/extensions/carlosorozcojimenez.ui5-tools-support/runtime/`
 

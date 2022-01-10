@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body {
+            height: 100vh;
+            width: 100vw;
+            background-color:white;
+            padding: 0;
+            margin: 0;
+            color: black;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+          }
+          header {
+            box-shadow: 0 0 3px black;
+          }
+          header,
+          main {
+            padding: 1rem 1rem 0 1rem;
+          }
+          footer {
+            background-color:#333333;
+            margin: 0.25rem;
+            height: 3rem;
+            border-radius: 0.25rem;
+            padding: 0 0.5rem;
+            display: flex;
+            flex-direction: row;
+            justify-content: Center;
+            align-items: Center;
+            align-content: center;
+            box-sizing: border-box;
+          }
+          button {
+            margin: 0 0.25rem;
+          }
+        </style>
+    </head>
+    <body>
+
+      <header class="paper" style="flex: 0 1 auto;">
+        <%- eulaHeaderHtml %>
+      </header>
+      <main style="overflow-y:auto;flex: 1 1 auto;" class="paper">
+        <p>
+          <%- eulaText %>
+        </p>
+      </main>
+      <footer style="flex: 0 0 auto;">
+        <Button onclick="accept()">I Have Read And Agree</Button>
+        <Button onclick="reject()">I Do Not Agree</Button>
+      </footer>
+
+      <script>
+        function accept() {
+            const vscode = acquireVsCodeApi();
+            vscode.postMessage({
+              command: "accept"
+            });
+        }
+        function reject() {
+            const vscode = acquireVsCodeApi();
+            vscode.postMessage({
+              command: "reject"
+            });
+        }
+    </script>
+    </body>
+</html>

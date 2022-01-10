@@ -161,6 +161,7 @@ export type VersionsTree = Record<string, VersionTree>;
 export interface VersionTree {
   version: string;
   patches: Array<VersionsItem>;
+  installed: boolean;
 }
 
 export interface VersionsItem {
@@ -168,6 +169,7 @@ export interface VersionsItem {
   size: string;
   url: string;
   oldVersion: boolean;
+  installed: boolean;
 }
 
 export interface SandboxFile {

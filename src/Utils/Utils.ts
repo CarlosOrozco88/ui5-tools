@@ -173,8 +173,10 @@ const Utils = {
     return extensions.getExtension('carlosorozcojimenez.ui5-tools')?.extensionUri?.fsPath || '';
   },
 
-  getRuntimeFsPath(bAddResources = false) {
-    const ui5Version = String(Config.general('ui5Version'));
+  getRuntimeFsPath(bAddResources = false, ui5Version?: string) {
+    if (!ui5Version) {
+      ui5Version = String(Config.general('ui5Version'));
+    }
     const fsPath = path.join(
       Utils.getExtensionFsPath(),
       '..',

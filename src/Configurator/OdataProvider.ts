@@ -25,6 +25,7 @@ export default {
       const odataProviderValue = String(Config.server('odataProxy'));
       const quickpick: QuickPick<QuickPickItem> = await window.createQuickPick();
       quickpick.title = 'ui5-tools > Configurator > oDataProvider: Select odata provider';
+      quickpick.ignoreFocusOut = true;
       quickpick.items = [
         {
           description: 'Gateway url. Proxy all requests starting with /sap',
