@@ -1,3 +1,6 @@
+## 1.1.10 (11/01/2022)
+- Fixed: configuration property `ui5-tools.deployer.rejectUnauthorized` /  SSL certs error when deploying
+
 ## 1.1.9 (10/01/2022)
 - Fixed: autorefresh when `distFolder === srcFolder`
 - Fixed: showing EULA when downloading SAPUI5 Runtime

@@ -663,17 +663,13 @@ export default {
 
   setUnautorized(oDeployOptions: DeployOptions) {
     const originalReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-    let restore = () => {
-      return;
-    };
-    if (oDeployOptions.conn?.useStrictSSL === false && Config.deployer('rejectUnauthorized')) {
+    if (oDeployOptions.conn?.useStrictSSL === false && !Config.deployer('rejectUnauthorized')) {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-      restore = () => {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalReject;
-      };
     }
     return {
-      restore: restore,
+      restore: () => {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalReject;
+      },
     };
   },
 };
