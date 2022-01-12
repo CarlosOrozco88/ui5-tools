@@ -2,7 +2,7 @@
   "name": "ui5-tools",
   "displayName": "UI5 Tools",
   "description": "Local development tools for UI5",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
@@ -541,7 +541,7 @@
     "core-js": "^3.20.2",
     "dayjs": "^1.10.7",
     "deepmerge": "^4.2.2",
-    "dotenv": "^10.0.0",
+    "dotenv": "^11.0.0",
     "ejs": "^3.1.6",
     "express": "^4.17.2",
     "express-timeout-handler": "^2.2.2",

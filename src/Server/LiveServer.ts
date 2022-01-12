@@ -167,6 +167,7 @@ export default {
       originalPath: '',
       overrideURL: '',
     });
+    Log.server(`File change detected: ${sFilePath}`);
     this.sendAllClients(data);
   },
 

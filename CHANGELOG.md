@@ -1,3 +1,7 @@
+## 1.1.11 (12/01/2022)
+- Fixed: autorefresh
+- Dependencies upgrade
+
 ## 1.1.10 (11/01/2022)
 - Fixed: configuration property `ui5-tools.deployer.rejectUnauthorized` /  SSL certs error when deploying
 

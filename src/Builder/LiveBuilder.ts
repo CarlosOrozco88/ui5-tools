@@ -26,20 +26,24 @@ export default {
       this.watchApps.close();
       this.watchApps = undefined;
     }
-    const distFolder = String(Config.general('distFolder'));
-    const srcFolder = String(Config.general('srcFolder'));
+
     const sWorkspaceRootPath = Utils.getWorkspaceRootPath();
     this.watchApps = chokidar.watch([sWorkspaceRootPath], {
       ignoreInitial: true,
       ignored: (sPath: string) => {
-        let bIgnore = false;
-        const aIgnored: Array<string> = ['.git', '.svn', '.hg', '.node_modules'];
-        if (distFolder !== srcFolder) {
-          aIgnored.push(distFolder);
+        const aAppsFs = Utils.ui5Apps.map((ui5App) => ui5App.srcFsPath);
+
+        let bIgnore = !aAppsFs.some((ui5SrcFs) => {
+          return ui5SrcFs.includes(sPath) || sPath.includes(ui5SrcFs);
+        });
+
+        if (!bIgnore) {
+          const aIgnored: Array<string> = ['.git', '.svn', '.hg', '.node_modules'];
+          const aPath = sPath.split(path.sep);
+          bIgnore = aIgnored.some((f) => aPath.includes(f));
         }
-        for (let i = 0; i < aIgnored.length && !bIgnore; i++) {
-          const sIgnored = aIgnored[i];
-          bIgnore = sPath.includes(sIgnored);
+        if (bIgnore) {
+          bIgnore = sWorkspaceRootPath !== sPath;
         }
         return bIgnore;
       },

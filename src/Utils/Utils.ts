@@ -14,10 +14,13 @@ let getUi5AppsPromise: Promise<Ui5Apps>;
 let sPromiseStatus: 'loading' | undefined;
 
 const Utils = {
+  ui5Apps: ui5Apps,
+
   async getAllUI5Apps(bRefresh = false): Promise<Ui5Apps> {
     if (!getUi5AppsPromise || (bRefresh && !sPromiseStatus)) {
       getUi5AppsPromise = new Promise(async (resolve, reject) => {
         Log.general(`Exploring ui5 projects...`);
+        this.ui5Apps = [];
         try {
           sPromiseStatus = 'loading';
           ui5Apps = [];
@@ -132,6 +135,7 @@ const Utils = {
 
           sPromiseStatus = undefined;
 
+          this.ui5Apps = ui5Apps;
           resolve(ui5Apps);
         } catch (oError) {
           sPromiseStatus = undefined;
