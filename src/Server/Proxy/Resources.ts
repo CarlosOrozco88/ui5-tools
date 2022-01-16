@@ -83,7 +83,7 @@ export default {
             //   }
             // },
             target: targetUri,
-            secure: Boolean(Config.server('resourcesSecure')),
+            secure: !!Config.server('resourcesSecure'),
             changeOrigin: true,
             logLevel: 'error',
             logProvider: Log.newLogProviderProxy,
@@ -105,7 +105,7 @@ export default {
               return resourcesPath;
             },
             target: targetUri,
-            secure: Boolean(Config.server('resourcesSecure')),
+            secure: !!Config.server('resourcesSecure'),
             changeOrigin: true,
             logLevel: 'error',
             logProvider: Log.newLogProviderProxy,

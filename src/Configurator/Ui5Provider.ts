@@ -477,7 +477,7 @@ export default {
       async (progress) => {
         progress.report({ increment: 10, message: 'Accept or reject EULA...' });
         try {
-          await this.acceptLicence(version.version);
+          await this.acceptLicence();
           progress.report({ increment: 10, message: 'Downloading...' });
           const zipBuffer = await Utils.fetchFile(version.url, {
             headers: {
@@ -497,13 +497,13 @@ export default {
           window.showInformationMessage(sMessage);
         } catch (oError: any) {
           const sMessage = Log.configurator(oError.message, Level.ERROR);
-          window.showErrorMessage(oError.message);
+          window.showErrorMessage(sMessage);
         }
       }
     );
   },
 
-  async acceptLicence(ui5Version: string): Promise<void> {
+  async acceptLicence(): Promise<void> {
     return new Promise(async (resolve, reject) => {
       const runtimeUrl = this.getRuntimeUrl();
       const document = await this.getRuntimeFile();

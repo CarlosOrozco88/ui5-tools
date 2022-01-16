@@ -8,23 +8,21 @@ import Utils from '../Utils/Utils';
 export default {
   async build(oResource: Uri): Promise<void> {
     const ui5Apps = await Utils.getAllUI5Apps();
-    // fspath from selected project
-    const ui5App = ui5Apps.find((app) => {
-      return app.appResourceDirname == oResource.fsPath;
-    });
-    try {
-      await Builder.buildProject(ui5App);
-    } catch (oError: any) {
-      Log.builder(oError.message, Level.ERROR);
+    const ui5App = ui5Apps.find((app) => app.appResourceDirname === oResource.fsPath);
+
+    if (ui5App) {
+      try {
+        await Builder.buildProject(ui5App);
+      } catch (oError: any) {
+        Log.builder(oError.message, Level.ERROR);
+      }
     }
   },
 
   async deploy(oResource: Uri): Promise<void> {
     const ui5Apps = await Utils.getAllUI5Apps();
-    // fspath from selected project
-    const ui5App = ui5Apps.find((app) => {
-      return app.appResourceDirname == oResource.fsPath;
-    });
+    const ui5App = ui5Apps.find((app) => app.appResourceDirname === oResource.fsPath);
+
     if (ui5App) {
       try {
         await Deployer.askCreateReuseTransport(ui5App);

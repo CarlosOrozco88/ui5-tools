@@ -3,7 +3,7 @@ import fs from 'fs';
 import http from 'http';
 import https from 'https';
 import path from 'path';
-import WebSocket from 'ws';
+import { WebSocketServer, WebSocket } from 'ws';
 
 import Utils from '../Utils/Utils';
 import Config from '../Utils/Config';
@@ -13,7 +13,7 @@ import { NextFunction, Request, Response } from 'express';
 
 const DELAY_REFRESH = 500;
 let liveServer: http.Server | https.Server | undefined;
-let liveServerWS: WebSocket.Server | undefined;
+let liveServerWS: WebSocketServer | undefined;
 let timeout: ReturnType<typeof setTimeout>;
 
 export default {
@@ -25,9 +25,7 @@ export default {
       try {
         Log.server('LiveServer > Starting...');
         this.middleware(oConfigParams);
-        if (!oConfigParams.restarting) {
-          await this.createServer(oConfigParams);
-        }
+        await this.createServer(oConfigParams);
         resolve();
       } catch (error) {
         reject(error);
@@ -50,10 +48,10 @@ export default {
         }
         liveServer.listen(portLiveReload);
 
-        liveServerWS = new WebSocket.Server({
+        liveServerWS = new WebSocketServer({
           server: liveServer,
         });
-        liveServerWS.on('connection', (ws: WebSocket) => this.onConnection(ws));
+        liveServerWS.on('connection', (ws) => this.onConnection(ws));
         liveServerWS.on('close', () => this.onClose());
         liveServerWS.on('error', (error) => this.onError(error.message));
 
@@ -104,12 +102,12 @@ export default {
     });
   },
 
-  onError(error: string): void {
-    this.debug('Error:' + error);
-  },
-
   onClose(): void {
     this.debug('WebSocket closed');
+  },
+
+  onError(error: string): void {
+    this.debug(`Error: + ${error}`);
   },
 
   serveLiveReloadScript(req: Request, res: Response, next: NextFunction): void {
@@ -159,40 +157,43 @@ export default {
   },
 
   refresh(sFilePath: string): void {
-    const data = JSON.stringify({
-      command: 'reload',
-      path: sFilePath,
-      liveCSS: true,
-      liveImg: true,
-      originalPath: '',
-      overrideURL: '',
-    });
-    Log.server(`File change detected: ${sFilePath}`);
-    this.sendAllClients(data);
+    if (liveServerWS) {
+      const data = JSON.stringify({
+        command: 'reload',
+        path: sFilePath,
+        liveCSS: true,
+        liveImg: true,
+        originalPath: '',
+        overrideURL: '',
+      });
+      Log.server(`File change detected: ${sFilePath}`);
+      this.sendAllClients(data);
+    }
   },
 
   sendAllClients(data: string): void {
     clearTimeout(timeout);
     timeout = setTimeout(() => {
-      Log.server('Refreshing browser...');
-      if (liveServerWS) {
-        liveServerWS.clients.forEach((client) => {
-          if (client.readyState === WebSocket.OPEN) {
-            this.debug('Sending: ' + data);
+      liveServerWS?.clients.forEach((ws) => {
+        if (ws.readyState === WebSocket.OPEN) {
+          Log.server('Refreshing browser...');
+          this.debug('Sending: ' + data);
 
-            client.send(data, (error) => {
-              if (error) {
-                this.debug(error.message);
-              }
-            });
-          }
-        });
-      }
+          ws.send(data, (error) => {
+            if (error) {
+              this.debug(error.message);
+            }
+          });
+        }
+      });
     }, DELAY_REFRESH);
   },
 
   async stop(): Promise<void> {
     if (liveServerWS) {
+      liveServerWS.clients.forEach((ws) => {
+        ws.terminate();
+      });
       liveServerWS.close();
       liveServerWS = undefined;
     }

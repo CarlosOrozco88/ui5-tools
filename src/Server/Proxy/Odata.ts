@@ -26,7 +26,7 @@ export default {
           proxy = createProxyMiddleware({
             pathRewrite: {},
             target: targets[0],
-            secure: Boolean(Config.server('odataSecure')),
+            secure: !!Config.server('odataSecure'),
             // onProxyReq(proxyReq, req, res) {
             //   const gatewayQuery = '' + Config.server('gatewayQuery');
             //   if (gatewayQuery) {
@@ -99,7 +99,7 @@ export default {
                   return nPath;
                 }.bind(this, i),
                 target: targets[i],
-                secure: Boolean(Config.server('odataSecure')),
+                secure: !!Config.server('odataSecure'),
                 // onProxyReq: function (query: string, proxyRex: ClientRequest, req: IncomingMessage) {
                 //   let url = req.url;
                 //   if (query) {

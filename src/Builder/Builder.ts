@@ -196,11 +196,11 @@ export default {
       } = oTasksMerged;
 
       // Config
-      replaceStrings = replaceStrings && Boolean(Config.builder('replaceStrings'));
-      babelifyJSFiles = babelifyJSFiles && Boolean(Config.builder('babelSources'));
-      compressFiles = compressFiles && Boolean(Config.builder('uglifySources'));
-      createDebugFiles = createDebugFiles && Boolean(Config.builder('debugSources'));
-      createPreload = createPreload && Boolean(Config.builder('buildPreload'));
+      replaceStrings = replaceStrings && !!Config.builder('replaceStrings');
+      babelifyJSFiles = babelifyJSFiles && !!Config.builder('babelSources');
+      compressFiles = compressFiles && !!Config.builder('uglifySources');
+      createDebugFiles = createDebugFiles && !!Config.builder('debugSources');
+      createPreload = createPreload && !!Config.builder('buildPreload');
 
       // Check that we are not deleting files from srcFolder
       if (srcFsPath === distFsPath) {

@@ -64,9 +64,6 @@ export default {
    */
   async start(oParameters?: ServerParameter): Promise<void> {
     if (status === ServerStatus.STOPPED) {
-      if (oParameters?.restarting) {
-        await StatusBar.checkVisibility();
-      }
       ResourcesProxy.resetCache();
 
       Log.server('Starting...');
@@ -91,7 +88,7 @@ export default {
           ui5Apps: ui5Apps,
           bServeProduction: bServeProduction,
           sServerMode: sServerMode,
-          watch: Boolean(Config.server('watch')),
+          watch: !!Config.server('watch'),
           protocol: Protocols[protocol],
           port: await portfinder.getPortPromise({
             port: Number(Config.server('port')),
@@ -105,8 +102,8 @@ export default {
           ui5ToolsIndex: Utils.getUi5ToolsIndexFolder(),
           isLaunchpadMounted: Utils.isLaunchpadMounted(),
           bCacheBuster: [sServerMode, 'Allways'].includes('' + Config.server('cacheBuster')),
-          restarting: Boolean(oParameters?.restarting),
-          bBabelSourcesLive: Boolean(Config.server('babelSourcesLive')),
+          restarting: !!oParameters?.restarting,
+          bBabelSourcesLive: !!Config.server('babelSourcesLive'),
           sBabelSourcesExclude: String(Config.builder('babelSourcesExclude')),
         };
 
