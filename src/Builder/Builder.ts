@@ -577,63 +577,71 @@ export default {
   },
 
   async compressJs(ui5App: Ui5App, fsPath: string): Promise<void> {
-    // Compress js files
-    const patternJs = new RelativePattern(fsPath, `**/*.js`);
-    const uglifySourcesExclude = String(Config.builder(`uglifySourcesExclude`));
-    const jsFiles = await workspace.findFiles(patternJs, uglifySourcesExclude);
+    if (Config.builder('uglifySources')) {
+      // Compress js files
+      const patternJs = new RelativePattern(fsPath, `**/*.js`);
+      const uglifySourcesExclude = String(Config.builder(`uglifySourcesExclude`));
+      const jsFiles = await workspace.findFiles(patternJs, uglifySourcesExclude);
 
-    for (let i = 0; i < jsFiles.length; i++) {
-      const uriOrigJs = Uri.file(jsFiles[i].fsPath);
-      const jsFileRaw = await workspace.fs.readFile(uriOrigJs);
+      for (let i = 0; i < jsFiles.length; i++) {
+        const uriOrigJs = Uri.file(jsFiles[i].fsPath);
+        const jsFileRaw = await workspace.fs.readFile(uriOrigJs);
 
-      const jsFileMinified: MinifyOutput = await minify(jsFileRaw.toString());
-      if (jsFileMinified.code) {
-        await workspace.fs.writeFile(uriOrigJs, Buffer.from(jsFileMinified.code));
+        const jsFileMinified: MinifyOutput = await minify(jsFileRaw.toString());
+        if (jsFileMinified.code) {
+          await workspace.fs.writeFile(uriOrigJs, Buffer.from(jsFileMinified.code));
+        }
       }
     }
   },
 
   async compressJson(ui5App: Ui5App, fsPath: string): Promise<void> {
-    // Compress json files
-    const patternJson = new RelativePattern(fsPath, `**/*.json`);
-    const jsonFiles = await workspace.findFiles(patternJson);
+    if (Config.builder('uglifySources')) {
+      // Compress json files
+      const patternJson = new RelativePattern(fsPath, `**/*.json`);
+      const jsonFiles = await workspace.findFiles(patternJson);
 
-    for (let i = 0; i < jsonFiles.length; i++) {
-      const uriOrigJs = Uri.file(jsonFiles[i].fsPath);
-      const jsonFileRaw = await workspace.fs.readFile(uriOrigJs);
+      for (let i = 0; i < jsonFiles.length; i++) {
+        const uriOrigJs = Uri.file(jsonFiles[i].fsPath);
+        const jsonFileRaw = await workspace.fs.readFile(uriOrigJs);
 
-      const jsFileMinified = prettyData.jsonmin(jsonFileRaw.toString());
-      await workspace.fs.writeFile(uriOrigJs, Buffer.from(jsFileMinified));
+        const jsFileMinified = prettyData.jsonmin(jsonFileRaw.toString());
+        await workspace.fs.writeFile(uriOrigJs, Buffer.from(jsFileMinified));
+      }
     }
   },
 
   async compressXml(ui5App: Ui5App, fsPath: string): Promise<void> {
-    // Compress xml files
-    const patternXml = new RelativePattern(fsPath, `**/*.xml`);
-    const xmlFiles = await workspace.findFiles(patternXml);
+    if (Config.builder('uglifySources')) {
+      // Compress xml files
+      const patternXml = new RelativePattern(fsPath, `**/*.xml`);
+      const xmlFiles = await workspace.findFiles(patternXml);
 
-    for (let i = 0; i < xmlFiles.length; i++) {
-      const uriOrigXml = Uri.file(xmlFiles[i].fsPath);
-      const cssFileRaw = await workspace.fs.readFile(uriOrigXml);
+      for (let i = 0; i < xmlFiles.length; i++) {
+        const uriOrigXml = Uri.file(xmlFiles[i].fsPath);
+        const cssFileRaw = await workspace.fs.readFile(uriOrigXml);
 
-      if (!xmlHtmlPrePattern.test(cssFileRaw.toString())) {
-        const xmlFileMinified = prettyData.xmlmin(cssFileRaw.toString(), false);
-        await workspace.fs.writeFile(uriOrigXml, Buffer.from(xmlFileMinified));
+        if (!xmlHtmlPrePattern.test(cssFileRaw.toString())) {
+          const xmlFileMinified = prettyData.xmlmin(cssFileRaw.toString(), false);
+          await workspace.fs.writeFile(uriOrigXml, Buffer.from(xmlFileMinified));
+        }
       }
     }
   },
 
   async compressCss(ui5App: Ui5App, fsPath: string): Promise<void> {
-    // Compress css files
-    const patternCss = new RelativePattern(fsPath, `**/*.css`);
-    const cssFiles = await workspace.findFiles(patternCss);
+    if (Config.builder('uglifySources')) {
+      // Compress css files
+      const patternCss = new RelativePattern(fsPath, `**/*.css`);
+      const cssFiles = await workspace.findFiles(patternCss);
 
-    for (let i = 0; i < cssFiles.length; i++) {
-      const uriOrigCss = Uri.file(cssFiles[i].fsPath);
-      const cssFileRaw = await workspace.fs.readFile(uriOrigCss);
+      for (let i = 0; i < cssFiles.length; i++) {
+        const uriOrigCss = Uri.file(cssFiles[i].fsPath);
+        const cssFileRaw = await workspace.fs.readFile(uriOrigCss);
 
-      const cssFileMinified = prettyData.cssmin(cssFileRaw.toString());
-      await workspace.fs.writeFile(uriOrigCss, Buffer.from(cssFileMinified));
+        const cssFileMinified = prettyData.cssmin(cssFileRaw.toString());
+        await workspace.fs.writeFile(uriOrigCss, Buffer.from(cssFileMinified));
+      }
     }
   },
 

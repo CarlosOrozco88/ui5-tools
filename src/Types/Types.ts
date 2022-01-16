@@ -42,6 +42,12 @@ export interface Ui5App {
   namespace: string;
 }
 
+export interface AppOptions {
+  ui5App: Ui5App;
+  title: string;
+  icon?: string;
+}
+
 export interface Log {
   log(sMessage: string): void;
   logVerbose(sMessage: string): void;

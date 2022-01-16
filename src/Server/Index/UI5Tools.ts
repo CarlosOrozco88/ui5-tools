@@ -10,46 +10,25 @@ import { ServerOptions, Ui5ToolsData } from '../../Types/Types';
 
 export default {
   // SERVER INDEX
-  async set({
-    serverApp,
-    ui5Apps,
-    ui5ToolsIndex,
-    baseDir,
-    ui5ToolsPath,
-    isLaunchpadMounted,
-  }: ServerOptions): Promise<void> {
+  async set(oConfigParams: ServerOptions): Promise<void> {
+    const { serverApp, ui5ToolsIndex, baseDir, ui5ToolsPath } = oConfigParams;
     Log.server('Mounting ui5-tools root page');
 
-    const existBasePathInApp = ui5Apps.find((ui5App) => {
-      return ui5App.appServerPath === '/';
-    });
-    if (!existBasePathInApp) {
-      serverApp.get(`/`, (req, res) => {
-        res.redirect(`/${ui5ToolsIndex}/`);
+    serverApp.get(`/`, (req, res, next) => {
+      const ui5Apps = Utils.ui5Apps;
+      const existBasePathInApp = ui5Apps.find((ui5App) => {
+        return ui5App.appServerPath === '/';
       });
-    }
-
-    const ui5toolsData: Ui5ToolsData = {
-      ...Utils.getOptionsVersion(),
-      readme: '',
-      about: '',
-      changelog: '',
-      launchpad: isLaunchpadMounted,
-      links: [],
-      contributors: [],
-      docs: { aTree: [], oHashes: {} },
-      ui5Apps: {
-        application: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'application'),
-        component: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'component'),
-        library: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'library'),
-        card: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'card'),
-      },
-      //@ts-ignore
-      config: Config.general(),
-    };
+      if (!existBasePathInApp) {
+        res.redirect(`/${ui5ToolsIndex}/`);
+      } else {
+        next();
+      }
+    });
 
     const indexPath = path.join(ui5ToolsPath, 'static', 'index', 'ui5tools', 'webapp');
     const indexHTML = (req: Request, res: Response, next: NextFunction) => {
+      const ui5toolsData = this.getUi5ToolsFile(oConfigParams);
       res.render(path.join(indexPath, 'index'), {
         theme: ui5toolsData.theme,
         edge: ui5toolsData.theme === 'sap_fiori_3',
@@ -61,6 +40,7 @@ export default {
 
     // render view with correct list or tree
     serverApp.get(`/${ui5ToolsIndex}/view/docs.view.xml`, (req, res, next) => {
+      const ui5toolsData = this.getUi5ToolsFile(oConfigParams);
       res.setHeader('content-type', 'text/xml');
       res.render(path.join(indexPath, 'view', 'docs'), {
         showTree: ui5toolsData.showTree,
@@ -77,6 +57,7 @@ export default {
 
     // Serve app data
     serverApp.get(`/${ui5ToolsIndex}/ui5tools.json`, async (req, res) => {
+      const ui5toolsData = this.getUi5ToolsFile(oConfigParams);
       ui5toolsData.readme = marked((await this.readFile(path.join(baseDir, 'README.md'))) || '');
       ui5toolsData.about = marked((await this.readFile(path.join(ui5ToolsPath, 'README.md'))) || '');
       ui5toolsData.changelog = marked((await this.readFile(path.join(ui5ToolsPath, 'CHANGELOG.md'))) || '');
@@ -98,6 +79,29 @@ export default {
       res.send(JSON.stringify(ui5toolsData, null, 2));
     });
     return;
+  },
+
+  getUi5ToolsFile({ isLaunchpadMounted }: ServerOptions) {
+    const ui5Apps = Utils.ui5Apps;
+    const ui5toolsData: Ui5ToolsData = {
+      ...Utils.getOptionsVersion(),
+      readme: '',
+      about: '',
+      changelog: '',
+      launchpad: isLaunchpadMounted,
+      links: [],
+      contributors: [],
+      docs: { aTree: [], oHashes: {} },
+      ui5Apps: {
+        application: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'application'),
+        component: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'component'),
+        library: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'library'),
+        card: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'card'),
+      },
+      //@ts-ignore
+      config: Config.general(),
+    };
+    return ui5toolsData;
   },
 
   async readFile(sPath: string): Promise<undefined | string> {

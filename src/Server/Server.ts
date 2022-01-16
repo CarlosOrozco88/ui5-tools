@@ -28,6 +28,7 @@ let serverApp: express.Express;
 let server: https.Server | http.Server;
 let status: ServerStatus = ServerStatus.STOPPED;
 let serverMode: ServerMode = ServerMode.DEV;
+let oConfigParams: ServerOptions;
 
 export default {
   async startDevelopment(oParameters?: ServerParameter): Promise<void> {
@@ -83,7 +84,7 @@ export default {
         const sServerMode = bServeProduction ? ServerMode.PROD : ServerMode.DEV;
         const ui5Apps = await Utils.getAllUI5Apps();
         const protocol = Config.server('protocol') as keyof typeof Protocols;
-        const oConfigParams: ServerOptions = {
+        oConfigParams = {
           serverApp: serverApp,
           ui5Apps: ui5Apps,
           bServeProduction: bServeProduction,
@@ -161,6 +162,10 @@ export default {
       window.showErrorMessage(sMessage);
       throw new Error(sMessage);
     }
+  },
+
+  getServerOptions() {
+    return oConfigParams;
   },
 
   async stopServer(): Promise<void> {

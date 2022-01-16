@@ -1,4 +1,4 @@
-import { commands, ExtensionContext } from 'vscode';
+import { commands, ExtensionContext, window } from 'vscode';
 
 // Server
 import Server from './Server/Server';
@@ -18,8 +18,11 @@ import StatusBar from './StatusBar/StatusBar';
 // Utils
 import Config from './Utils/Config';
 import Log from './Utils/Log';
+import Utils from './Utils/Utils';
 
 export async function activate(context: ExtensionContext): Promise<void> {
+  Utils.setWorkspaceContext(context);
+
   const { registerCommand } = commands;
   const { subscriptions } = context;
 
