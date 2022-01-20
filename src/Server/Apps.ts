@@ -65,7 +65,7 @@ export default {
               }
               if (bTranspile) {
                 const fsPath = Uri.file(path.join(staticPath, req.path));
-                const babelifiedCode = await Builder.babelifyFile(ui5App, fsPath);
+                const babelifiedCode = await Builder.babelifyJSFile(ui5App, fsPath);
                 res.type('.js');
                 // Log.server(
                 //   `LiveTranspile: ${path.join(req.baseUrl, req.baseUrl)} transpiled successfully`,

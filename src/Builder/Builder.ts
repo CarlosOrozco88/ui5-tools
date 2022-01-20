@@ -21,6 +21,10 @@ import { Ui5App, BuildTasks, KeysValuesConfig } from '../Types/Types';
 
 import { transformAsync, BabelFileResult } from '@babel/core';
 import presetEnv from '@babel/preset-env';
+// // @ts-ignore
+// import presetTypescript from '@babel/preset-typescript';
+// // @ts-ignore
+// import presetUi5 from 'babel-preset-transform-ui5';
 
 // @ts-ignore
 import transformAsyncToPromises from 'babel-plugin-transform-async-to-promises';
@@ -244,6 +248,9 @@ export default {
         await this.compileLess(ui5App, srcFsPath, distFsPath);
         increment = 0;
       }
+
+      // progress?.report({ increment: increment, message: `${folderName} Babelify ts files` });
+      // await this.babelifyTSFiles(ui5App, distFsPath);
 
       // babel js files
       increment += 5 * multiplier;
@@ -487,7 +494,7 @@ export default {
         //require('core-js');
 
         for (let i = 0; i < jsFiles.length; i++) {
-          const babelifiedCode: string = await this.babelifyFile(ui5App, jsFiles[i]);
+          const babelifiedCode: string = await this.babelifyJSFile(ui5App, jsFiles[i]);
           if (babelifiedCode) {
             const uriOrigJs = jsFiles[i];
             await workspace.fs.writeFile(uriOrigJs, Buffer.from(babelifiedCode));
@@ -499,7 +506,7 @@ export default {
     }
   },
 
-  async babelifyFile(ui5App: Ui5App, fsUri: Uri): Promise<string> {
+  async babelifyJSFile(ui5App: Ui5App, fsUri: Uri): Promise<string> {
     let babelifiedCode = '';
 
     const jsFileRaw = await workspace.fs.readFile(fsUri);
@@ -533,6 +540,69 @@ export default {
 
     return babelifiedCode;
   },
+
+  // async babelifyTSFiles(ui5App: Ui5App, folderPath: string): Promise<void> {
+  //   if (Config.builder('babelSources')) {
+  //     try {
+  //       Log.builder(`Babelify files from ${folderPath}`);
+  //       // Create -dbg files
+  //       const patternJs = new RelativePattern(folderPath, `**/*.ts`);
+  //       const babelSourcesExclude = String(Config.builder(`babelSourcesExclude`));
+  //       const jsFiles = await workspace.findFiles(patternJs, babelSourcesExclude);
+
+  //       //require('core-js');
+
+  //       for (let i = 0; i < jsFiles.length; i++) {
+  //         const babelifiedCode: string = await this.babelifyTSFile(ui5App, jsFiles[i]);
+  //         if (babelifiedCode) {
+  //           const sPath = jsFiles[i].fsPath.replace('.ts', '.js');
+
+  //           const uriToJs = Uri.file(sPath);
+  //           await workspace.fs.writeFile(uriToJs, Buffer.from(babelifiedCode));
+  //         }
+  //       }
+  //     } catch (error: any) {
+  //       throw new Error(error);
+  //     }
+  //   }
+  // },
+
+  // async babelifyTSFile(ui5App: Ui5App, fsUri: Uri): Promise<string> {
+  //   let babelifiedCode = '';
+
+  //   const jsFileRaw = await workspace.fs.readFile(fsUri);
+  //   const jsFileString = jsFileRaw.toString();
+  //   const filename = fsUri.fsPath.replace(ui5App.srcFsPath, '').replace(ui5App.distFsPath, '');
+  //   const babelified: BabelFileResult | null = await transformAsync(jsFileString, {
+  //     filename: filename,
+  //     plugins: [
+  //       [
+  //         transformAsyncToPromises,
+  //         {
+  //           inlineHelpers: true,
+  //         },
+  //       ],
+  //       [transformRemoveConsole],
+  //     ],
+  //     presets: [
+  //       [
+  //         presetEnv,
+  //         {
+  //           targets: {
+  //             browsers: 'last 2 versions, ie 11',
+  //           },
+  //         },
+  //       ],
+  //       [presetTypescript, {}],
+  //       [presetUi5, {}],
+  //     ],
+  //   });
+  //   if (babelified && babelified.code && babelified.code !== jsFileString) {
+  //     babelifiedCode = babelified.code.replace(/\r\n|\r|\n/g, os.EOL);
+  //   }
+
+  //   return babelifiedCode;
+  // },
 
   /**
    * Create -dbg.js files

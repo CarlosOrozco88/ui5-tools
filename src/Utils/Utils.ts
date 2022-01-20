@@ -13,6 +13,7 @@ const ui5Apps: Ui5Apps = [];
 let getUi5AppsPromise: Promise<Ui5Apps>;
 let sPromiseStatus: 'loading' | undefined;
 let extensionContext: ExtensionContext;
+// import { ProjectsView } from '../ActivityBar/ProjectsView';
 
 const Utils = {
   ui5Apps,
@@ -67,6 +68,8 @@ const Utils = {
           commands.executeCommand('setContext', 'ui5-tools:resourcesPath', aResourcesDirname);
 
           sPromiseStatus = undefined;
+
+          // ProjectsView.refresh();
 
           resolve(ui5Apps);
         } catch (oError) {

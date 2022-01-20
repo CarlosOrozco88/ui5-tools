@@ -1,5 +1,7 @@
 import { commands, ExtensionContext, window } from 'vscode';
 
+// import { ProjectsView } from './ActivityBar/ProjectsView';
+
 // Server
 import Server from './Server/Server';
 // Configurator
@@ -22,6 +24,8 @@ import Utils from './Utils/Utils';
 
 export async function activate(context: ExtensionContext): Promise<void> {
   Utils.setWorkspaceContext(context);
+
+  // window.registerTreeDataProvider('ui5toolsprojects', ProjectsView);
 
   const { registerCommand } = commands;
   const { subscriptions } = context;
