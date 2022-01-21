@@ -188,13 +188,6 @@ const Utils = {
     if (!ui5Version) {
       ui5Version = String(Config.general('ui5Version'));
     }
-    // TODO
-    // Check introduced in version 1.1.12 on 15/01/22. Maintain this during 1 or 2 months
-    const oldFsPath = path.join('..', 'carlosorozcojimenez.ui5-tools-support');
-    if (fs.existsSync(oldFsPath)) {
-      fs.rmSync(oldFsPath, { recursive: true, force: true });
-    }
-    // End check
 
     const fsPath = path.join(
       this.getGlobalStorageFsPath(),
@@ -383,5 +376,13 @@ const Utils = {
     return this.getGlobalStorageUri().fsPath;
   },
 };
+
+// TODO
+// Check introduced in version 1.1.12 on 15/01/22. Maintain this during 1 or 2 months
+const oldFsPath = path.join(Utils.getExtensionFsPath(), '..', 'carlosorozcojimenez.ui5-tools-support');
+if (fs.existsSync(oldFsPath)) {
+  fs.rmSync(oldFsPath, { recursive: true, force: true });
+}
+// End check
 
 export default Utils;

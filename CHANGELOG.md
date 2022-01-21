@@ -1,4 +1,4 @@
-## 1.1.12-14 (20/01/2022)
+## 1.1.12-15 (20/01/2022)
 - Changed runtime download from `~/.vscode/extensions/carlosorozcojimenez.ui5-tools-support/runtime/` to file system path provide by VSCode. Now using `globalStorageUri` from `ExtensionContext`.
 - Improved livereload and manifest CRUD detection
 - Dependencies upgrade
