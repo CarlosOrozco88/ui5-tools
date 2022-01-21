@@ -190,13 +190,7 @@ const Utils = {
     }
     // TODO
     // Check introduced in version 1.1.12 on 15/01/22. Maintain this during 1 or 2 months
-    const oldFsPath = path.join(
-      '..',
-      'carlosorozcojimenez.ui5-tools-support',
-      'runtime',
-      ui5Version || 'unknown',
-      bAddResources ? 'resources' : ''
-    );
+    const oldFsPath = path.join('..', 'carlosorozcojimenez.ui5-tools-support');
     if (fs.existsSync(oldFsPath)) {
       fs.rmSync(oldFsPath, { recursive: true, force: true });
     }
