@@ -184,7 +184,7 @@ const Utils = {
     return extensions.getExtension('carlosorozcojimenez.ui5-tools')?.extensionUri?.fsPath || '';
   },
 
-  getRuntimeFsPath(bAddResources = false, ui5Version?: string) {
+  getRuntimeFsPath(bAddResources = false, ui5Version?: string, framework = 'sapui5') {
     if (!ui5Version) {
       ui5Version = String(Config.general('ui5Version'));
     }
@@ -204,6 +204,7 @@ const Utils = {
 
     const fsPath = path.join(
       this.getGlobalStorageFsPath(),
+      framework,
       'runtime',
       ui5Version || 'unknown',
       bAddResources ? 'resources' : ''
