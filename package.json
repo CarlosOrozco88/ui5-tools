@@ -2,7 +2,7 @@
   "name": "ui5-tools",
   "displayName": "UI5 Tools",
   "description": "Local development tools for UI5",
-  "version": "1.1.13",
+  "version": "1.1.14",
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
@@ -44,35 +44,7 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "ui5toolscontainer",
-          "title": "Ui5 Tools",
-          "icon": "static/images/logo_blue.png"
-        }
-      ]
-    },
-    "views": {
-      "ui5toolscontainer": [
-        {
-          "type": "tree",
-          "id": "ui5toolsprojects",
-          "name": "UI5 Projects"
-        },
-        {
-          "type": "tree",
-          "id": "ui5toolsserver",
-          "name": "UI5 Server"
-        }
-      ]
-    },
-    "viewsWelcome": [
-      {
-        "view": "ui5toolsprojects",
-        "contents": "In order to use git features, you can open a folder containing a git repository or clone from a URL.\n[Open Folder](command:vscode.openFolder)\n[Clone Repository](command:git.clone)\nTo learn more about how to use git and source control in VS Code [read our docs](https://aka.ms/vscode-scm)."
-      }
-    ],
+
     "menus": {
       "explorer/context": [
         {

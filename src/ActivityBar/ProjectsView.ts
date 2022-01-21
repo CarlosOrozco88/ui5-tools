@@ -42,3 +42,35 @@
 
 // export const ProjectsView = new ProjectsViewClass();
 // ProjectsView.refresh();
+
+/*
+"viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ui5toolscontainer",
+          "title": "Ui5 Tools",
+          "icon": "static/images/logo_blue.png"
+        }
+      ]
+    },
+    "views": {
+      "ui5toolscontainer": [
+        {
+          "type": "tree",
+          "id": "ui5toolsprojects",
+          "name": "UI5 Projects"
+        },
+        {
+          "type": "tree",
+          "id": "ui5toolsserver",
+          "name": "UI5 Server"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "ui5toolsprojects",
+        "contents": "In order to use git features, you can open a folder containing a git repository or clone from a URL.\n[Open Folder](command:vscode.openFolder)\n[Clone Repository](command:git.clone)\nTo learn more about how to use git and source control in VS Code [read our docs](https://aka.ms/vscode-scm)."
+      }
+    ],
+    */
