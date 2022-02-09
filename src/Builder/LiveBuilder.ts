@@ -134,7 +134,7 @@ export default {
     const watchExtensions = String(Config.server('watchExtensions')).replace(/\\s/g, '');
     const watchExtensionsArray = watchExtensions.split(',');
     const bWatchedExtension = watchExtensionsArray.includes(fileExtension);
-    if (ui5App || (bWatchedExtension && bRefresh)) {
+    if (ui5App && (bWatchedExtension || bRefresh)) {
       LiveServer.refresh(sFilePath);
     }
   },

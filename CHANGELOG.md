@@ -1,3 +1,7 @@
+## 1.1.16 (09/02/2022)
+- Fixed: css hot reload
+- Dependencies upgrade
+
 ## 1.1.12-15 (20/01/2022)
 - Changed runtime download from `~/.vscode/extensions/carlosorozcojimenez.ui5-tools-support/runtime/` to file system path provide by VSCode. Now using `globalStorageUri` from `ExtensionContext`.
 - Improved livereload and manifest CRUD detection
