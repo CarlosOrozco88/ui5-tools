@@ -1,3 +1,6 @@
+## 1.1.17 (29/03/2022)
+- Dependencies upgrade
+
 ## 1.1.16 (09/02/2022)
 - Fixed: css hot reload
 - Dependencies upgrade
