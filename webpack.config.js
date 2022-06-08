@@ -22,6 +22,7 @@ module.exports = {
     'utf-8-validate': 'commonjs utf-8-validate',
     'clean-css': 'commonjs clean-css',
     babylon: 'commonjs babylon',
+    'source-map': 'commonjs source-map'
   },
   resolve: {
     alias: {},
