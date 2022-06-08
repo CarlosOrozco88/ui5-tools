@@ -184,18 +184,17 @@ const Utils = {
     return extensions.getExtension('carlosorozcojimenez.ui5-tools')?.extensionUri?.fsPath || '';
   },
 
+  getRuntimeFsPathBase(framework = 'sapui5') {
+    const fsPath = path.join(this.getGlobalStorageFsPath(), framework, 'runtime');
+    return fsPath;
+  },
+
   getRuntimeFsPath(bAddResources = false, ui5Version?: string, framework = 'sapui5') {
     if (!ui5Version) {
       ui5Version = String(Config.general('ui5Version'));
     }
-
-    const fsPath = path.join(
-      this.getGlobalStorageFsPath(),
-      framework,
-      'runtime',
-      ui5Version || 'unknown',
-      bAddResources ? 'resources' : ''
-    );
+    const fsPathBase = Utils.getRuntimeFsPathBase(framework);
+    const fsPath = path.join(fsPathBase, ui5Version || 'unknown', bAddResources ? 'resources' : '');
     return fsPath;
   },
 

@@ -123,7 +123,7 @@ export default {
 
         if (bRefresh && (sAction === 'add' || !ui5App)) {
           ui5App = await Utils.addUi5App(sFilePath);
-          if (ui5App && Server.getServerOptions()?.serverApp) {
+          if (ui5App && Server.isStarted()) {
             await Apps.serveApp(ui5App);
           }
         }

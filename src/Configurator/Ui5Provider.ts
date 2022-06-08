@@ -1,4 +1,13 @@
-import { window, workspace, Uri, ConfigurationTarget, ProgressLocation, ViewColumn, WebviewPanel } from 'vscode';
+import {
+  window,
+  workspace,
+  Uri,
+  ConfigurationTarget,
+  ProgressLocation,
+  ViewColumn,
+  WebviewPanel,
+  FileType,
+} from 'vscode';
 import { HTMLElement, parse } from 'node-html-parser';
 import AdmZip from 'adm-zip';
 import { createHash } from 'crypto';
@@ -478,6 +487,11 @@ export default {
         progress.report({ increment: 10, message: 'Accept or reject EULA...' });
         try {
           await this.acceptLicence();
+        } catch (oErrorLicense: any) {
+          const sMessage = Log.configurator(oErrorLicense.message, Level.ERROR);
+          window.showErrorMessage(sMessage);
+        }
+        try {
           progress.report({ increment: 10, message: 'Downloading...' });
           const zipBuffer = await Utils.fetchFile(version.url, {
             headers: {
@@ -498,6 +512,7 @@ export default {
         } catch (oError: any) {
           const sMessage = Log.configurator(oError.message, Level.ERROR);
           window.showErrorMessage(sMessage);
+          throw oError;
         }
       }
     );
@@ -550,6 +565,80 @@ export default {
     });
 
     // }
+  },
+
+  async uninstallRuntimeWizard() {
+    const quickpick = await window.createQuickPick();
+    quickpick.title = 'ui5-tools > Configurator: Uninstall SAPUI5 Runtime';
+    Log.configurator(`Uninstall SAPUI5 Runtime`);
+    const fsPathRuntimeBase = Utils.getRuntimeFsPathBase();
+    const uriFsPathRuntimeBase = Uri.file(fsPathRuntimeBase);
+    const aFoldersFiles = await workspace.fs.readDirectory(uriFsPathRuntimeBase);
+    const aFolders = aFoldersFiles.filter(([name, fileType]) => {
+      return fileType === FileType.Directory;
+    });
+    const aOptions = aFolders.map(([name]) => {
+      return { label: name, description: '' };
+    });
+    if (quickpick.items.length > 1) {
+      aOptions.push({
+        label: 'ALL',
+        description: 'Remove all SAPUI5 versions',
+      });
+    }
+    quickpick.items = aOptions;
+    quickpick.placeholder = 'Select SAPUI5 version to uninstall';
+    quickpick.ignoreFocusOut = true;
+    quickpick.step = 1;
+    quickpick.totalSteps = 1;
+    quickpick.canSelectMany = false;
+    quickpick.onDidAccept(async () => {
+      if (quickpick.selectedItems.length) {
+        const value = quickpick.selectedItems[0].label;
+        const folder = aFolders.find(([name]) => {
+          return name === value;
+        });
+        if (folder) {
+          const [name] = folder;
+          await this.uninstallUi5Runtime(name);
+        } else if (value === 'ALL') {
+          Log.configurator(`Uninstall SAPUI5 Runtime: Uninstall all SAPUI5 versions`);
+          try {
+            for (let i = 0; i < aFolders.length; i++) {
+              const [name] = aFolders[i];
+              await this.uninstallUi5Runtime(name);
+            }
+            const sMessage = `Uninstall SAPUI5 Runtime: all SAPUI5 runtime versions uninstalled successfully`;
+            Log.configurator(sMessage);
+            window.showInformationMessage(sMessage);
+          } catch (oError) {
+            const sMessage = `Uninstall SAPUI5 Runtime: unable to uninstall SAPUI5 Runtime`;
+            Log.configurator(sMessage, Level.ERROR);
+            window.showErrorMessage(sMessage);
+          }
+        }
+      }
+      quickpick.hide();
+    });
+    quickpick.show();
+  },
+
+  async uninstallUi5Runtime(ui5Version: string) {
+    Log.configurator(`Uninstall SAPUI5 Runtime: Selected ${ui5Version} version`);
+    try {
+      const fsVersionPath = Utils.getRuntimeFsPath(false, ui5Version);
+      const fsVersionUri = Uri.file(fsVersionPath);
+      await workspace.fs.delete(fsVersionUri, { recursive: true, useTrash: false });
+
+      const sMessage = `Uninstall SAPUI5 Runtime: ${ui5Version} uninstalled successfully`;
+      Log.configurator(sMessage);
+      window.showInformationMessage(sMessage);
+    } catch (oError) {
+      const sMessage = `Uninstall SAPUI5 Runtime: unable to uninstall ${ui5Version} version`;
+      Log.configurator(sMessage, Level.ERROR);
+      window.showErrorMessage(sMessage);
+      throw oError;
+    }
   },
 
   async downloadSandbox() {

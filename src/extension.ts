@@ -52,6 +52,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
   subscriptions.push(registerCommand('ui5-tools.configurator.odataProvider', () => OdataProvider.wizard()));
   subscriptions.push(registerCommand('ui5-tools.configurator.ui5Provider', () => Ui5Provider.wizard()));
   subscriptions.push(registerCommand('ui5-tools.configurator.replaceStrings', () => ReplaceStrings.wizard()));
+  subscriptions.push(
+    registerCommand('ui5-tools.configurator.uninstallRuntime', () => Ui5Provider.uninstallRuntimeWizard())
+  );
 
   subscriptions.push(registerCommand('ui5-tools.menu.builder.build', (oResource) => Menu.build(oResource)));
   subscriptions.push(registerCommand('ui5-tools.menu.deployer.deploy', (oResource) => Menu.deploy(oResource)));
