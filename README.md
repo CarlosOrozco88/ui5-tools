@@ -165,6 +165,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - `ui5-tools.configurator.odataProvider`: Configure odata provider | Shortcut: `alt+c alt+o`
 - `ui5-tools.configurator.ui5Provider`: Configure ui5 provider | Shortcut: `alt+c alt+u`
 - `ui5-tools.configurator.replaceStrings`: Configure replace strings | Shortcut: `alt+c alt+r`
+- `ui5-tools.configurator.uninstallRuntime`: Uninstall SAPUI5 Runtime | Shortcut: `alt+c alt+d`
 
 ## Menus
 

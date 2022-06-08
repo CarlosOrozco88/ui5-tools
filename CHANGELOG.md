@@ -1,5 +1,5 @@
-## 1.1.18 (05/06/2022)
-- New Configurator menu: `Configurator --> Uninstall SAPUI5 Runtime`
+## 1.1.18 & 1.1.19 (08/06/2022)
+- New Configurator menu: `Configurator --> Uninstall SAPUI5 Runtime` (shortcut `alt+c alt+d`)
 - Dependencies upgrade
 
 ## 1.1.17 (29/03/2022)
