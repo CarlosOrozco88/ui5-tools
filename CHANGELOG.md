@@ -1,3 +1,8 @@
+## 1.1.20 (17/06/2022)
+- Upgraded default `ui5-tools.ui5Version` from `1.71.44` to `1.71.48`
+- New configuration property `ui5-tools.server.proxyDestinations`
+- Dependencies upgrade
+
 ## 1.1.18 & 1.1.19 (08/06/2022)
 - New Configurator menu: `Configurator --> Uninstall SAPUI5 Runtime` (shortcut `alt+c alt+d`)
 - Dependencies upgrade

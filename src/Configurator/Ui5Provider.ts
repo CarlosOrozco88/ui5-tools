@@ -29,17 +29,27 @@ export default {
     try {
       const ui5Provider = await this.quickPickUi5Provider();
       if (ui5Provider === 'Gateway') {
-        const sGatewayUri = await this.inputBoxGatewayUri();
-        try {
-          await this.configureGWVersion(sGatewayUri);
-        } catch (oError) {
-          Log.configurator(oError, Level.ERROR);
-          await this.setUi5Version();
-        }
+        //@ts-ignore
+        await Config.server().update('resourcesProxy', ui5Provider, ConfigurationTarget.Workspace);
+        Log.configurator(`Set resourcesProxy value to ${ui5Provider}`);
+
+        await this.inputBoxGatewayUri();
+        await this.setGatewayUi5Version();
       } else if (ui5Provider === 'Runtime') {
+        //@ts-ignore
+        await Config.server().update('resourcesProxy', ui5Provider, ConfigurationTarget.Workspace);
+        Log.configurator(`Set resourcesProxy value to ${ui5Provider}`);
+
         await this.quickPickUi5RuntimeVersion();
       } else if (ui5Provider === 'CDN SAPUI5' || ui5Provider === 'CDN OpenUI5') {
+        //@ts-ignore
+        await Config.server().update('resourcesProxy', ui5Provider, ConfigurationTarget.Workspace);
+        Log.configurator(`Set resourcesProxy value to ${ui5Provider}`);
+
         await this.setUi5Version();
+      } else if (ui5Provider) {
+        await this.setDestination(ui5Provider);
+        await this.setGatewayUi5Version();
       }
       Server.restart();
     } catch (error: any) {
@@ -47,14 +57,20 @@ export default {
     }
   },
 
-  async quickPickUi5Provider() {
+  async setGatewayUi5Version() {
+    const sGatewayUri = String(Config.server('resourcesUri'));
+    try {
+      await this.configureGWVersion(sGatewayUri);
+    } catch (oError) {
+      Log.configurator(oError, Level.ERROR);
+      await this.setUi5Version();
+    }
+  },
+
+  async quickPickUi5Provider(): Promise<string> {
     return new Promise(async (resolve, reject) => {
       const ui5ProviderValue = String(Config.server('resourcesProxy'));
-
-      const quickpick = await window.createQuickPick();
-      quickpick.ignoreFocusOut = true;
-      quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 provider';
-      quickpick.items = [
+      const defaultItems = [
         {
           description: 'Use resources from gateway',
           label: 'Gateway',
@@ -76,14 +92,27 @@ export default {
           label: 'None',
         },
       ];
+
+      const proxyDestinations: Array<any> | unknown = Config.server('proxyDestinations');
+      let proxyDestinationsItems: Array<any> = [];
+      if (Array.isArray(proxyDestinations)) {
+        proxyDestinationsItems = proxyDestinations.map(({ url, name }) => {
+          return {
+            description: url,
+            label: name,
+          };
+        });
+      }
+      const items = proxyDestinationsItems.concat(defaultItems);
+      const quickpick = await window.createQuickPick();
+      quickpick.ignoreFocusOut = true;
+      quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 provider';
+      quickpick.items = items;
       quickpick.placeholder = ui5ProviderValue;
       quickpick.canSelectMany = false;
       quickpick.onDidAccept(async () => {
         if (quickpick.selectedItems.length) {
           const value = quickpick.selectedItems[0].label;
-          //@ts-ignore
-          await Config.server().update('resourcesProxy', value, ConfigurationTarget.Workspace);
-          Log.configurator(`Set resourcesProxy value to ${value}`);
           resolve(value);
         } else {
           const sMessage = Log.configurator('No ui5 provider configured');
@@ -119,6 +148,32 @@ export default {
       });
       inputBox.show();
     });
+  },
+
+  async getDestination(destinationName: string): Promise<{ name: string; type: string; url: string }> {
+    let proxyDestination;
+    const proxyDestinations: Array<any> | unknown = Config.server('proxyDestinations');
+    if (Array.isArray(proxyDestinations)) {
+      proxyDestination = proxyDestinations.find((destination) => destination.name === destinationName);
+    }
+    return proxyDestination;
+  },
+
+  async setDestination(destinationName: string): Promise<void> {
+    const proxyDestination = await this.getDestination(destinationName);
+    if (proxyDestination) {
+      //@ts-ignore
+      await Config.server()?.update(
+        'resourcesProxy',
+        proxyDestination.type ?? 'Gateway',
+        ConfigurationTarget.Workspace
+      );
+      Log.configurator(`Set resourcesProxy value to ${proxyDestination.type ?? 'Gateway'}`);
+
+      //@ts-ignore
+      await Config.server()?.update('resourcesUri', proxyDestination.url ?? 'Gateway', ConfigurationTarget.Workspace);
+      Log.configurator(`Set resourcesUri value to ${proxyDestination.url ?? 'Gateway'}`);
+    }
   },
 
   async setUi5Version() {
@@ -487,11 +542,7 @@ export default {
         progress.report({ increment: 10, message: 'Accept or reject EULA...' });
         try {
           await this.acceptLicence();
-        } catch (oErrorLicense: any) {
-          const sMessage = Log.configurator(oErrorLicense.message, Level.ERROR);
-          window.showErrorMessage(sMessage);
-        }
-        try {
+
           progress.report({ increment: 10, message: 'Downloading...' });
           const zipBuffer = await Utils.fetchFile(version.url, {
             headers: {
@@ -509,10 +560,9 @@ export default {
             Level.SUCCESS
           );
           window.showInformationMessage(sMessage);
-        } catch (oError: any) {
-          const sMessage = Log.configurator(oError.message, Level.ERROR);
+        } catch (oErrorLicense: any) {
+          const sMessage = Log.configurator(oErrorLicense.message, Level.ERROR);
           window.showErrorMessage(sMessage);
-          throw oError;
         }
       }
     );

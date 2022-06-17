@@ -2,7 +2,7 @@
   "name": "ui5-tools",
   "displayName": "UI5 Tools",
   "description": "Local development tools for UI5",
-  "version": "1.1.19",
+  "version": "1.1.20",
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
@@ -19,7 +19,7 @@
   "license": "Apache-2.0",
   "icon": "static/images/logo_blue.png",
   "engines": {
-    "vscode": "^1.67.0"
+    "vscode": "^1.68.0"
   },
   "categories": [
     "Other"
@@ -222,7 +222,7 @@
         },
         "ui5-tools.ui5Version": {
           "type": "string",
-          "default": "1.71.44",
+          "default": "1.71.48",
           "description": "UI5 library version for CDN proxy in server and build correct preload files"
         },
         "ui5-tools.server.name": {
@@ -328,6 +328,26 @@
           ],
           "default": "Runtime",
           "description": "Proxy all odata calls to a gateway, cdn or local folder (proxy all url begining with /resources)"
+        },
+        "ui5-tools.server.proxyDestinations": {
+          "type": "array",
+          "title": "List of destinations",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Destination name"
+            },
+            "type": {
+              "type": "string",
+              "description": "Destination type (currently only supports 'Gateway')"
+            },
+            "url": {
+              "type": "string",
+              "description": "Destination URL"
+            }
+          },
+          "default": [],
+          "description": "Your own list of destinations"
         },
         "ui5-tools.server.resourcesUri": {
           "type": "string",
@@ -517,28 +537,28 @@
     "@types/node": "14.18.5",
     "@types/on-headers": "1.0.0",
     "@types/pretty-data": "0.40.0",
-    "@types/vscode": "1.67.0",
+    "@types/vscode": "1.68.0",
     "@types/ws": "8.5.3",
-    "@typescript-eslint/eslint-plugin": "5.27.1",
-    "@typescript-eslint/parser": "5.27.1",
+    "@typescript-eslint/eslint-plugin": "5.28.0",
+    "@typescript-eslint/parser": "5.28.0",
     "babel-loader": "8.2.5",
     "clean-webpack-plugin": "4.0.0",
-    "eslint": "8.17.0",
+    "eslint": "8.18.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-prettier": "4.0.0",
     "glob": "8.0.3",
-    "html-loader": "3.1.0",
+    "html-loader": "3.1.2",
     "mocha": "10.0.0",
     "node-loader": "2.0.0",
-    "prettier": "2.6.2",
-    "typescript": "4.7.3",
+    "prettier": "2.7.1",
+    "typescript": "4.7.4",
     "vscode-test": "1.6.1",
     "webassembly-loader": "1.1.0",
     "webpack": "5.73.0",
-    "webpack-cli": "4.9.2"
+    "webpack-cli": "4.10.0"
   },
   "dependencies": {
-    "@babel/core": "7.18.2",
+    "@babel/core": "7.18.5",
     "@babel/plugin-transform-modules-commonjs": "7.18.2",
     "@babel/preset-env": "7.18.2",
     "@babel/preset-typescript": "^7.17.12",
@@ -551,7 +571,7 @@
     "chokidar": "3.5.3",
     "connect-livereload": "0.6.1",
     "cookie-parser": "1.4.6",
-    "core-js": "3.22.8",
+    "core-js": "3.23.1",
     "dayjs": "1.11.3",
     "deepmerge": "4.2.2",
     "dotenv": "16.0.1",
@@ -560,10 +580,10 @@
     "express-timeout-handler": "2.2.2",
     "http-proxy-middleware": "2.0.6",
     "http-terminator": "3.2.0",
-    "less": "4.1.2",
+    "less": "4.1.3",
     "less-openui5": "0.11.2",
     "livereload": "0.9.3",
-    "marked": "4.0.16",
+    "marked": "4.0.17",
     "minimatch": "5.1.0",
     "node-html-parser": "5.3.3",
     "on-headers": "1.0.2",
@@ -571,12 +591,12 @@
     "openui5-preload": "4.0.0",
     "portfinder": "1.0.28",
     "pretty-data": "0.40.0",
-    "terser": "5.14.0",
+    "terser": "5.14.1",
     "ts-loader": "9.3.0",
     "ui5-nwabap-deployer-core": "1.0.23",
     "utf-8-validate": "5.0.9",
     "wasm-loader": "1.3.0",
-    "ws": "8.7.0",
+    "ws": "8.8.0",
     "xmldoc": "1.1.2"
   }
 }

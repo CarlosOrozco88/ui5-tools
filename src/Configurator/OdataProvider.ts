@@ -7,12 +7,21 @@ export default {
   async wizard(): Promise<void> {
     try {
       const odataProxyValue = await this.quickPickOdataProxy();
-
       if (odataProxyValue === 'Gateway') {
         await this.inputBoxGatewayUri();
+        //@ts-ignore
+        await Config.server()?.update('odataProxy', odataProxyValue, ConfigurationTarget.Workspace);
+
+        Log.configurator(`Set odataProxy value to ${odataProxyValue}`);
       } else if (odataProxyValue === 'Other') {
         await this.inputBoxOtherUri();
         await this.inputBoxOdataMountPath();
+        //@ts-ignore
+        await Config.server()?.update('odataProxy', odataProxyValue, ConfigurationTarget.Workspace);
+
+        Log.configurator(`Set odataProxy value to ${odataProxyValue}`);
+      } else if (odataProxyValue) {
+        await this.setDestination(odataProxyValue);
       }
       Server.restart();
     } catch (error: any) {
@@ -23,10 +32,9 @@ export default {
   async quickPickOdataProxy(): Promise<string> {
     return new Promise(async (resolve, reject) => {
       const odataProviderValue = String(Config.server('odataProxy'));
+
       const quickpick: QuickPick<QuickPickItem> = await window.createQuickPick();
-      quickpick.title = 'ui5-tools > Configurator > oDataProvider: Select odata provider';
-      quickpick.ignoreFocusOut = true;
-      quickpick.items = [
+      const defaultItems = [
         {
           description: 'Gateway url. Proxy all requests starting with /sap',
           label: 'Gateway',
@@ -40,15 +48,25 @@ export default {
           label: 'None',
         },
       ];
+      const proxyDestinations: Array<any> | unknown = Config.server('proxyDestinations');
+      let proxyDestinationsItems: Array<any> = [];
+      if (Array.isArray(proxyDestinations)) {
+        proxyDestinationsItems = proxyDestinations.map(({ url, name }) => {
+          return {
+            description: url,
+            label: name,
+          };
+        });
+      }
+      const items = proxyDestinationsItems.concat(defaultItems);
+      quickpick.title = 'ui5-tools > Configurator > oDataProvider: Select odata provider';
+      quickpick.ignoreFocusOut = true;
+      quickpick.items = items;
       quickpick.placeholder = odataProviderValue;
       quickpick.canSelectMany = false;
       quickpick.onDidAccept(async () => {
         if (quickpick.selectedItems.length) {
           const value = quickpick.selectedItems[0].label;
-          //@ts-ignore
-          await Config.server()?.update('odataProxy', value, ConfigurationTarget.Workspace);
-
-          Log.configurator(`Set odataProxy value to ${value}`);
           resolve(value);
         } else {
           const sMessage = Log.configurator('No odata proxy configured');
@@ -84,6 +102,28 @@ export default {
       });
       inputBox.show();
     });
+  },
+
+  async getDestination(destinationName: string): Promise<{ name: string; type: string; url: string }> {
+    let proxyDestination;
+    const proxyDestinations: Array<any> | unknown = Config.server('proxyDestinations');
+    if (Array.isArray(proxyDestinations)) {
+      proxyDestination = proxyDestinations.find((destination) => destination.name === destinationName);
+    }
+    return proxyDestination;
+  },
+
+  async setDestination(destinationName: string): Promise<void> {
+    const proxyDestination = await this.getDestination(destinationName);
+    if (proxyDestination) {
+      //@ts-ignore
+      await Config.server()?.update('odataProxy', proxyDestination.type ?? 'Gateway', ConfigurationTarget.Workspace);
+      Log.configurator(`Set odataProxy value to ${proxyDestination.type ?? 'Gateway'}`);
+
+      //@ts-ignore
+      await Config.server()?.update('odataUri', proxyDestination.url ?? 'Gateway', ConfigurationTarget.Workspace);
+      Log.configurator(`Set odataUri value to ${proxyDestination.url ?? 'Gateway'}`);
+    }
   },
 
   async inputBoxOtherUri(): Promise<string> {
