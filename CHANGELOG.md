@@ -1,3 +1,8 @@
+## 1.2.0 (21/06/2022)
+- New! First typescript (ESM) support, both server and builder
+- Dependencies upgrade
+
+
 ## 1.1.20 (17/06/2022)
 - Upgraded default `ui5-tools.ui5Version` from `1.71.44` to `1.71.48`
 - New configuration property `ui5-tools.server.proxyDestinations`

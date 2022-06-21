@@ -24,6 +24,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - Resources proxy has **built in server cache**, cleaned at every server start.
 - Configurable UI5 version (when using gateway proxy, extension will detect sapui5 version automatically)
 - **Live reload browser**, css and images hot reload
+- **Typescript** support (ESM)
 - **Built in localhost home** page server, with apps launchpad, readme.md, docs (md files), links, server info...
 - **Built in launchpad** for resources: Gateway, CDN SAPUI5 and Runtime. Configurable with file `fioriSandboxConfig.json`
 - Server uses **folder hierarchy**. For product apps and Z apps, is possible to emulate gateway bsp paths
@@ -34,6 +35,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 
 - **Component-preload.js**, checking configured ui5 version for correct build. Build your project by doing right click in project folder or `alt+b alt+b` and select project
 - **Dbg** files creation
+- **Typescript** support (ESM)
 - **Build less** files (looks for styles.css, PROJECTNAME.less or library.source.less)
 - **Uglify** files
 - **Replace strings**
@@ -92,6 +94,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - `ui5-tools.server.odataMountPath`: The mountpath for 'Other' odataProxy. Accepts multiple paths, respecting the same order that odataUri for odataProxy type `Other` | default: `/odata`
 - `ui5-tools.server.resourcesProxy`: Proxy all odata calls to a Gateway, CDN or Local Runtime (proxy all url begining with /resources) | default: `CDN SAPUI5`
 - `ui5-tools.server.resourcesUri`: Your resources server url (example: http://srvaspgwd.com:8080/)
+- `ui5-tools.server.proxyDestinations`: Your own list of destinations | default: `[]`
 - `ui5-tools.server.resourcesSecure`: Verify resourcesProxy SSL Certs | default: `false`
 - `ui5-tools.server.babelSourcesLive`: Live transform es6 to es5 (server in DEV mode), internet explorer 11 compat: `false`
 - `ui5-tools.server.cacheBuster`: Activate cacheBuster in server mode: | Default: `None`

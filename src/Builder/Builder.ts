@@ -21,10 +21,10 @@ import { Ui5App, BuildTasks, KeysValuesConfig } from '../Types/Types';
 
 import { transformAsync, BabelFileResult } from '@babel/core';
 import presetEnv from '@babel/preset-env';
-// // @ts-ignore
-// import presetTypescript from '@babel/preset-typescript';
-// // @ts-ignore
-// import presetUi5 from 'babel-preset-transform-ui5';
+// @ts-ignore
+import presetTypescript from '@babel/preset-typescript';
+// @ts-ignore
+import presetUi5 from 'babel-preset-transform-ui5';
 
 // @ts-ignore
 import transformAsyncToPromises from 'babel-plugin-transform-async-to-promises';
@@ -249,8 +249,8 @@ export default {
         increment = 0;
       }
 
-      // progress?.report({ increment: increment, message: `${folderName} Babelify ts files` });
-      // await this.babelifyTSFiles(ui5App, distFsPath);
+      progress?.report({ increment: increment, message: `${folderName} Babelify ts files` });
+      await this.babelifyTSFiles(ui5App, distFsPath);
 
       // babel js files
       increment += 5 * multiplier;
@@ -507,22 +507,36 @@ export default {
   },
 
   async babelifyJSFile(ui5App: Ui5App, fsUri: Uri): Promise<string> {
-    let babelifiedCode = '';
-
     const jsFileRaw = await workspace.fs.readFile(fsUri);
     const jsFileString = jsFileRaw.toString();
     const filename = fsUri.fsPath.replace(ui5App.srcFsPath, '').replace(ui5App.distFsPath, '');
+    const babelifiedCode = this.babelifyJSString(jsFileString, filename);
+
+    return babelifiedCode;
+  },
+
+  async babelifyJSString(
+    jsFileString: string,
+    filename: string,
+    options?: { removeConsole?: boolean; sourceMaps?: boolean }
+  ): Promise<string> {
+    const { removeConsole = true, sourceMaps = false } = options ?? {};
+    let babelifiedCode = '';
+    const plugins = [
+      [
+        transformAsyncToPromises,
+        {
+          inlineHelpers: true,
+        },
+      ],
+    ];
+    if (removeConsole) {
+      plugins.push([transformRemoveConsole]);
+    }
     const babelified: BabelFileResult | null = await transformAsync(jsFileString, {
       filename: filename,
-      plugins: [
-        [
-          transformAsyncToPromises,
-          {
-            inlineHelpers: true,
-          },
-        ],
-        [transformRemoveConsole],
-      ],
+      sourceMaps: sourceMaps ? 'inline' : undefined,
+      plugins: plugins,
       presets: [
         [
           presetEnv,
@@ -541,68 +555,60 @@ export default {
     return babelifiedCode;
   },
 
-  // async babelifyTSFiles(ui5App: Ui5App, folderPath: string): Promise<void> {
-  //   if (Config.builder('babelSources')) {
-  //     try {
-  //       Log.builder(`Babelify files from ${folderPath}`);
-  //       // Create -dbg files
-  //       const patternJs = new RelativePattern(folderPath, `**/*.ts`);
-  //       const babelSourcesExclude = String(Config.builder(`babelSourcesExclude`));
-  //       const jsFiles = await workspace.findFiles(patternJs, babelSourcesExclude);
+  async babelifyTSFiles(ui5App: Ui5App, folderPath: string): Promise<void> {
+    try {
+      Log.builder(`Babelify files from ${folderPath}`);
+      // Create -dbg files
+      const patternJs = new RelativePattern(folderPath, `**/*.ts`);
+      const babelSourcesExclude = String(Config.builder(`babelSourcesExclude`));
+      const jsFiles = await workspace.findFiles(patternJs, babelSourcesExclude);
 
-  //       //require('core-js');
+      //require('core-js');
 
-  //       for (let i = 0; i < jsFiles.length; i++) {
-  //         const babelifiedCode: string = await this.babelifyTSFile(ui5App, jsFiles[i]);
-  //         if (babelifiedCode) {
-  //           const sPath = jsFiles[i].fsPath.replace('.ts', '.js');
+      for (let i = 0; i < jsFiles.length; i++) {
+        const babelifiedCode: string = await this.babelifyTSFile(ui5App, jsFiles[i]);
+        if (babelifiedCode) {
+          const sPathJs = jsFiles[i].fsPath.replace('.ts', '.js');
 
-  //           const uriToJs = Uri.file(sPath);
-  //           await workspace.fs.writeFile(uriToJs, Buffer.from(babelifiedCode));
-  //         }
-  //       }
-  //     } catch (error: any) {
-  //       throw new Error(error);
-  //     }
-  //   }
-  // },
+          const uriToJs = Uri.file(sPathJs);
+          await workspace.fs.writeFile(uriToJs, Buffer.from(babelifiedCode));
 
-  // async babelifyTSFile(ui5App: Ui5App, fsUri: Uri): Promise<string> {
-  //   let babelifiedCode = '';
+          await workspace.fs.delete(jsFiles[i]);
+        }
+      }
+    } catch (error: any) {
+      throw new Error(error);
+    }
+  },
 
-  //   const jsFileRaw = await workspace.fs.readFile(fsUri);
-  //   const jsFileString = jsFileRaw.toString();
-  //   const filename = fsUri.fsPath.replace(ui5App.srcFsPath, '').replace(ui5App.distFsPath, '');
-  //   const babelified: BabelFileResult | null = await transformAsync(jsFileString, {
-  //     filename: filename,
-  //     plugins: [
-  //       [
-  //         transformAsyncToPromises,
-  //         {
-  //           inlineHelpers: true,
-  //         },
-  //       ],
-  //       [transformRemoveConsole],
-  //     ],
-  //     presets: [
-  //       [
-  //         presetEnv,
-  //         {
-  //           targets: {
-  //             browsers: 'last 2 versions, ie 11',
-  //           },
-  //         },
-  //       ],
-  //       [presetTypescript, {}],
-  //       [presetUi5, {}],
-  //     ],
-  //   });
-  //   if (babelified && babelified.code && babelified.code !== jsFileString) {
-  //     babelifiedCode = babelified.code.replace(/\r\n|\r|\n/g, os.EOL);
-  //   }
+  async babelifyTSFile(ui5App: Ui5App, fsUri: Uri): Promise<string> {
+    const tsFileRaw = await workspace.fs.readFile(fsUri);
+    const tsFileString = tsFileRaw.toString();
+    const filename = fsUri.fsPath.replace(ui5App.srcFsPath, '').replace(ui5App.distFsPath, '');
 
-  //   return babelifiedCode;
-  // },
+    const babelifiedCode = await this.babelifyTSString(tsFileString, filename);
+
+    return babelifiedCode;
+  },
+
+  async babelifyTSString(tsFileString: string, filename: string, options?: { sourceMaps?: boolean }): Promise<string> {
+    const { sourceMaps = false } = options ?? {};
+    let babelifiedCode = '';
+
+    const babelified: BabelFileResult | null = await transformAsync(tsFileString, {
+      filename: filename,
+      sourceMaps: sourceMaps ? 'inline' : undefined,
+      presets: [
+        [presetTypescript, {}],
+        [presetUi5, {}],
+      ],
+    });
+    if (babelified && babelified.code && babelified.code !== tsFileString) {
+      babelifiedCode = babelified.code.replace(/\r\n|\r|\n/g, os.EOL);
+    }
+
+    return babelifiedCode;
+  },
 
   /**
    * Create -dbg.js files

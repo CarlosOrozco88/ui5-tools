@@ -54,36 +54,48 @@ export default {
             }
           }
         }
-        let bTranspile = false;
-        if (bBabelSourcesLive) {
-          if (sInnerPath.endsWith('.js') && !sInnerPath.includes('resources/') && !sInnerPath.endsWith('-preload.js')) {
-            try {
-              bTranspile = true;
-              for (let i = 0; i < aBabelExclude.length && bTranspile; i++) {
-                const sExclude = aBabelExclude[i];
-                bTranspile = !minimatch(sInnerPath, sExclude);
-              }
-              if (bTranspile) {
-                const fsPath = Uri.file(path.join(staticPath, req.path));
-                const babelifiedCode = await Builder.babelifyJSFile(ui5App, fsPath);
-                res.type('.js');
-                // Log.server(
-                //   `LiveTranspile: ${path.join(req.baseUrl, req.baseUrl)} transpiled successfully`,
-                //   Level.INFO
-                // );
 
-                res.set('Cache-Control', 'no-store');
-                res.send(babelifiedCode);
-              } else {
-                // Log.server(`LiveTranspile: ${req.path} skipped babelify`, Level.INFO);
+        let bTranspile =
+          sInnerPath.endsWith('.js') && !sInnerPath.includes('resources/') && !sInnerPath.endsWith('-preload.js');
+        for (let i = 0; bTranspile && i < aBabelExclude.length; i++) {
+          const sExclude = aBabelExclude[i];
+          bTranspile = !minimatch(sInnerPath, sExclude);
+        }
+
+        let sFile = '';
+        if (bTranspile) {
+          const fsPathTs = path.join(staticPath, req.path.replace('.js', '.ts'));
+          const fsUriTs = Uri.file(fsPathTs);
+
+          try {
+            const sFileTsRaw = await workspace.fs.readFile(fsUriTs);
+            const sFileTs = sFileTsRaw.toString();
+            sFile = await Builder.babelifyTSString(sFileTs, fsPathTs, { sourceMaps: true });
+          } catch (error: any) {
+            sFile = '';
+          }
+          if (bBabelSourcesLive) {
+            try {
+              const fsPathJs = path.join(staticPath, req.path);
+              if (!sFile) {
+                const fsUriJs = Uri.file(fsPathJs);
+                const sFileJsRaw = await workspace.fs.readFile(fsUriJs);
+                sFile = sFileJsRaw.toString();
               }
+              sFile = await Builder.babelifyJSString(sFile, fsPathJs, { removeConsole: false, sourceMaps: true });
+              res.type('.js');
+              Log.server(`LiveTranspile: ${path.join(req.baseUrl, req.baseUrl)} transpiled successfully`, Level.INFO);
+
+              res.set('Cache-Control', 'no-store');
             } catch (error: any) {
+              sFile = '';
               Log.server(`LiveTranspile: ${error.message}`, Level.WARNING);
-              bTranspile = false;
             }
           }
         }
-        if (!bTranspile) {
+        if (sFile) {
+          res.send(sFile);
+        } else {
           next();
         }
       },
