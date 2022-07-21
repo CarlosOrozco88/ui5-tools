@@ -1,3 +1,0 @@
-# folder
-
-example folder.md
