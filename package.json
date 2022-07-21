@@ -592,7 +592,7 @@
     "openui5-preload": "4.0.0",
     "portfinder": "1.0.28",
     "pretty-data": "0.40.0",
-    "terser": "5.14.1",
+    "terser": "5.14.2",
     "ts-loader": "9.3.0",
     "ui5-nwabap-deployer-core": "1.0.23",
     "utf-8-validate": "5.0.9",
