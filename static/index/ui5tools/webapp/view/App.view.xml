@@ -1,6 +1,6 @@
 <mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns:customData="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1" xmlns="sap.m" xmlns:tnt="sap.tnt" controllerName="ui5tools.controller.App" displayBlock="true" width="100%" height="100%">
 
-  <tnt:ToolPage id="toolPage" class="sapUiSizeCompact">
+  <tnt:ToolPage id="toolPage" class="sapUiSizeCompact ui5tools">
     <tnt:header>
       <tnt:ToolHeader>
         <Button icon="sap-icon://sap-ui5" type="Transparent">
@@ -47,7 +47,7 @@
       </tnt:SideNavigation>
     </tnt:sideContent>
     <tnt:mainContents>
-      <NavContainer id="ui5toolsApp" />
+      <NavContainer id="ui5toolsApp" autoFocus="false" />
     </tnt:mainContents>
   </tnt:ToolPage>
 </mvc:View>

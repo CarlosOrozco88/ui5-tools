@@ -2,10 +2,14 @@
   <Page title="Info">
     <Panel headerText="General" expanded="true" expandable="true" backgroundDesign="Solid">
       <f:SimpleForm>
-        <Label text="Source folder" />
-        <Text text="{ui5tools>/config/srcFolder}" />
+        <Label text="App folder" />
+        <Text text="{ui5tools>/config/appFolder}" />
+        <Label text="App Src folder" />
+        <Text text="{ui5tools>/config/appSrcFolder}" />
         <Label text="Library folder" />
         <Text text="{ui5tools>/config/libraryFolder}" />
+        <Label text="Library Src folder" />
+        <Text text="{ui5tools>/config/librarySrcFolder}" />
         <Label text="Dist folder" />
         <Text text="{ui5tools>/config/distFolder}" />
         <Label text="UI5 Version" />
@@ -25,8 +29,6 @@
 
         <Label text="Server name" />
         <Text text="{ui5tools>/config/server/name}" />
-        <Label text="Serve folder" />
-        <Text text="{ui5tools>/config/server/serveFolder}" />
         <Label text="Resources proxy" />
         <Text text="{ui5tools>/config/server/resourcesProxy}" />
         <Label text="Resources URL" />

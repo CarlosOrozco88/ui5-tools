@@ -1,35 +1,100 @@
 <mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" controllerName="ui5tools.controller.apps" displayBlock="true" width="100%" height="100%">
-    <!-- <Page showHeader="false" enableScrolling="false"> -->
 
-        <!-- <HBox width="100%" height="100%" renderType="Bare"> -->
-            <!-- <HBox width="calc(100% - 30%)" height="100%" renderType="Bare"> -->
-                <Page title="Workspace Apps">
-                    <Panel headerText="Applications: {= ${ui5tools>/ui5Apps/application}.length}" expanded="true" expandable="true" visible="{= ${ui5tools>/ui5Apps/application}.length > 0}">
-                        <HBox items="{path:'ui5tools>/ui5Apps/application',sorter:{path: 'folderName'}}" wrap="Wrap">
-                            <GenericTile class="sapUiTinyMarginBegin sapUiTinyMarginTop" header="{ui5tools>folderName}" subheader="{ui5tools>namespace}" sizeBehavior="Small" press="pressTile"></GenericTile>
+    <Page title="Workspace Apps">
+        <IconTabBar headerMode="Inline">
+            <items>
+                <IconTabFilter icon="sap-icon://grid" text="Grid" key="grid" >
+                    <Panel headerText="Applications: {= ${ui5tools>/ui5Projects/application}.length}" expanded="true" expandable="true" visible="{= ${ui5tools>/ui5Projects/application}.length > 0}">
+                        <HBox items="{ui5tools>/ui5Projects/application}" wrap="Wrap">
+                            <GenericTile class="sapUiTinyMarginEnd sapUiTinyMarginTop" header="{ui5tools>folderName}" subheader="{ui5tools>namespace}" sizeBehavior="Small" press="pressTile">
+                                <tileContent>
+                                    <TileContent>
+                                        <VBox renderType="Bare">
+                                            <Text text="{parts:['ui5tools>fsPathWorking','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathWorking}" class="namespace" />
+                                            <Text text="{parts:['ui5tools>fsPathGenerated','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathGenerated}" class="namespace" />
+                                            <Text text="{parts:['ui5tools>fsPathDist','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathDist}" class="namespace" />
+                                        </VBox>
+                                    </TileContent>
+                                </tileContent>
+                            </GenericTile>
                         </HBox>
                     </Panel>
-                    <Panel headerText="Components: {= ${ui5tools>/ui5Apps/component}.length}" expanded="true" expandable="true" visible="{= ${ui5tools>/ui5Apps/component}.length > 0}">
-                        <HBox items="{path:'ui5tools>/ui5Apps/component',sorter:{path: 'folderName'}}" wrap="Wrap">
-                            <GenericTile class="sapUiTinyMarginBegin sapUiTinyMarginTop" header="{ui5tools>folderName}" subheader="{ui5tools>namespace}" sizeBehavior="Small" press="pressTile"></GenericTile>
+                    <Panel headerText="Components: {= ${ui5tools>/ui5Projects/component}.length}" expanded="true" expandable="true" visible="{= ${ui5tools>/ui5Projects/component}.length > 0}" class="sapUiSmallMarginTop">
+                        <HBox items="{ui5tools>/ui5Projects/component}" wrap="Wrap">
+                            <GenericTile class="sapUiTinyMarginEnd sapUiTinyMarginTop" header="{ui5tools>folderName}" subheader="{ui5tools>namespace}" sizeBehavior="Small" press="pressTile">
+                                <tileContent>
+                                    <TileContent>
+                                        <VBox renderType="Bare">
+                                            <Text text="{parts:['ui5tools>fsPathWorking','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathWorking}" class="namespace" />
+                                            <Text text="{parts:['ui5tools>fsPathGenerated','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathGenerated}" class="namespace" />
+                                            <Text text="{parts:['ui5tools>fsPathDist','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathDist}" class="namespace" />
+                                        </VBox>
+                                    </TileContent>
+                                </tileContent>
+                            </GenericTile>
                         </HBox>
                     </Panel>
-                    <Panel headerText="Cards: {= ${ui5tools>/ui5Apps/card}.length}" expanded="true" expandable="true" visible="{= ${ui5tools>/ui5Apps/card}.length > 0}">
-                        <HBox items="{path:'ui5tools>/ui5Apps/card',sorter:{path: 'folderName'}}" wrap="Wrap">
-                            <GenericTile class="sapUiTinyMarginBegin sapUiTinyMarginTop" header="{ui5tools>folderName}" subheader="{ui5tools>namespace}" sizeBehavior="Small" press="pressTile"></GenericTile>
+                    <Panel headerText="Cards: {= ${ui5tools>/ui5Projects/card}.length}" expanded="true" expandable="true" visible="{= ${ui5tools>/ui5Projects/card}.length > 0}" class="sapUiSmallMarginTop">
+                        <HBox items="{ui5tools>/ui5Projects/card}" wrap="Wrap">
+                            <GenericTile class="sapUiTinyMarginEnd sapUiTinyMarginTop" header="{ui5tools>folderName}" subheader="{ui5tools>namespace}" sizeBehavior="Small" press="pressTile">
+                                <tileContent>
+                                    <TileContent>
+                                        <VBox renderType="Bare">
+                                            <Text text="{parts:['ui5tools>fsPathWorking','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathWorking}" class="namespace" />
+                                            <Text text="{parts:['ui5tools>fsPathGenerated','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathGenerated}" class="namespace" />
+                                            <Text text="{parts:['ui5tools>fsPathDist','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathDist}" class="namespace" />
+                                        </VBox>
+                                    </TileContent>
+                                </tileContent>
+                            </GenericTile>
                         </HBox>
                     </Panel>
-                    <Panel headerText="Libraries: {= ${ui5tools>/ui5Apps/library}.length}" expanded="true" expandable="true" visible="{= ${ui5tools>/ui5Apps/library}.length > 0}">
-                        <HBox items="{path:'ui5tools>/ui5Apps/library',sorter:{path: 'folderName'}}" wrap="Wrap">
-                            <GenericTile class="sapUiTinyMarginBegin sapUiTinyMarginTop" header="{ui5tools>folderName}" subheader="{ui5tools>namespace}" sizeBehavior="Small"></GenericTile>
+                    <Panel headerText="Libraries: {= ${ui5tools>/ui5Projects/library}.length}" expanded="true" expandable="true" visible="{= ${ui5tools>/ui5Projects/library}.length > 0}" class="sapUiSmallMarginTop">
+                        <HBox items="{ui5tools>/ui5Projects/library}" wrap="Wrap">
+                            <GenericTile class="sapUiTinyMarginEnd sapUiTinyMarginTop" header="{ui5tools>folderName}" subheader="{ui5tools>namespace}" sizeBehavior="Small">
+                                <tileContent>
+                                    <TileContent>
+                                        <VBox renderType="Bare">
+                                            <Text text="{parts:['ui5tools>fsPathWorking','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathWorking}" class="namespace" />
+                                            <Text text="{parts:['ui5tools>fsPathGenerated','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathGenerated}" class="namespace" />
+                                            <Text text="{parts:['ui5tools>fsPathDist','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathDist}" class="namespace" />
+                                        </VBox>
+                                    </TileContent>
+                                </tileContent>
+                            </GenericTile>
                         </HBox>
-                    </Panel>
-                </Page>
-
-            <!-- </HBox> -->
-            <!-- <HBox width="30%" height="100%" renderType="Bare">
-                <mvc:XMLView viewName="ui5tools.view.contributors" />
-            </HBox> -->
-        <!-- </HBox> -->
-    <!-- </Page> -->
+                    </Panel> 
+                </IconTabFilter>
+                <IconTabFilter icon="sap-icon://list" text="List" key="table">
+                    <Table items="{path:'ui5tools>/ui5Projects/all',sorter:{path:'type', group: true}}" sticky="ColumnHeaders">
+                        <columns>
+                            <Column>
+                                <Label text="Project" />
+                            </Column>
+                            <Column>
+                                <Label text="Working Folder" />
+                            </Column>
+                            <Column>
+                                <Label text="Served Folder" />
+                            </Column>
+                            <Column>
+                                <Label text="Dist Folder" />
+                            </Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem type="Active" press="pressTile">
+                                <VBox renderType="Bare">
+                                    <Label text="{ui5tools>folderName}" />
+                                    <Label text="{ui5tools>namespace}" class="namespace" />
+                                </VBox>
+                                <Text text="{parts:['ui5tools>fsPathWorking','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathWorking}" />
+                                <Text text="{parts:['ui5tools>fsPathGenerated','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathGenerated}" />
+                                <Text text="{parts:['ui5tools>fsPathDist','ui5tools>fsPathBase'],formatter:'.pathFolder'}" tooltip="{ui5tools>fsPathDist}" />
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </IconTabFilter>
+            </items>
+        </IconTabBar>
+    </Page>
 </mvc:View>
