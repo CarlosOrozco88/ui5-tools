@@ -1,4 +1,4 @@
-import { commands, ExtensionContext, window } from 'vscode';
+import { commands, ExtensionContext } from 'vscode';
 
 // import { ProjectsView } from './ActivityBar/ProjectsView';
 
@@ -10,7 +10,7 @@ import Ui5Provider from './Configurator/Ui5Provider';
 import ReplaceStrings from './Configurator/ReplaceStrings';
 // Builder
 import Builder from './Builder/Builder';
-import LiveBuilder from './Builder/LiveBuilder';
+import Watcher from './Builder/Watcher';
 // Deployer
 import Deployer from './Deployer/Deployer';
 // Menu
@@ -20,15 +20,27 @@ import StatusBar from './StatusBar/StatusBar';
 // Utils
 import Config from './Utils/Config';
 import Log from './Utils/Log';
-import Utils from './Utils/Utils';
+import Extension from './Utils/Extension';
+import Finder from './Project/Finder';
 
 export async function activate(context: ExtensionContext): Promise<void> {
-  Utils.setWorkspaceContext(context);
+  Extension.setWorkspaceContext(context);
 
   // window.registerTreeDataProvider('ui5toolsprojects', ProjectsView);
 
   const { registerCommand } = commands;
   const { subscriptions } = context;
+
+  subscriptions.push(
+    registerCommand('ui5-tools.general.refreshProjects', async () => {
+      const isServerStarted = Server.isStarted();
+      await Server.stop();
+      await Finder.getAllUI5Projects(true);
+      if (isServerStarted) {
+        await Server.start({ restarting: true });
+      }
+    })
+  );
 
   // Configure commands
   subscriptions.push(registerCommand('ui5-tools.server.startDevelopment', () => Server.startDevelopment()));
@@ -45,6 +57,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   subscriptions.push(registerCommand('ui5-tools.builder.build', () => Builder.askProjectToBuild()));
   subscriptions.push(registerCommand('ui5-tools.builder.buildAll', () => Builder.buildAllProjects()));
+  subscriptions.push(registerCommand('ui5-tools.builder.generate', () => Builder.askProjectToGenerate()));
 
   subscriptions.push(registerCommand('ui5-tools.deployer.deploy', () => Deployer.askProjectToDeploy()));
   subscriptions.push(registerCommand('ui5-tools.deployer.deployAll', () => Deployer.deployAllProjects()));
@@ -57,13 +70,14 @@ export async function activate(context: ExtensionContext): Promise<void> {
   );
 
   subscriptions.push(registerCommand('ui5-tools.menu.builder.build', (oResource) => Menu.build(oResource)));
+  subscriptions.push(registerCommand('ui5-tools.menu.builder.generate', (oResource) => Menu.generate(oResource)));
   subscriptions.push(registerCommand('ui5-tools.menu.deployer.deploy', (oResource) => Menu.deploy(oResource)));
 
-  subscriptions.push(registerCommand('ui5-tools.showOutput', () => Log.showOutput()));
+  subscriptions.push(registerCommand('ui5-tools.general.showOutput', () => Log.showOutput()));
 
   await StatusBar.init(subscriptions);
 
-  LiveBuilder.attachWatch();
+  Watcher.start();
 
   if (Config.server('startOnLaunch')) {
     Log.general(`Start on launch`);

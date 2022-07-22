@@ -5,16 +5,17 @@ import https from 'https';
 import path from 'path';
 import { WebSocketServer, WebSocket } from 'ws';
 
-import Utils from '../Utils/Utils';
+import Utils from '../Utils/Extension';
 import Config from '../Utils/Config';
 import Log from '../Utils/Log';
 import { ServerOptions } from '../Types/Types';
 import { NextFunction, Request, Response } from 'express';
+import Server from './Server';
 
 const DELAY_REFRESH = 500;
 let liveServer: http.Server | https.Server | undefined;
 let liveServerWS: WebSocketServer | undefined;
-let timeout: ReturnType<typeof setTimeout>;
+let awaiterRefresh: NodeJS.Timeout;
 
 export default {
   liveServerWS: undefined,
@@ -121,11 +122,6 @@ export default {
   },
 
   middleware({ serverApp, portLiveReload }: ServerOptions): void {
-    // let include = [];
-
-    // ui5Apps.forEach((ui5App) => {
-    //   include.push(new RegExp(`^${ui5App.appServerPath}(.*)`, 'g'));
-    // });
     // Include only workspace projects
     const aIgnore: FileMatcher[] = [
       /\.js(\?.*)?$/,
@@ -142,7 +138,7 @@ export default {
       /(.*)\/resources\/(.*)/,
     ];
 
-    const odataMountPath = String(Config.server('odataMountPath'));
+    const odataMountPath = Config.server('odataMountPath') as string;
     const mpaths = odataMountPath.replace(/\\s/g, '').split(',');
     mpaths.forEach((path) => {
       const re = new RegExp(`^${path}`, 'g');
@@ -157,7 +153,7 @@ export default {
   },
 
   refresh(sFilePath: string): void {
-    if (liveServerWS) {
+    if (liveServerWS && Server.isStarted()) {
       const data = JSON.stringify({
         command: 'reload',
         path: sFilePath,
@@ -172,8 +168,8 @@ export default {
   },
 
   sendAllClients(data: string): void {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
+    clearTimeout(awaiterRefresh);
+    awaiterRefresh = setTimeout(() => {
       liveServerWS?.clients.forEach((ws) => {
         if (ws.readyState === WebSocket.OPEN) {
           Log.server('Refreshing browser...');

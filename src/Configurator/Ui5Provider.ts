@@ -16,11 +16,13 @@ import ejs from 'ejs';
 import fs from 'fs';
 
 import Config from '../Utils/Config';
-import Utils from '../Utils/Utils';
+import Utils from '../Utils/Extension';
 import Log from '../Utils/Log';
 import Server from '../Server/Server';
 import { Level, SandboxFile, VersionsItem, VersionsTree, VersionTree } from '../Types/Types';
 import path from 'path';
+import Fetch from '../Utils/Fetch';
+import Ui5 from '../Utils/Ui5';
 
 let panelLicence: WebviewPanel | undefined;
 
@@ -61,8 +63,8 @@ export default {
     const sGatewayUri = String(Config.server('resourcesUri'));
     try {
       await this.configureGWVersion(sGatewayUri);
-    } catch (oError) {
-      Log.configurator(oError, Level.ERROR);
+    } catch (oError: any) {
+      Log.configurator(oError.message, Level.ERROR);
       await this.setUi5Version();
     }
   },
@@ -197,8 +199,8 @@ export default {
 
         Log.configurator(`Set ui5Version value ${ui5Version}`);
         resolve(ui5Version);
-      } catch (sError) {
-        Log.configurator(sError, Level.ERROR);
+      } catch (sError: any) {
+        Log.configurator(sError.message, Level.ERROR);
         reject(sError);
       }
       resolve(ui5Version);
@@ -354,14 +356,14 @@ export default {
 
   async getVersionOverview(framework = 'sapui5') {
     const url = `https://${framework}.hana.ondemand.com/versionoverview.json`;
-    const fileBuffer = await Utils.fetchFile(url);
-    return JSON.parse(fileBuffer.toString());
+    const fileString = await Fetch.file(url);
+    return JSON.parse(fileString);
   },
 
   async getNeoApp(framework = 'sapui5') {
     const url = `https://${framework}.hana.ondemand.com/neo-app.json`;
-    const fileBuffer = await Utils.fetchFile(url);
-    return JSON.parse(fileBuffer.toString());
+    const fileString = await Fetch.file(url);
+    return JSON.parse(fileString);
   },
 
   async configureGWVersion(sGatewayUri: string) {
@@ -374,8 +376,8 @@ export default {
 
   async getGatewayVersion(sGatewayUri: string): Promise<Record<string, any>> {
     const url = `${sGatewayUri}/sap/public/bc/ui5_ui5/1/resources/sap-ui-version.json`;
-    const fileBuffer = await Utils.fetchFile(url);
-    return JSON.parse(fileBuffer.toString());
+    const fileString = await Fetch.file(url);
+    return JSON.parse(fileString);
   },
 
   async quickPickUi5RuntimeVersion() {
@@ -390,7 +392,9 @@ export default {
         await Config.general().update('ui5Version', version.version, ConfigurationTarget.Workspace);
         Log.configurator(`Set ui5Version value ${version.version}`);
 
-        await this.downloadRuntime(version);
+        if (!version.installed) {
+          await this.downloadRuntime(version);
+        }
         resolve(version);
       } catch (error) {
         reject(error);
@@ -470,8 +474,7 @@ export default {
   async getRuntimeFile(): Promise<HTMLElement> {
     const url = this.getRuntimeUrl();
 
-    const bufferUrl = await Utils.fetchFile(url);
-    const stringUrl = bufferUrl.toString();
+    const stringUrl = await Fetch.file(url);
 
     return parse(stringUrl);
   },
@@ -492,7 +495,7 @@ export default {
       if (firstCol?.[0]?.innerHTML === 'Runtime') {
         const ui5Version = firstCol?.[1]?.innerHTML;
 
-        const { major, minor } = Utils.parseVersion(ui5Version);
+        const { major, minor } = Ui5.parseVersion(ui5Version);
         let parentVersion = '';
         if (major && minor) {
           parentVersion = `${major}.${minor}`;
@@ -544,7 +547,7 @@ export default {
           await this.acceptLicence();
 
           progress.report({ increment: 10, message: 'Downloading...' });
-          const zipBuffer = await Utils.fetchFile(version.url, {
+          const zipBuffer = await Fetch.buffer(version.url, {
             headers: {
               Cookie: 'eula_3_1_agreed=tools.hana.ondemand.com/developer-license-3_1.txt',
             },
@@ -605,7 +608,7 @@ export default {
         panelLicence?.dispose();
       });
 
-      panelLicence.onDidDispose((event) => {
+      panelLicence.onDidDispose(() => {
         panelLicence = undefined;
         if (!bClosed) {
           const sMessage = Log.configurator('SAPUI5 EULA NOT Accepted', Level.ERROR);
@@ -624,7 +627,7 @@ export default {
     const fsPathRuntimeBase = Utils.getRuntimeFsPathBase();
     const uriFsPathRuntimeBase = Uri.file(fsPathRuntimeBase);
     const aFoldersFiles = await workspace.fs.readDirectory(uriFsPathRuntimeBase);
-    const aFolders = aFoldersFiles.filter(([name, fileType]) => {
+    const aFolders = aFoldersFiles.filter(({ 1: fileType }) => {
       return fileType === FileType.Directory;
     });
     const aOptions = aFolders.map(([name]) => {
@@ -708,8 +711,7 @@ export default {
           const minorV = majorV.patches[j];
 
           const urlSandbox = `https://sapui5.hana.ondemand.com/${minorV.label}/test-resources/sap/ushell/bootstrap/sandbox.js`;
-          const fileSandbox = await Utils.fetchFile(urlSandbox);
-          const fileString = fileSandbox.toString();
+          const fileString = await Fetch.file(urlSandbox);
           const fileMinified: MinifyOutput = await minify(fileString, {
             compress: false,
           });

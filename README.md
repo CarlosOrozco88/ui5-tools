@@ -5,9 +5,13 @@
 
 VSCode extension for ui5 developers. This extension is not intended to replace ui5 cli, its main objective is to provide a fast and global workspace configuration to work with multi root workspaces and projects deployed to on premise systems (Gateway).
 
-You can find examples of vscode workspace configuration in [workspaceExample](workspaceExample) folder.
+## Examples
+
+> You can find examples of vscode workspace configuration in [this repository](https://github.com/CarlosOrozco88/ui5-tools-examples).
 
 ## Features
+
+---
 
 ### ui5-tools
 
@@ -21,14 +25,13 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - Configurable **proxy** to one o multiple **odata service** (Gateway, Other, None). Command `alt+c alt+o`
 - Supports `.env` file for odata service authentication. `UI5TOOLS_ODATA_USER - UI5TOOLS_ODATA_PASSWORD`, `UI5TOOLS_ODATA_USER_2 - UI5TOOLS_ODATA_PASSWORD_2`, etc.
 - Configurable **proxy** to **resources** (Gateway, CDN SAPUI5, CDN OpenUI5, Local Runtime, None). Command `alt+c alt+u`
-- Resources proxy has **built in server cache**, cleaned at every server start.
 - Configurable UI5 version (when using gateway proxy, extension will detect sapui5 version automatically)
 - **Live reload browser**, css and images hot reload
 - **Typescript** support (ESM)
 - **Built in localhost home** page server, with apps launchpad, readme.md, docs (md files), links, server info...
 - **Built in launchpad** for resources: Gateway, CDN SAPUI5 and Runtime. Configurable with file `fioriSandboxConfig.json`
 - Server uses **folder hierarchy**. For product apps and Z apps, is possible to emulate gateway bsp paths
-- Start server in **development mode** `alt+s alt+s` or **production mode** `alt+s alt+p` (launches `srcFolder` or `distFolder` folder of each project)
+- Start server in **development mode** `alt+s alt+s` or **production mode** `alt+s alt+p` (launches `appFolder/libraryFolder` or `distFolder` folder of each project)
 - Multiple comands: start `alt+s alt+s`, restart `alt+s alt+r`... (check commands secction)
 
 #### Builder
@@ -36,10 +39,10 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - **Component-preload.js**, checking configured ui5 version for correct build. Build your project by doing right click in project folder or `alt+b alt+b` and select project
 - **Dbg** files creation
 - **Typescript** support (ESM)
-- **Build less** files (looks for styles.css, PROJECTNAME.less or library.source.less)
+- **Build less** files (looks for `styles.css`, `PROJECTFOLDERNAME.less` or library.source.less)
 - **Uglify** files
 - **Replace strings**
-- Build one app `alt+b alt+b` or all apps `alt+b alt+a` in one command
+- Build one project `alt+b alt+b` or all apps `alt+b alt+a` in one command
 - Building preload (Component-preload and library-preload) process uses [openui5-preload](https://github.com/r-murphy/openui5-preload)
 - Building theme (library.source.less) process uses [less-openui5](https://github.com/SAP/less-openui5)
 - Building styles (styles.less and PROJECTFOLDER.less) process uses [less](https://github.com/less/less.js)
@@ -60,6 +63,7 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - **Create custom replacements** like `<% CUSTOMKEY %>` in workspace environment (configurable with command `alt+c alt+r`)
 - **Computed values** `COMPUTED_DATE_TIMESTAMP`, `COMPUTED_DATE_ISO`, `COMPUTED_DATE_DMY`, `COMPUTED_DATE_YMD`, `COMPUTED_DATE_MYD` and the special value `COMPUTED_DATE_FORMATTED`
 - **Suports custom computed date format**, replacements using dayjs during the build process:
+
 ```json
 "ui5-tools.builder.replaceKeysValues": [
   {
@@ -72,10 +76,15 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 
 ## Settings
 
+---
+
 #### General Settings
 
-- `ui5-tools.srcFolder`: Source folder in your app | default: `webapp,src`
-- `ui5-tools.distFolder`: Source folder in your app | default: `dist`
+- `ui5-tools.appSrcFolder`: Source folder for applications (ts) | default: `src`
+- `ui5-tools.appFolder`: Transpiled folder for applications (js) | default: `webapp`
+- `ui5-tools.librarySrcFolder`: Source folder for libraries (ts) | default: `src`
+- `ui5-tools.libraryFolder`: Transpiled folder for libraries (js) | default: `src-gen`
+- `ui5-tools.distFolder`: Destination folder in your project (final build) | default: `dist`
 - `ui5-tools.ui5Version`: UI5 library version for CDN proxy in server and build correct preload files: `1.71.42`
 
 #### Server Settings
@@ -111,31 +120,8 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 - `ui5-tools.builder.buildLess`: Auto build less files into css when saving changes | default: `true`
 - `ui5-tools.builder.replaceStrings`: Replace strings when building | default: `true`
 - `ui5-tools.builder.replaceExtensions`: File extensions to look for keys to replace | default: `xml,js,json,properties`
-- `ui5-tools.builder.replaceKeysValues`: Key/Value pair list. Replace <% key %> with 'value' while building the app | default: 
-`
-[
-  {
-    "key": "TIMESTAMP",
-    "value": "COMPUTED_DATE_TIMESTAMP"
-  },
-  {
-    "key": "ISODATE",
-    "value": "COMPUTED_DATE_ISO"
-  },
-  {
-    "key": "DMY",
-    "value": "COMPUTED_DATE_DMY"
-  },
-  {
-    "key": "YMD",
-    "value": "COMPUTED_DATE_YMD"
-  },
-  {
-    "key": "MYD",
-    "value": "COMPUTED_DATE_MYD"
-  }
-]
-`
+- `ui5-tools.builder.replaceKeysValues`: Key/Value pair list. Replace <% key %> with 'value' while building the project | default:
+  `[ { "key": "TIMESTAMP", "value": "COMPUTED_DATE_TIMESTAMP" }, { "key": "ISODATE", "value": "COMPUTED_DATE_ISO" }, { "key": "DMY", "value": "COMPUTED_DATE_DMY" }, { "key": "YMD", "value": "COMPUTED_DATE_YMD" }, { "key": "MYD", "value": "COMPUTED_DATE_MYD" } ]`
 
 #### Deployer Settings
 
@@ -145,9 +131,16 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 
 ## Commands
 
+---
+
+#### General Commands
+
+- `ui5-tools.general.refreshProjects`: Search for UI5 projects | Shortcut: `alt+g alt+r`
+- `ui5-tools.general.showOutput`: Open the extension output | Shortcut: `alt+g alt+o`
+
 #### Server Commands
 
-- `ui5-tools.server.startDevelopment`: Start server in development mode (srcFolder) | Shortcut: `alt+s alt+s`
+- `ui5-tools.server.startDevelopment`: Start server in development mode (appFolder/libraryFolder) | Shortcut: `alt+s alt+s`
 - `ui5-tools.server.startProduction`: Start server in production mode (distFolder) | Shortcut: `alt+s alt+p`
 - `ui5-tools.server.startBuildProduction`: Build workspace and start server in production mode | Shortcut: `alt+s alt+b`
 - `ui5-tools.server.stop`: Stop server | Shortcut: `alt+s alt+x`
@@ -156,12 +149,13 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 
 #### Builder Commands
 
-- `ui5-tools.builder.build`: Build ui5 app | Shortcut: `alt+b alt+b`
+- `ui5-tools.builder.build`: Build ui5 project | Shortcut: `alt+b alt+b`
 - `ui5-tools.builder.buildAll`: Build workspace | Shortcut: `alt+b alt+a`
+- `ui5-tools.builder.generate`: Generate ui5 project
 
 #### Deployer Commands
 
-- `ui5-tools.menu.deployer.deploy`: Build and deploy app | Shortcut: `alt+d alt+d`
+- `ui5-tools.menu.deployer.deploy`: Build and deploy project | Shortcut: `alt+d alt+d`
 
 #### Configurator Commands
 
@@ -172,10 +166,15 @@ You can find examples of vscode workspace configuration in [workspaceExample](wo
 
 ## Menus
 
+---
+
 - `ui5-tools.menu.builder.build`: Build option in project folder menu (right click)
+- `ui5-tools.menu.builder.generate`: Generate the project from `appSrcFolder/librarySrcFolder` to `appFolder/libraryFolder` (right click)
 - `ui5-tools.menu.deployer.deploy`: Build and deploy option in project folder menu (right click)
 
 ## Credits
+
+---
 
 - Preload javascript builder: [openui5-preload](https://github.com/r-murphy/openui5-preload) - [Ryan Murphy](https://github.com/r-murphy)
 - Deployer: [ui5-nwabap-deployer-core](https://github.com/pfefferf/ui5-nwabap-deployer/blob/master/packages/ui5-nwabap-deployer-core) - [Florian Pfeffer](https://github.com/pfefferf)

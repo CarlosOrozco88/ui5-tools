@@ -2,7 +2,7 @@
   "name": "ui5-tools",
   "displayName": "UI5 Tools",
   "description": "Local development tools for UI5",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
@@ -45,22 +45,31 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-
     "menus": {
       "explorer/context": [
         {
           "command": "ui5-tools.menu.builder.build",
-          "group": "ui5-tools",
+          "group": "ui5-tools-build",
           "when": "explorerResourceIsFolder && resourcePath in ui5-tools:resourcesPath"
         },
         {
+          "command": "ui5-tools.menu.builder.generate",
+          "group": "ui5-tools-build",
+          "when": "explorerResourceIsFolder && resourcePath in ui5-tools:generatorPath"
+        },
+        {
           "command": "ui5-tools.menu.deployer.deploy",
-          "group": "ui5-tools",
+          "group": "ui5-tools-deploy",
           "when": "explorerResourceIsFolder && resourcePath in ui5-tools:resourcesPath"
         }
       ]
     },
     "keybindings": [
+      {
+        "command": "ui5-tools.general.refreshProjects",
+        "key": "alt+g alt+r",
+        "mac": "alt+g alt+r"
+      },
       {
         "command": "ui5-tools.server.startDevelopment",
         "key": "alt+s alt+s",
@@ -117,6 +126,11 @@
         "mac": "alt+b alt+b"
       },
       {
+        "command": "ui5-tools.builder.generate",
+        "key": "alt+b alt+g",
+        "mac": "alt+b alt+g"
+      },
+      {
         "command": "ui5-tools.builder.buildAll",
         "key": "alt+b alt+a",
         "mac": "alt+b alt+a"
@@ -132,12 +146,16 @@
         "mac": "alt+d alt+a"
       },
       {
-        "command": "ui5-tools.showOutput",
-        "key": "alt+v alt+o",
-        "mac": "alt+v alt+o"
+        "command": "ui5-tools.general.showOutput",
+        "key": "alt+g alt+o",
+        "mac": "alt+g alt+o"
       }
     ],
     "commands": [
+      {
+        "command": "ui5-tools.general.refreshProjects",
+        "title": "UI5 Tools: General > Refresh UI5 Projects"
+      },
       {
         "command": "ui5-tools.server.startDevelopment",
         "title": "UI5 Tools: Server > Start Development"
@@ -187,34 +205,52 @@
         "title": "UI5 Tools: Builder > Build all UI5 projects"
       },
       {
-        "command": "ui5-tools.menu.builder.build",
-        "title": "UI5 Tools: Build UI5 project"
+        "command": "ui5-tools.builder.generate",
+        "title": "UI5 Tools: Builder > Generate UI5 project"
       },
       {
         "command": "ui5-tools.deployer.deployAll",
         "title": "UI5 Tools: Deployer > Deploy all UI5 projects"
       },
       {
+        "command": "ui5-tools.menu.builder.build",
+        "title": "UI5 Tools: Build UI5 project"
+      },
+      {
+        "command": "ui5-tools.menu.builder.generate",
+        "title": "UI5 Tools: Generate UI5 project"
+      },
+      {
         "command": "ui5-tools.menu.deployer.deploy",
         "title": "UI5 Tools: Deploy UI5 project"
       },
       {
-        "command": "ui5-tools.showOutput",
+        "command": "ui5-tools.general.showOutput",
         "title": "UI5 Tools: Show Output"
       }
     ],
     "configuration": {
       "title": "UI5 Tools",
       "properties": {
-        "ui5-tools.srcFolder": {
+        "ui5-tools.appFolder": {
           "type": "string",
           "default": "webapp",
-          "description": "Source folder in your app"
+          "description": "App folder"
+        },
+        "ui5-tools.appSrcFolder": {
+          "type": "string",
+          "default": "src",
+          "description": "Source folder in your app (src)"
         },
         "ui5-tools.libraryFolder": {
           "type": "string",
+          "default": "src-gen",
+          "description": "Source folder in your library (src)"
+        },
+        "ui5-tools.librarySrcFolder": {
+          "type": "string",
           "default": "src",
-          "description": "Source folder in your library"
+          "description": "Source folder in your library (src)"
         },
         "ui5-tools.distFolder": {
           "type": "string",
@@ -223,22 +259,13 @@
         },
         "ui5-tools.ui5Version": {
           "type": "string",
-          "default": "1.71.48",
+          "default": "1.71.46",
           "description": "UI5 library version for CDN proxy in server and build correct preload files"
         },
         "ui5-tools.server.name": {
           "type": "string",
           "default": "UI5 Server",
           "description": "Server name"
-        },
-        "ui5-tools.server.serveFolder": {
-          "type": "string",
-          "enum": [
-            "Source Folder",
-            "Dist Folder"
-          ],
-          "default": "Source Folder",
-          "description": "Folder to serve"
         },
         "ui5-tools.server.port": {
           "type": "number",
@@ -327,7 +354,7 @@
             "Download SAPUI5 Runtime",
             "Do not proxy resources"
           ],
-          "default": "Runtime",
+          "default": "CDN OpenUI5",
           "description": "Proxy all odata calls to a gateway, cdn or local folder (proxy all url begining with /resources)"
         },
         "ui5-tools.server.proxyDestinations": {
@@ -524,31 +551,30 @@
   },
   "devDependencies": {
     "@types/adm-zip": "0.5.0",
-    "@types/apicache": "1.6.1",
     "@types/babel__core": "7.1.19",
     "@types/babel__preset-env": "7.9.2",
     "@types/connect-livereload": "0.6.0",
-    "@types/cookie-parser": "1.4.3",
     "@types/ejs": "3.1.1",
     "@types/express": "4.17.13",
     "@types/glob": "7.2.0",
     "@types/less": "3.0.3",
     "@types/marked": "4.0.3",
     "@types/mocha": "9.1.1",
-    "@types/node": "14.18.5",
+    "@types/node": "16.11.7",
+    "@types/node-fetch": "2.6.2",
     "@types/on-headers": "1.0.0",
     "@types/pretty-data": "0.40.0",
     "@types/vscode": "1.68.0",
     "@types/ws": "8.5.3",
-    "@typescript-eslint/eslint-plugin": "5.29.0",
-    "@typescript-eslint/parser": "5.29.0",
+    "@typescript-eslint/eslint-plugin": "5.30.7",
+    "@typescript-eslint/parser": "5.30.7",
     "babel-loader": "8.2.5",
     "clean-webpack-plugin": "4.0.0",
-    "eslint": "8.18.0",
+    "eslint": "8.20.0",
     "eslint-config-prettier": "8.5.0",
-    "eslint-plugin-prettier": "4.0.0",
+    "eslint-plugin-prettier": "4.2.1",
     "glob": "8.0.3",
-    "html-loader": "3.1.2",
+    "html-loader": "4.1.0",
     "mocha": "10.0.0",
     "node-loader": "2.0.0",
     "prettier": "2.7.1",
@@ -559,20 +585,18 @@
     "webpack-cli": "4.10.0"
   },
   "dependencies": {
-    "@babel/core": "7.18.5",
-    "@babel/plugin-transform-modules-commonjs": "7.18.2",
-    "@babel/preset-env": "7.18.2",
-    "@babel/preset-typescript": "^7.17.12",
+    "@babel/core": "7.18.9",
+    "@babel/plugin-transform-modules-commonjs": "7.18.6",
+    "@babel/preset-env": "7.18.9",
+    "@babel/preset-typescript": "7.18.6",
     "adm-zip": "0.5.9",
-    "apicache": "1.6.3",
     "babel-plugin-transform-async-to-promises": "0.8.18",
     "babel-plugin-transform-remove-console": "6.9.4",
-    "babel-preset-transform-ui5": "^7.0.5",
+    "babel-preset-transform-ui5": "7.0.5",
     "bufferutil": "4.0.6",
     "chokidar": "3.5.3",
     "connect-livereload": "0.6.1",
-    "cookie-parser": "1.4.6",
-    "core-js": "3.23.2",
+    "core-js": "3.23.5",
     "dayjs": "1.11.3",
     "deepmerge": "4.2.2",
     "dotenv": "16.0.1",
@@ -584,20 +608,21 @@
     "less": "4.1.3",
     "less-openui5": "0.11.2",
     "livereload": "0.9.3",
-    "marked": "4.0.17",
+    "marked": "4.0.18",
     "minimatch": "5.1.0",
+    "node-fetch": "2.6.7",
     "node-html-parser": "5.3.3",
     "on-headers": "1.0.2",
     "open": "8.4.0",
     "openui5-preload": "4.0.0",
     "portfinder": "1.0.28",
     "pretty-data": "0.40.0",
-    "terser": "5.14.1",
-    "ts-loader": "9.3.0",
+    "terser": "5.14.2",
+    "ts-loader": "9.3.1",
     "ui5-nwabap-deployer-core": "1.0.23",
     "utf-8-validate": "5.0.9",
     "wasm-loader": "1.3.0",
-    "ws": "8.8.0",
-    "xmldoc": "1.1.3"
+    "ws": "8.8.1",
+    "xmldoc": "1.2.0"
   }
 }

@@ -1,12 +1,14 @@
 import { workspace, RelativePattern, Uri } from 'vscode';
-import express, { NextFunction, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import path from 'path';
 import { marked } from 'marked';
 
-import Utils from '../../Utils/Utils';
 import Config from '../../Utils/Config';
 import Log from '../../Utils/Log';
 import { ServerOptions, Ui5ToolsData } from '../../Types/Types';
+import Finder from '../../Project/Finder';
+import Ui5 from '../../Utils/Ui5';
+import Server from '../Server';
 
 export default {
   // SERVER INDEX
@@ -15,10 +17,7 @@ export default {
     Log.server('Mounting ui5-tools root page');
 
     serverApp.get(`/`, (req, res, next) => {
-      const ui5Apps = Utils.ui5Apps;
-      const existBasePathInApp = ui5Apps.find((ui5App) => {
-        return ui5App.appServerPath === '/';
-      });
+      const existBasePathInApp = Finder.ui5Projects.get('/');
       if (!existBasePathInApp) {
         res.redirect(`/${ui5ToolsIndex}/`);
       } else {
@@ -27,11 +26,12 @@ export default {
     });
 
     const indexPath = path.join(ui5ToolsPath, 'static', 'index', 'ui5tools', 'webapp');
-    const indexHTML = (req: Request, res: Response, next: NextFunction) => {
-      const ui5toolsData = this.getUi5ToolsFile(oConfigParams);
+    const indexHTML = async (req: Request, res: Response) => {
+      const oConfigParams = Server.getServerOptions() as ServerOptions;
+      const ui5toolsData = await this.getUi5ToolsFile(oConfigParams);
       res.render(path.join(indexPath, 'index'), {
         theme: ui5toolsData.theme,
-        edge: ui5toolsData.theme === 'sap_fiori_3',
+        edge: ui5toolsData.theme === 'sap_fiori_3' || ui5toolsData.theme === 'sap_horizon',
       });
     };
     // render index with correct theme
@@ -39,8 +39,9 @@ export default {
     serverApp.get(`/${ui5ToolsIndex}/index.html`, indexHTML);
 
     // render view with correct list or tree
-    serverApp.get(`/${ui5ToolsIndex}/view/docs.view.xml`, (req, res, next) => {
-      const ui5toolsData = this.getUi5ToolsFile(oConfigParams);
+    serverApp.get(`/${ui5ToolsIndex}/view/docs.view.xml`, async (req, res) => {
+      const oConfigParams = Server.getServerOptions() as ServerOptions;
+      const ui5toolsData = await this.getUi5ToolsFile(oConfigParams);
       res.setHeader('content-type', 'text/xml');
       res.render(path.join(indexPath, 'view', 'docs'), {
         showTree: ui5toolsData.showTree,
@@ -57,7 +58,8 @@ export default {
 
     // Serve app data
     serverApp.get(`/${ui5ToolsIndex}/ui5tools.json`, async (req, res) => {
-      const ui5toolsData = this.getUi5ToolsFile(oConfigParams);
+      const oConfigParams = Server.getServerOptions() as ServerOptions;
+      const ui5toolsData = await this.getUi5ToolsFile(oConfigParams);
       ui5toolsData.readme = marked((await this.readFile(path.join(baseDir, 'README.md'))) || '');
       ui5toolsData.about = marked((await this.readFile(path.join(ui5ToolsPath, 'README.md'))) || '');
       ui5toolsData.changelog = marked((await this.readFile(path.join(ui5ToolsPath, 'CHANGELOG.md'))) || '');
@@ -75,16 +77,16 @@ export default {
           url: 'https://github.com/jeremies',
         },
       ];
-
-      res.send(JSON.stringify(ui5toolsData, null, 2));
+      const sUi5ToolsData = JSON.stringify(ui5toolsData, null, 2);
+      res.send(sUi5ToolsData);
     });
     return;
   },
 
-  getUi5ToolsFile({ isLaunchpadMounted }: ServerOptions) {
-    const ui5Apps = Utils.ui5Apps;
+  async getUi5ToolsFile({ isLaunchpadMounted }: ServerOptions) {
+    const ui5Projects = await Finder.getAllUI5ProjectsArray();
     const ui5toolsData: Ui5ToolsData = {
-      ...Utils.getOptionsVersion(),
+      ...Ui5.getOptionsVersion(),
       readme: '',
       about: '',
       changelog: '',
@@ -92,11 +94,12 @@ export default {
       links: [],
       contributors: [],
       docs: { aTree: [], oHashes: {} },
-      ui5Apps: {
-        application: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'application'),
-        component: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'component'),
-        library: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'library'),
-        card: ui5Apps.filter((app) => app.manifest['sap.app'].type === 'card'),
+      ui5Projects: {
+        all: ui5Projects,
+        application: ui5Projects.filter(({ type }) => type === 'application'),
+        component: ui5Projects.filter(({ type }) => type === 'component'),
+        library: ui5Projects.filter(({ type }) => type === 'library'),
+        card: ui5Projects.filter(({ type }) => type === 'card'),
       },
       //@ts-ignore
       config: Config.general(),

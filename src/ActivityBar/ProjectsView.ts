@@ -1,23 +1,24 @@
 // import { TreeDataProvider, TreeItem, TreeItemCollapsibleState, EventEmitter, Event } from 'vscode';
-// import { AppOptions, Ui5App, Ui5Apps } from '../Types/Types';
+// import { AppOptions, Ui5Project, Ui5Projects } from '../Types/Types';
 
-// import Utils from '../Utils/Utils';
+// import Extension from '../Utils/Extension';
+// import Finder from '../Apps/Finder';
 
-// export class ProjectsViewClass implements TreeDataProvider<Ui5App | AppOptions> {
-//   private _onDidChangeTreeData: EventEmitter<Ui5App | void | AppOptions> = new EventEmitter<
-//     Ui5App | void | AppOptions
+// export class ProjectsViewClass implements TreeDataProvider<Ui5Project | AppOptions> {
+//   private _onDidChangeTreeData: EventEmitter<Ui5Project | void | AppOptions> = new EventEmitter<
+//     Ui5Project | void | AppOptions
 //   >();
-//   readonly onDidChangeTreeData: Event<Ui5App | void | AppOptions> = this._onDidChangeTreeData.event;
+//   readonly onDidChangeTreeData: Event<Ui5Project | void | AppOptions> = this._onDidChangeTreeData.event;
 
 //   refresh(): void {
 //     this._onDidChangeTreeData.fire();
 //   }
 
-//   getTreeItem(item: Ui5App | AppOptions): TreeItem {
-//     if ((item as Ui5App).folderName !== undefined) {
-//       const ui5App = item as Ui5App;
+//   getTreeItem(item: Ui5Project | AppOptions): TreeItem {
+//     if ((item as Ui5Project).folderName !== undefined) {
+//       const ui5Project = item as Ui5Project;
 //       return {
-//         label: ui5App.namespace,
+//         label: ui5Project.namespace,
 //         collapsibleState: TreeItemCollapsibleState.Collapsed,
 //       };
 //     } else {
@@ -28,14 +29,14 @@
 //     }
 //   }
 
-//   async getChildren(element?: Ui5App): Promise<Ui5Apps | Array<AppOptions>> {
+//   async getChildren(element?: Ui5Project): Promise<Ui5Projects | Array<AppOptions>> {
 //     if (element) {
 //       return Promise.resolve([
-//         { ui5App: element, title: 'Build' },
-//         { ui5App: element, title: 'Deploy' },
+//         { ui5Project: element, title: 'Build' },
+//         { ui5Project: element, title: 'Deploy' },
 //       ]);
 //     } else {
-//       return Utils.getAllUI5Apps();
+//       return Finder.getAllUI5Projects();
 //     }
 //   }
 // }

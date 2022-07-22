@@ -1,19 +1,16 @@
 import { window } from 'vscode';
 
 import express from 'express';
-// import cookieParser from 'cookie-parser';
-// @ts-ignore
-import expressTimeout from 'express-timeout-handler';
 
 import open from 'open';
 import http from 'http';
 import https from 'https';
 import portfinder from 'portfinder';
 
-import Apps from './Apps';
+import Projects from './Projects';
 import LiveServer from './LiveServer';
 import StatusBar from '../StatusBar/StatusBar';
-import Utils from '../Utils/Utils';
+import Utils from '../Utils/Extension';
 import Log from '../Utils/Log';
 import Config from '../Utils/Config';
 import OdataProxy from './Proxy/Odata';
@@ -23,12 +20,14 @@ import IndexLaunchpad from './Index/Launchpad';
 import ejs from 'ejs';
 import { createHttpTerminator } from 'http-terminator';
 import { ServerParameter, ServerOptions, ServerMode, ServerStatus, Protocols, Level } from '../Types/Types';
+import { timeoutMiddleware } from './Middlewares/Timeout';
+import Finder from '../Project/Finder';
 
 let serverApp: express.Express;
 let server: https.Server | http.Server;
 let status: ServerStatus = ServerStatus.STOPPED;
 let serverMode: ServerMode = ServerMode.DEV;
-let oConfigParams: ServerOptions;
+let oConfigParams: ServerOptions | undefined;
 
 export default {
   async startDevelopment(oParameters?: ServerParameter): Promise<void> {
@@ -65,28 +64,26 @@ export default {
    */
   async start(oParameters?: ServerParameter): Promise<void> {
     if (status === ServerStatus.STOPPED) {
-      ResourcesProxy.resetCache();
-
       Log.server('Starting...');
       try {
         serverApp = express();
         serverApp.set('view engine', 'ejs');
         serverApp.disable('x-powered-by');
-        // serverApp.use(cookieParser());
 
         serverApp.engine('ejs', ejs.renderFile);
 
         status = ServerStatus.STARTING;
         StatusBar.startingText();
 
-        // Reload config, checks new projects
         const bServeProduction = serverMode === ServerMode.PROD;
         const sServerMode = bServeProduction ? ServerMode.PROD : ServerMode.DEV;
-        const ui5Apps = await Utils.getAllUI5Apps();
+
+        const ui5Projects = await Finder.getAllUI5ProjectsArray();
+
         const protocol = Config.server('protocol') as keyof typeof Protocols;
-        oConfigParams = {
+        const newConfigParams = {
           serverApp: serverApp,
-          ui5Apps: ui5Apps,
+          ui5Projects: ui5Projects,
           bServeProduction: bServeProduction,
           sServerMode: sServerMode,
           watch: !!Config.server('watch'),
@@ -102,35 +99,26 @@ export default {
           ui5ToolsPath: Utils.getExtensionFsPath(),
           ui5ToolsIndex: Utils.getUi5ToolsIndexFolder(),
           isLaunchpadMounted: Utils.isLaunchpadMounted(),
-          bCacheBuster: [sServerMode, 'Allways'].includes('' + Config.server('cacheBuster')),
+          bCacheBuster: [sServerMode, 'Allways'].includes(Config.server('cacheBuster') as string),
           restarting: !!oParameters?.restarting,
           bBabelSourcesLive: !!Config.server('babelSourcesLive'),
-          sBabelSourcesExclude: String(Config.builder('babelSourcesExclude')),
+          sBabelSourcesExclude: Config.builder('babelSourcesExclude') as string,
         };
+        oConfigParams = newConfigParams;
 
         if (oConfigParams.timeout) {
-          serverApp.use(
-            expressTimeout.handler({
-              timeout: oConfigParams.timeout,
-              onTimeout(req: any, res: any) {
-                const message = Log.server('UI5 Tools server timeout', Level.ERROR);
-                res.status(503).send(message);
-              },
-              onDelayedResponse(req: any, method: any, args: any, requestTime: any) {
-                Log.server('Attempted to call ${method} after timeout', Level.ERROR);
-              },
-            })
-          );
+          serverApp.use(timeoutMiddleware(oConfigParams));
         }
+
+        await OdataProxy.set(oConfigParams);
+        await ResourcesProxy.set(oConfigParams);
 
         if (oConfigParams.watch) {
           await LiveServer.start(oConfigParams);
         }
 
-        Apps.serve(oConfigParams);
+        await Projects.serve(oConfigParams);
 
-        await OdataProxy.set(oConfigParams);
-        await ResourcesProxy.set(oConfigParams);
         await IndexUI5Tools.set(oConfigParams);
         await IndexLaunchpad.set(oConfigParams);
 
@@ -141,17 +129,17 @@ export default {
         }
 
         server.listen(oConfigParams.port, () => {
+          status = ServerStatus.STARTED;
+          StatusBar.stopText(newConfigParams.port);
+
           Log.server('Started!');
           const openBrowser = Config.server('openBrowser');
-          const ui5ToolsIndex = Utils.getUi5ToolsIndexFolder();
 
-          if (openBrowser && !oConfigParams.restarting) {
-            open(`${oConfigParams.protocol}://localhost:${oConfigParams.port}/${ui5ToolsIndex}/`);
+          if (openBrowser && !newConfigParams.restarting) {
+            const ui5ToolsIndex = Utils.getUi5ToolsIndexFolder();
+            open(`${newConfigParams.protocol}://localhost:${newConfigParams.port}/${ui5ToolsIndex}/`);
           }
         });
-
-        status = ServerStatus.STARTED;
-        StatusBar.stopText(oConfigParams.port);
       } catch (e: any) {
         Log.server(e.message, Level.ERROR);
         window.showErrorMessage(e.message);
@@ -176,6 +164,7 @@ export default {
         server,
       });
       httpTerminator.terminate();
+      oConfigParams = undefined;
       Log.server('Stopped!');
     }
     return;
@@ -245,6 +234,12 @@ export default {
 
   isStartedProduction() {
     return this.isStarted() && serverMode === ServerMode.PROD;
+  },
+
+  isCachebusterOn() {
+    const oServerMode = this.getServerOptions();
+    const sServerMode = oServerMode?.sServerMode ?? ServerMode.DEV;
+    return [sServerMode, 'Allways'].includes(Config.server('cacheBuster') as string);
   },
 
   getServerMode() {

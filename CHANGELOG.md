@@ -1,77 +1,110 @@
+## 2.0.0 (22/07/2022)
+
+- Full Typescript support
+- Deprecated configuration property `ui5-tools.srcFolder`. Splitted in two configuration properties:
+- New configuration properties `ui5-tools.appFolder` and `ui5-tools.libraryFolder`. The actual folder of normal ui5 apps writed in javascript (same as old configuration property `ui5-tools.srcFolder`, but with defaults to `webapp/src-gen`)
+- New configuration properties `ui5-tools.appSrcFolder` and `ui5-tools.librarySrcFolder` (defaults `src/src`). The new working folder for typescript projects. It will be transpiled into `appFolder/libraryFolder` at server launch.
+- New command `ui5-tools.general.refreshProjects` (`alt+g alt+r`). Search for UI5 projects.
+- New command `ui5-tools.builder.generate` (`alt+b alt+g`). Generate `appFolder/libraryFolder` from a project
+- Show output keybinding changed to `alt+g alt+o`
+- New option in the project menu: `Generate UI5 Project`
+- Removed apicache / server side resources cache
+- New repo with [workspace examples](https://github.com/CarlosOrozco88/ui5-tools-examples)
+- Changed default `ui5-tools.server.resourcesProxy` from `Runtime` to `OpenUI5`
+- Updated default `ui5-tools.ui5Version` from 1.71.42 to 1.71.46
+- Dependencies upgrade
+
 ## 1.2.0 (21/06/2022)
+
 - New! First typescript (ESM) support, both server and builder
 - Dependencies upgrade
 
-
 ## 1.1.20 (17/06/2022)
+
 - Upgraded default `ui5-tools.ui5Version` from `1.71.44` to `1.71.48`
 - New configuration property `ui5-tools.server.proxyDestinations`
 - Dependencies upgrade
 
 ## 1.1.18 & 1.1.19 (08/06/2022)
+
 - New Configurator menu: `Configurator --> Uninstall SAPUI5 Runtime` (shortcut `alt+c alt+d`)
 - Dependencies upgrade
 
 ## 1.1.17 (29/03/2022)
+
 - Dependencies upgrade
 
 ## 1.1.16 (09/02/2022)
+
 - Fixed: css hot reload
 - Dependencies upgrade
 
 ## 1.1.12-15 (20/01/2022)
+
 - Changed runtime download from `~/.vscode/extensions/carlosorozcojimenez.ui5-tools-support/runtime/` to file system path provide by VSCode. Now using `globalStorageUri` from `ExtensionContext`.
 - Improved livereload and manifest CRUD detection
 - Dependencies upgrade
 - Hotfixes
 
 ## 1.1.11 (12/01/2022)
+
 - Fixed: autorefresh
 - Dependencies upgrade
 
 ## 1.1.10 (11/01/2022)
-- Fixed: configuration property `ui5-tools.deployer.rejectUnauthorized` /  SSL certs error when deploying
+
+- Fixed: configuration property `ui5-tools.deployer.rejectUnauthorized` / SSL certs error when deploying
 
 ## 1.1.9 (10/01/2022)
+
 - Fixed: autorefresh when `distFolder === srcFolder`
 - Fixed: showing EULA when downloading SAPUI5 Runtime
 
 ## 1.1.8 (09/01/2022)
+
 - Changed runtime download from `~/.vscode/extensions/carlosorozcojimenez.ui5-tools-${version}/runtime/` to `~/.vscode/extensions/carlosorozcojimenez.ui5-tools-support/runtime/`
 
 ## 1.1.7 (09/01/2022)
+
 - Updated default value for `ui5-tools.ui5Version` to 1.71.44
 - Updated default value for `ui5-tools.server.resourcesProxy` to `Runtime`
 - File `sandbox.js` is included in the extension bundle. Now it is possible to launch the launchpad in enclosed networks
 - Dependencies upgrade
 
 ## 1.1.6 (04/01/2022)
+
 - New `ui5-tools.server.resourcesProxy` option `Runtime`. Download from tools.hana.ondemand.com the Runtime selected. The runtime is downloaded and unzipped in ui5-tools/runtime extension folder.
 - Wizard for `Configurator -> Ui5Provider` updated with `Runtime` options
 - Server start: when using new `Runtime` option, server startup checks if ui5 version is downloaded and download it automatically.
 - Dependencies upgrade
 
 ## 1.1.5 (18/11/2021)
+
 - Dependencies upgrade
 
 ## 1.1.4 (03/11/2021)
+
 - Fixed: detection of projects without webapp/src/Webcontent folders and deployment without build
 - Dependencies upgrade
 
 ## 1.1.3 (29/10/2021)
+
 - Fixed: `ui5-tools.server.babelSourcesLive` fixed in windows systems
 - Changed: computed date replaced changed due to speed improvements. Check [readme file](README.md)
 - Dependencies upgrade
 
 ## 1.1.2 (22/10/2021)
+
 - New configuration property `ui5-tools.server.babelSourcesLive`. Live transpile js.
 - AppcacheBuster is changed default value: `None`.
 
 ## 1.1.1 (19/10/2021)
+
 - Babelify bug solved
 - Dependencies upgrade
 
 ## 1.1.0 (18/10/2021)
+
 - Extension migrated to typescript
 - Removed font generator: check new extension [Icon Font Bundler](https://marketplace.visualstudio.com/items?itemName=carlosorozcojimenez.icon-font-bundler)
 - Some bugs solved

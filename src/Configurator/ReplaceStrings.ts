@@ -14,7 +14,7 @@ export default {
   },
 
   async quickPickAddRemoveStrings(): Promise<boolean> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       //@ts-ignore
       const replaceKeysValues: Array<{ key: string; value: string }> = Config.builder('replaceKeysValues');
 

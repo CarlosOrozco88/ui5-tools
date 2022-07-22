@@ -1,9 +1,10 @@
 import { window } from 'vscode';
 
-import { Log as LogType, Level } from '../Types/Types';
+import { Log as LogType, Level, LogTools } from '../Types/Types';
+import Utils from './Extension';
 
 const ui5toolsOutput = window.createOutputChannel(`ui5-tools`);
-const Log: Record<string, any> = {
+const Log: LogTools = {
   showOutput(): void {
     ui5toolsOutput.show();
   },
@@ -12,7 +13,8 @@ const Log: Record<string, any> = {
     const oDate = new Date();
     const sDate = oDate.toLocaleTimeString();
     const sLevelExpanded = sLevel + '       '.slice(0, 7 - sLevel.length);
-    const sNewLine = `[${sLevelExpanded} - ${sDate}] ${sPrev}: ${sText}`;
+    const rootPath = Utils.getWorkspaceRootPath();
+    const sNewLine = `[${sLevelExpanded} - ${sDate}] ${sPrev}: ${sText}`.replace(rootPath, '');
     ui5toolsOutput.appendLine(sNewLine);
     console.log(sNewLine);
     return sText;
@@ -53,22 +55,23 @@ const Log: Record<string, any> = {
   newLogProvider(fnLogger = Log.general): LogType {
     return {
       log: (sMessage: string) => {
-        fnLogger(sMessage, Level.LOG);
+        return fnLogger(sMessage, Level.LOG);
       },
-      logVerbose: (sMessage: string) => {
+      logVerbose: () => {
         // console.log(oParam)
+        return '';
       },
       debug: (sMessage: string) => {
-        fnLogger(sMessage, Level.DEBUG);
+        return fnLogger(sMessage, Level.DEBUG);
       },
       info: (sMessage: string) => {
-        fnLogger(sMessage, Level.INFO);
+        return fnLogger(sMessage, Level.INFO);
       },
       warn: (sMessage: string) => {
-        fnLogger(sMessage, Level.WARNING);
+        return fnLogger(sMessage, Level.WARNING);
       },
       error: (sMessage: string) => {
-        fnLogger(sMessage, Level.ERROR);
+        return fnLogger(sMessage, Level.ERROR);
       },
     };
   },

@@ -6,23 +6,24 @@ import TransportManager from 'ui5-nwabap-deployer-core/lib/TransportManager';
 import deepmerge from 'deepmerge';
 import fs from 'fs';
 
-import Builder from '../Builder/Builder';
 import Log from '../Utils/Log';
-import Utils from '../Utils/Utils';
+import Utils from '../Utils/Extension';
 import Config from '../Utils/Config';
-import { DeployMassive, DeployOptions, Level, Ui5App, DeployStatus, Ui5ToolsConfiguration } from '../Types/Types';
+import { DeployMassive, DeployOptions, Level, DeployStatus, Ui5ToolsConfiguration } from '../Types/Types';
+import Ui5Project from '../Project/Ui5Project';
+import Finder from '../Project/Finder';
 
 const oLogger = Log.newLogProviderDeployer();
 
 export default {
   async askProjectToDeploy(): Promise<void> {
-    let ui5App: Ui5App | undefined;
+    let ui5Project: Ui5Project | undefined;
     try {
       Log.deployer(`Asking project to deploy`);
-      const ui5Apps = await Utils.getAllUI5Apps();
-      if (ui5Apps.length > 1) {
+      const ui5Projects = await Finder.getAllUI5ProjectsArray();
+      if (ui5Projects.length > 1) {
         const qpOptions: Array<QuickPickItem> = [];
-        ui5Apps.forEach((app) => {
+        ui5Projects.forEach((app) => {
           qpOptions.push({
             label: app.folderName,
             description: app.namespace,
@@ -48,19 +49,19 @@ export default {
         });
 
         // fspath from selected project
-        ui5App = ui5Apps.find((app) => {
+        ui5Project = ui5Projects.find((app) => {
           return app.namespace == ui5ProjectToDeploy.description;
         });
-      } else if (ui5Apps.length == 1) {
+      } else if (ui5Projects.length == 1) {
         // only one project
-        ui5App = ui5Apps[0];
+        ui5Project = ui5Projects[0];
       }
     } catch (e) {
-      ui5App = undefined;
+      ui5Project = undefined;
     }
     try {
-      if (ui5App) {
-        await this.askCreateReuseTransport(ui5App);
+      if (ui5Project) {
+        await this.askCreateReuseTransport(ui5Project);
       }
     } catch (oError: any) {
       Log.deployer(oError.message, Level.ERROR);
@@ -69,7 +70,7 @@ export default {
 
   async deployAllProjects(): Promise<void> {
     Log.deployer(`Deploy all ui5 projects`);
-    const ui5Apps = await Utils.getAllUI5Apps();
+    const ui5Projects = await Finder.getAllUI5ProjectsArray();
     await window.withProgress(
       {
         location: ProgressLocation.Notification,
@@ -87,20 +88,20 @@ export default {
           [DeployStatus.Skipped]: 0,
         };
         progress.report({ increment: 0 });
-        for (let i = 0; i < ui5Apps.length; i++) {
+        for (let i = 0; i < ui5Projects.length; i++) {
           if (token.isCancellationRequested) {
             return;
           }
           progress.report({
-            increment: 100 / ui5Apps.length,
-            message: `${ui5Apps[i].folderName} (${i + 1}/${ui5Apps.length})`,
+            increment: 100 / ui5Projects.length,
+            message: `${ui5Projects[i].folderName} (${i + 1}/${ui5Projects.length})`,
           });
           try {
-            const deployed = await this.askCreateReuseTransport(ui5Apps[i], oMassiveOptions);
+            const deployed = await this.askCreateReuseTransport(ui5Projects[i], oMassiveOptions);
             oResults[deployed]++;
           } catch (oError) {
             oResults[DeployStatus.Error]++;
-            const sMessage = Log.deployer(`Project ${ui5Apps[i].folderName} not deployed`, Level.ERROR);
+            const sMessage = Log.deployer(`Project ${ui5Projects[i].folderName} not deployed`, Level.ERROR);
             window.showErrorMessage(sMessage);
           }
         }
@@ -115,21 +116,21 @@ export default {
     );
   },
 
-  async askCreateReuseTransport(ui5App: Ui5App, oMassiveOptions?: DeployMassive): Promise<DeployStatus> {
+  async askCreateReuseTransport(ui5Project: Ui5Project, oMassiveOptions?: DeployMassive): Promise<DeployStatus> {
     let oDeployOptions: DeployOptions;
     try {
-      if (ui5App) {
-        let ui5AppConfig = await Utils.getUi5ToolsFile(ui5App);
+      if (ui5Project) {
+        let ui5ProjectConfig = await ui5Project.getUi5ToolsFile();
 
-        if (oMassiveOptions?.deployWorkspace && ui5AppConfig?.deployer?.globalDeploy === false) {
+        if (oMassiveOptions?.deployWorkspace && ui5ProjectConfig?.deployer?.globalDeploy === false) {
           return DeployStatus.Skipped;
         }
 
-        if (!ui5AppConfig) {
-          ui5AppConfig = await this.createConfigFile(ui5App);
+        if (!ui5ProjectConfig) {
+          ui5ProjectConfig = await this.createConfigFile(ui5Project);
         }
 
-        const oDeployOptionsFs = await this.getDeployOptions(ui5AppConfig);
+        const oDeployOptionsFs = await this.getDeployOptions(ui5ProjectConfig);
         let sOption;
 
         if (oMassiveOptions?.transportno) {
@@ -165,7 +166,7 @@ export default {
             const selTransportOptionQp = await window.createQuickPick();
             selTransportOptionQp.title = 'ui5-tools > Deployer > Update or create transport';
             selTransportOptionQp.items = qpOptions;
-            selTransportOptionQp.placeholder = `Create or update transport for ${ui5App.folderName} project`;
+            selTransportOptionQp.placeholder = `Create or update transport for ${ui5Project.folderName} project`;
             selTransportOptionQp.canSelectMany = false;
             selTransportOptionQp.onDidAccept(async () => {
               if (selTransportOptionQp.selectedItems.length) {
@@ -187,22 +188,22 @@ export default {
           case '':
             throw new Error('Deploy canceled');
           case 'Create':
-            await this.createTransport(ui5App, oDeployOptions, oMassiveOptions);
+            await this.createTransport(ui5Project, oDeployOptions, oMassiveOptions);
             break;
           case 'Update':
-            await this.updateTransport(ui5App, oDeployOptions);
+            await this.updateTransport(ui5Project, oDeployOptions);
             break;
           case 'Read':
             Log.deployer(`Using ui5tools.json file`);
             break;
           default:
-            await this.updateTransport(ui5App, oDeployOptions, sOption);
+            await this.updateTransport(ui5Project, oDeployOptions, sOption);
             break;
         }
         if (oMassiveOptions) {
           oMassiveOptions.transportno = String(oDeployOptions.ui5.transportno);
         }
-        await this.deployProject(ui5App, oDeployOptions, oMassiveOptions);
+        await this.deployProject(ui5Project, oDeployOptions, oMassiveOptions);
       }
     } catch (oError: any) {
       Log.deployer(oError.message, Level.ERROR);
@@ -212,13 +213,13 @@ export default {
     return DeployStatus.Success;
   },
 
-  async createTransport(ui5App: Ui5App, oDeployOptions: DeployOptions, oMassiveOptions?: DeployMassive) {
+  async createTransport(ui5Project: Ui5Project, oDeployOptions: DeployOptions, oMassiveOptions?: DeployMassive) {
     const sDate = new Date().toLocaleString();
-    const sDefaultText = `${ui5App.folderName}: ${sDate}`;
+    const sDefaultText = `${ui5Project.folderName}: ${sDate}`;
 
     let transport_text: string;
     try {
-      transport_text = await new Promise((resolve, reject) => {
+      transport_text = await new Promise((resolve) => {
         const inputBox = window.createInputBox();
         inputBox.title = 'ui5-tools > Deployer > Create transport > Enter transport text';
         inputBox.placeholder = 'Enter transport text';
@@ -262,10 +263,10 @@ export default {
     oDeployOptions.ui5.transportno = transportno;
   },
 
-  async updateTransport(ui5App: Ui5App, oDeployOptions: DeployOptions, transportno?: string) {
+  async updateTransport(ui5Project: Ui5Project, oDeployOptions: DeployOptions, transportno?: string) {
     if (!transportno) {
       try {
-        transportno = await new Promise((resolve, reject) => {
+        transportno = await new Promise((resolve) => {
           const inputBox = window.createInputBox();
           inputBox.title = 'ui5-tools > Deployer > Update transport > Enter transport number';
           inputBox.placeholder = 'Enter the transport number';
@@ -295,9 +296,13 @@ export default {
     return new TransportManager(oDeployOptions, oLogger);
   },
 
-  async deployProject(ui5App: Ui5App, oDeployOptions: DeployOptions, oMassiveOptions?: DeployMassive): Promise<void> {
-    if (ui5App) {
-      const folderName = ui5App.folderName;
+  async deployProject(
+    ui5Project: Ui5Project,
+    oDeployOptions: DeployOptions,
+    oMassiveOptions?: DeployMassive
+  ): Promise<void> {
+    if (ui5Project) {
+      const folderName = ui5Project.folderName;
       Log.deployer(`Deploying ${folderName}`);
       await window.withProgress(
         {
@@ -310,10 +315,10 @@ export default {
             throw new Error('Deploy canceled');
           });
 
-          await Builder.build({ ui5App, progress, multiplier: 0.5 });
-          await this.deploy({ ui5App, oDeployOptions, progress, multiplier: 0.5 });
+          await ui5Project.build({ progress, multiplier: 0.5 });
+          await this.deploy({ ui5Project, oDeployOptions, progress, multiplier: 0.5 });
 
-          const sMessage = Log.deployer(`Project ${ui5App.folderName} deployed!`);
+          const sMessage = Log.deployer(`Project ${ui5Project.folderName} deployed!`);
 
           if (!oMassiveOptions?.deployWorkspace) {
             window.showInformationMessage(sMessage);
@@ -324,36 +329,36 @@ export default {
   },
 
   async deploy({
-    ui5App,
+    ui5Project,
     oDeployOptions,
     progress,
     multiplier = 1,
   }: {
-    ui5App: Ui5App;
+    ui5Project: Ui5Project;
     oDeployOptions: DeployOptions;
     progress?: Progress<any>;
     multiplier: number;
   }) {
     let message = '';
 
-    const ui5AppConfig = await Utils.getUi5ToolsFile(ui5App);
-    const sType = ui5AppConfig?.deployer?.type || '';
+    const ui5ProjectConfig = await ui5Project.getUi5ToolsFile();
+    const sType = ui5ProjectConfig?.deployer?.type || '';
 
     if (sType === 'Gateway') {
       // Authentication
       message = Log.deployer('Gateway destination found');
       progress?.report({ increment: 20 * multiplier, message });
 
-      this.autoSaveOrder(ui5App, oDeployOptions);
+      this.autoSaveOrder(ui5Project, oDeployOptions);
 
       const processReject = this.setUnautorized(oDeployOptions);
       try {
-        const patternFiles = new RelativePattern(ui5App.deployFsPath, `**/*`);
+        const patternFiles = new RelativePattern(ui5Project.fsPathDeploy, `**/*`);
         const aProjectFiles = await workspace.findFiles(patternFiles);
         const aProjectResources = await Promise.all(
           aProjectFiles.map(async (file) => {
             return {
-              path: file.fsPath.replace(ui5App.deployFsPath, '').split('\\').join('/'),
+              path: file.fsPath.replace(ui5Project.fsPathDeploy, '').split('\\').join('/'),
               content: fs.readFileSync(file.fsPath, { encoding: null }),
             };
           })
@@ -386,18 +391,18 @@ export default {
     }
   },
 
-  async autoSaveOrder(ui5App: Ui5App, oDeployOptions: DeployOptions) {
+  async autoSaveOrder(ui5Project: Ui5Project, oDeployOptions: DeployOptions) {
     const bAutoSaveOrder = Config.deployer('autoSaveOrder');
     if (bAutoSaveOrder) {
-      const ui5AppConfig = await Utils.getUi5ToolsFile(ui5App);
-      if (ui5AppConfig.deployer?.type == 'Gateway' && typeof ui5AppConfig.deployer?.options?.ui5 === 'object') {
-        ui5AppConfig.deployer.options.ui5.transportno = oDeployOptions.ui5.transportno;
+      const ui5ProjectConfig = await ui5Project.getUi5ToolsFile();
+      if (ui5ProjectConfig.deployer?.type == 'Gateway' && typeof ui5ProjectConfig.deployer?.options?.ui5 === 'object') {
+        ui5ProjectConfig.deployer.options.ui5.transportno = oDeployOptions.ui5.transportno;
       }
-      await Utils.setUi5ToolsFile(ui5App, ui5AppConfig);
+      await ui5Project.setUi5ToolsFile(ui5ProjectConfig);
     }
   },
 
-  async createConfigFile(ui5App: Ui5App) {
+  async createConfigFile(ui5Project: Ui5Project) {
     Log.deployer(`Create ui5-tools.json file?`);
     const qpOptions = [
       {
@@ -412,7 +417,7 @@ export default {
       const selTransportOptionQp = await window.createQuickPick();
       selTransportOptionQp.title = 'ui5-tools > Deployer > Create ui5-tools.json file?';
       selTransportOptionQp.items = qpOptions;
-      selTransportOptionQp.placeholder = `Project ${ui5App.folderName} does not have a ui5-tools.json file, create it now?`;
+      selTransportOptionQp.placeholder = `Project ${ui5Project.folderName} does not have a ui5-tools.json file, create it now?`;
       selTransportOptionQp.canSelectMany = false;
       selTransportOptionQp.onDidAccept(async () => {
         if (selTransportOptionQp.selectedItems.length) {
@@ -426,7 +431,7 @@ export default {
     });
     if (!selTransportOption || selTransportOption.label !== 'Yes') {
       Log.deployer(`Abort creation`);
-      throw new Error(`File ui5tools.json not found for project ${ui5App.folderName}`);
+      throw new Error(`File ui5tools.json not found for project ${ui5Project.folderName}`);
     }
     Log.deployer(`Collecting data...`);
 
@@ -450,7 +455,7 @@ export default {
       },
     };
 
-    const sServer: string = await new Promise((resolve, reject) => {
+    const sServer: string = await new Promise((resolve) => {
       const inputBox = window.createInputBox();
       inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Server Url';
       inputBox.step = 1;
@@ -471,7 +476,7 @@ export default {
 
     let sClient;
     try {
-      sClient = await new Promise((resolve, reject) => {
+      sClient = await new Promise((resolve) => {
         const inputBox = window.createInputBox();
         inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Client';
         inputBox.step = 2;
@@ -492,7 +497,7 @@ export default {
       oConfigFile.deployer.options.conn.client = Number(sClient);
     }
 
-    const sLanguage: string = await new Promise((resolve, reject) => {
+    const sLanguage: string = await new Promise((resolve) => {
       const inputBox = window.createInputBox();
       inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Language';
       inputBox.step = 3;
@@ -511,7 +516,7 @@ export default {
     Log.deployer(`ui5-tools.json: Language ${sLanguage}`);
     oConfigFile.deployer.options.ui5.language = sLanguage;
 
-    const sPackage: string = await new Promise((resolve, reject) => {
+    const sPackage: string = await new Promise((resolve) => {
       const inputBox = window.createInputBox();
       inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Package for the BSP';
       inputBox.step = 4;
@@ -530,7 +535,7 @@ export default {
     Log.deployer(`ui5-tools.json: Package ${sPackage}`);
     oConfigFile.deployer.options.ui5.package = sPackage;
 
-    const sBspContainer: string = await new Promise((resolve, reject) => {
+    const sBspContainer: string = await new Promise((resolve) => {
       const inputBox = window.createInputBox();
       inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Package for the BSP (max 15 chars)';
       inputBox.step = 5;
@@ -554,7 +559,7 @@ export default {
     Log.deployer(`ui5-tools.json: BSP Container ${sBspContainer}`);
     oConfigFile.deployer.options.ui5.bspcontainer = sBspContainer;
 
-    const sBspContainerText: string = await new Promise((resolve, reject) => {
+    const sBspContainerText: string = await new Promise((resolve) => {
       const inputBox = window.createInputBox();
       inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > BSP Description';
       inputBox.step = 6;
@@ -575,13 +580,13 @@ export default {
 
     oConfigFile.deployer.options.ui5.calc_appindex = true;
 
-    await Utils.setUi5ToolsFile(ui5App, oConfigFile);
+    await ui5Project.setUi5ToolsFile(oConfigFile);
     Log.deployer(`ui5-tools.json: File created!`);
 
     return oConfigFile;
   },
 
-  async getDeployOptions(ui5AppConfig: Ui5ToolsConfiguration): Promise<DeployOptions> {
+  async getDeployOptions(ui5ProjectConfig: Ui5ToolsConfiguration): Promise<DeployOptions> {
     // const oDeployOptionsDefault = {
     //   conn: {
     //     server: undefined,
@@ -616,13 +621,13 @@ export default {
       },
     };
 
-    const oDeployOptions = deepmerge.all<DeployOptions>([oUserPassword, ui5AppConfig?.deployer?.options]);
+    const oDeployOptions = deepmerge.all<DeployOptions>([oUserPassword, ui5ProjectConfig?.deployer?.options]);
     return oDeployOptions;
   },
 
   async getUserPass(oDeployOptions: DeployOptions): Promise<void> {
     if (!oDeployOptions?.auth?.user || !oDeployOptions?.auth?.pwd) {
-      const sUser: string = await new Promise((resolve, reject) => {
+      const sUser: string = await new Promise((resolve) => {
         const inputBox = window.createInputBox();
         inputBox.title = 'ui5-tools > Deployer > Server username';
         inputBox.step = 1;
@@ -640,7 +645,7 @@ export default {
       }
       oDeployOptions.auth.user = sUser;
 
-      const sPwd: string = await new Promise((resolve, reject) => {
+      const sPwd: string = await new Promise((resolve) => {
         const inputBox = window.createInputBox();
         inputBox.title = `ui5-tools > Deployer > Server password for ${sUser}`;
         inputBox.step = 2;

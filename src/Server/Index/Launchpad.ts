@@ -1,10 +1,12 @@
 import path from 'path';
 
-import Utils from '../../Utils/Utils';
+import Utils from '../../Utils/Extension';
 import Log from '../../Utils/Log';
 import ResourcesProxy from '../Proxy/Resources';
 import { ServerOptions } from '../../Types/Types';
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
+import Finder from '../../Project/Finder';
+import Ui5 from '../../Utils/Ui5';
 
 export default {
   async set(oConfigParams: ServerOptions): Promise<void> {
@@ -18,29 +20,30 @@ export default {
       //   fioriSandboxConfig.modulePaths[manifest['sap.app'].id] = `../${folder}`;
       // });
 
-      const ui5toolsData = Utils.getOptionsVersion();
+      const ui5toolsData = Ui5.getOptionsVersion();
       const flpPath = path.join(ui5ToolsPath, 'static', 'index', 'flp');
 
-      const indexFLP = (req: Request, res: Response, next: NextFunction) => {
+      const indexFLP = (req: Request, res: Response) => {
         res.render(path.join(flpPath, 'index'), { theme: ui5toolsData.theme });
       };
       serverApp.get('/flp/', indexFLP);
       serverApp.get('/flp/index.html', indexFLP);
 
-      serverApp.get('/flp/test-resources/sap/ushell/shells/sandbox/fioriSandboxConfig.json', (req, res) => {
+      serverApp.get('/flp/test-resources/sap/ushell/shells/sandbox/fioriSandboxConfig.json', async (req, res) => {
         const fioriSandboxConfig = {
           modulePaths: {},
           applications: {},
         };
-        Utils.ui5Apps.forEach((ui5App) => {
-          const hash = 'ui5tools-' + ui5App.folderName.toLowerCase();
+        const ui5Projects = await Finder.getAllUI5Projects();
+        ui5Projects.forEach((ui5Project) => {
+          const hash = 'ui5tools-' + ui5Project.folderName.toLowerCase();
           //@ts-ignore
           fioriSandboxConfig.applications[hash] = {
-            additionalInformation: `SAPUI5.Component=${ui5App.namespace}`,
+            additionalInformation: `SAPUI5.Component=${ui5Project.namespace}`,
             applicationType: 'SAPUI5',
-            url: ui5App.appServerPath,
-            description: ui5App.namespace,
-            title: ui5App.folderName,
+            url: ui5Project.serverPath,
+            description: ui5Project.namespace,
+            title: ui5Project.folderName,
           };
         });
         res.send(JSON.stringify(fioriSandboxConfig, null, 2));

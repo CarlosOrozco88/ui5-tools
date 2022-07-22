@@ -1,5 +1,6 @@
 import express from 'express';
 import { WorkspaceConfiguration } from 'vscode';
+import Ui5Project from '../Project/Ui5Project';
 
 export interface ServerParameter {
   restarting?: boolean;
@@ -7,7 +8,7 @@ export interface ServerParameter {
 
 export interface ServerOptions {
   serverApp: express.Express;
-  ui5Apps: Ui5Apps;
+  ui5Projects: Ui5ProjectsArray;
   bServeProduction: boolean;
   sServerMode: ServerMode;
   watch: boolean;
@@ -19,42 +20,71 @@ export interface ServerOptions {
   ui5ToolsPath: string;
   ui5ToolsIndex: string;
   isLaunchpadMounted: boolean;
-  bCacheBuster: boolean;
   restarting: boolean;
-  bBabelSourcesLive: boolean;
-  sBabelSourcesExclude: string;
 }
 
-export type Ui5Apps = Array<Ui5App>;
+export type Ui5Projects = Map<string, Ui5Project>;
+export type Ui5ProjectsArray = Array<Ui5Project>;
 
-export interface Ui5App {
-  appFsPath: string;
-  appConfigPath: string;
-  appResourceDirname: string;
-  appServerPath: string;
+export interface Ui5Properties {
+  /** The manifest json */
+  manifest: Record<string, any>;
+  namespace: string;
   type: string;
   isLibrary: boolean;
-  srcFsPath: string;
-  distFsPath: string;
-  deployFsPath: string;
-  manifest: Record<string, any>;
+  /** In order to get the correct project folder, to avoid getting the generated instead of src */
+  priority: number;
+  /** The actual path of the working folder that contains the manifest file */
+  fsPathWorking: string;
+  /** Actual folder name that contains the manifest.json (webapp, src, ...) */
+  workingFolder: string;
+  /**
+   * Path that contains working folder. Here is where the code is modified by the user.
+   * It is used in order to get proper menu in the project folder (build-deploy)
+   */
+  fsPathBase: string;
+  /** Folder name of the project path base */
   folderName: string;
-  namespace: string;
+  /** Path where the ui5-tools.json config file should exsists */
+  fsPathConfig: string;
+  /** Path where the server serves the project */
+  serverPath: string;
+  /** Path that should contain the sources of the project */
+  fsPathSource: string;
+  /** Path that contains the auto-generated project (served content) */
+  fsPathGenerated: string;
+  /** Path that contains the build of the project */
+  fsPathDist: string;
+  /** Path that contains the deploy files */
+  fsPathDeploy: string;
 }
 
 export interface AppOptions {
-  ui5App: Ui5App;
+  ui5Project: Ui5Project;
   title: string;
   icon?: string;
 }
 
 export interface Log {
-  log(sMessage: string): void;
-  logVerbose(sMessage: string): void;
-  debug(sMessage: string): void;
-  info(sMessage: string): void;
-  warn(sMessage: string): void;
-  error(sMessage: string): void;
+  log(sMessage: string): string;
+  logVerbose(sMessage: string): string;
+  debug(sMessage: string): string;
+  info(sMessage: string): string;
+  warn(sMessage: string): string;
+  error(sMessage: string): string;
+}
+export interface LogTools {
+  showOutput(): void;
+  log(sPrev: string, sText: string, sLevel?: Level): string;
+  general(sText: string, sLevel?: Level): string;
+  configurator(sText: string, sLevel?: Level): string;
+  builder(sText: string, sLevel?: Level): string;
+  deployer(sText: string, sLevel?: Level): string;
+  server(sText: string, sLevel?: Level): string;
+  proxy(sText: string, sLevel?: Level): string;
+  newLogProviderProxy(): Log;
+  newLogProviderDeployer(): Log;
+  newLogProvider(fnLogger?: (sText: string, sLevel?: Level) => string): Log;
 }
 
 export enum ServerMode {
@@ -84,6 +114,7 @@ export interface BuildTasks {
   copyFolder: boolean;
   replaceStrings: boolean;
   compileLess: boolean;
+  transpileTSFiles: boolean;
   babelifyJSFiles: boolean;
   compressFiles: boolean;
   createDebugFiles: boolean;
@@ -144,11 +175,12 @@ export interface Ui5ToolsData {
   links: Array<any>;
   contributors: Array<any>;
   docs: { aTree: Array<any>; oHashes: Record<string, any> };
-  ui5Apps: {
-    application: Array<any>;
-    component: Array<any>;
-    library: Array<any>;
-    card: Array<any>;
+  ui5Projects: {
+    all: Array<Ui5Project>;
+    application: Array<Ui5Project>;
+    component: Array<Ui5Project>;
+    library: Array<Ui5Project>;
+    card: Array<Ui5Project>;
   };
   config: WorkspaceConfiguration;
   compatVersion: string;
