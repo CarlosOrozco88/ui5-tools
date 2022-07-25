@@ -6,9 +6,9 @@ import TransportManager from 'ui5-nwabap-deployer-core/lib/TransportManager';
 import deepmerge from 'deepmerge';
 import fs from 'fs';
 
-import Log from '../Utils/Log';
-import Utils from '../Utils/Extension';
-import Config from '../Utils/Config';
+import Log from '../Utils/LogVscode';
+import Utils from '../Utils/ExtensionVscode';
+import Config from '../Utils/ConfigVscode';
 import { DeployMassive, DeployOptions, Level, DeployStatus, Ui5ToolsConfiguration } from '../Types/Types';
 import Ui5Project from '../Project/Ui5Project';
 import Finder from '../Project/Finder';

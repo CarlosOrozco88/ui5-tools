@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import Utils from '../../../Utils/Extension';
+import Utils from '../../../Utils/ExtensionVscode';
 
 export function createAuthMiddleware(index?: number): RequestHandler {
   return function (req, res, next): void {

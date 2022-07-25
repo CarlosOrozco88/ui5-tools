@@ -1,6 +1,6 @@
 import { window, ConfigurationTarget, InputBox, QuickPick, QuickPickItem } from 'vscode';
-import Config from '../Utils/Config';
-import Log from '../Utils/Log';
+import Config from '../Utils/ConfigVscode';
+import Log from '../Utils/LogVscode';
 import Server from '../Server/Server';
 
 export default {

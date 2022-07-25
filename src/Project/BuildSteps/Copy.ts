@@ -1,5 +1,5 @@
 import { Uri, workspace } from 'vscode';
-import Log from '../../Utils/Log';
+import Log from '../../Utils/LogVscode';
 
 export default {
   /**

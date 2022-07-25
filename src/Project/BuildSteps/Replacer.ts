@@ -1,9 +1,9 @@
 import { RelativePattern, Uri, workspace } from 'vscode';
 import { KeysValuesConfig } from '../../Types/Types';
-import Config from '../../Utils/Config';
+import Config from '../../Utils/ConfigVscode';
 
 import dayjs from 'dayjs';
-import Log from '../../Utils/Log';
+import Log from '../../Utils/LogVscode';
 
 export default {
   /**

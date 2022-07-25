@@ -3,7 +3,7 @@ import { Progress, ProgressLocation, Uri, window, workspace } from 'vscode';
 import chokidar, { FSWatcher } from 'chokidar';
 
 import { BuildTasks, Ui5ToolsConfiguration } from '../Types/Types';
-import Config from '../Utils/Config';
+import Config from '../Utils/ConfigVscode';
 import Finder from './Finder';
 
 import Clean from './BuildSteps/Clean';
@@ -18,6 +18,7 @@ import Compress from './BuildSteps/Compress';
 import LiveServer from '../Server/LiveServer';
 import Server from '../Server/Server';
 import StatusBar from '../StatusBar/StatusBar';
+import Log from '../Utils/LogVscode';
 
 const DEFAULT_TASKS_BUILD: BuildTasks = {
   cleanFolder: true,
@@ -150,27 +151,32 @@ export default class Ui5Project {
    */
   async generate() {
     const sWorkingFolder = this.fsPathWorking;
-    const sDestFolder = this.fsPathGenerated;
+    const sGeneratedFolder = this.fsPathGenerated;
 
-    if (sWorkingFolder !== sDestFolder) {
-      // When there are not generated folder (default: webapp/src-gen), we generate the folders
-      // in order to serve the files from here
+    await this.unwatch();
+    try {
+      if (sWorkingFolder === sGeneratedFolder) {
+        await Less.build(this, sWorkingFolder, sGeneratedFolder);
+      } else {
+        StatusBar.setExtraText(`Generating project ${this.folderName}...`);
+        // When there are not generated folder (default: webapp/src-gen), we generate the folders
+        // in order to serve the files from here
 
-      StatusBar.startingText(`: Generating project ${this.folderName}...`);
-
-      await Clean.folder(sDestFolder);
-      await Copy.folder(sWorkingFolder, sDestFolder);
-      await Less.build(this, sWorkingFolder, sDestFolder);
-      await Clean.removeLess(sDestFolder);
-      await Typescript.build(sDestFolder, { sourceMaps: true });
-    } else {
-      await Less.build(this, sWorkingFolder, sDestFolder);
+        await Clean.folder(sGeneratedFolder);
+        await Copy.folder(sWorkingFolder, sGeneratedFolder);
+        await Less.build(this, sWorkingFolder, sGeneratedFolder);
+        await Clean.removeLess(sGeneratedFolder);
+        await Typescript.build(sGeneratedFolder, { sourceMaps: true });
+        StatusBar.setExtraText();
+      }
+    } finally {
+      await this.watch();
     }
   }
 
   watch(): Promise<void> {
     return new Promise((resolve) => {
-      const aIgnored = ['.git', '.svn', '.hg', '.DS_Store'];
+      const aIgnored = ['.git', '.svn', '.hg', '.DS_Store', 'node_modules'];
       this.watcher = chokidar.watch([this.fsPathWorking], {
         ignoreInitial: true,
         ignored: (sPath: string) => {
@@ -184,13 +190,17 @@ export default class Ui5Project {
       this.watcher.on('add', (sFilePath) => this.fileChanged(sFilePath));
       this.watcher.on('change', (sFilePath) => this.fileChanged(sFilePath));
       this.watcher.on('unlink', (sFilePath) => this.fileChanged(sFilePath));
-      this.watcher.on('ready', () => resolve());
+      this.watcher.on('ready', () => {
+        resolve();
+      });
     });
   }
 
   async fileChanged(pathFileChanged: string) {
     const filename = path.basename(pathFileChanged);
+    const fileExtension = path.extname(pathFileChanged).replace('.', '');
     let pathGenerated = pathFileChanged.replace(this.fsPathWorking, this.fsPathGenerated);
+    let doRefresh = true;
 
     if (filename === 'manifest.json') {
       try {
@@ -206,63 +216,62 @@ export default class Ui5Project {
       } catch (oError) {
         await Finder.removeUi5Project(this);
         await StatusBar.checkVisibility(false);
-      }
-    } else {
-      const fileExtension = path.extname(pathFileChanged).replace('.', '');
-
-      const uriGenerated = Uri.file(pathGenerated);
-
-      const OPTIONS: Record<string, () => void> = {};
-
-      const buildless = Config.builder('buildLess') as boolean;
-      const isServerStarted = Server.isStarted();
-      const isSameFolder = this.fsPathWorking === this.fsPathGenerated;
-      if (buildless && (isServerStarted || isSameFolder)) {
-        OPTIONS.less = async () => {
-          await this.awaitLiveLess();
-        };
-      }
-
-      if (Server.isStartedDevelopment()) {
-        if (this.isGenerated()) {
-          OPTIONS.ts = async () => {
-            await Copy.file(pathFileChanged, pathGenerated);
-            await Typescript.transpileUriToFile(uriGenerated, { sourceMaps: true });
-          };
-          OPTIONS.default = async () => {
-            await Copy.file(pathFileChanged, pathGenerated);
-          };
-        }
-      }
-      const fnExecute = OPTIONS[fileExtension] ?? OPTIONS.default;
-      await fnExecute?.();
-
-      if (Server.isStartedProduction()) {
-        await this.awaitLiveBuild();
-        pathGenerated = pathFileChanged.replace(this.fsPathGenerated, this.fsPathDist);
+        return;
       }
     }
-    LiveServer.refresh(pathGenerated);
+    const uriGenerated = Uri.file(pathGenerated);
+
+    const OPTIONS: Record<string, () => void> = {};
+
+    const buildless = Config.builder('buildLess') as boolean;
+    const isServerStarted = Server.isStarted();
+    const isSameFolder = this.fsPathWorking === this.fsPathGenerated;
+
+    if (buildless && (isServerStarted || isSameFolder)) {
+      OPTIONS.less = async () => {
+        StatusBar.setExtraText(`Generating css for ${this.folderName}...`);
+        const [firstPath, ...otherPaths] = await this.awaitLiveLess();
+        pathGenerated = firstPath && !otherPaths.length ? firstPath : pathGenerated.replace('.less', '.css');
+        doRefresh = !isSameFolder;
+        StatusBar.setExtraText();
+      };
+    }
+
+    if (Server.isStartedDevelopment() && this.isGenerated()) {
+      OPTIONS.ts = async () => {
+        StatusBar.setExtraText(`Generating js file from ${filename}...`);
+        await Copy.file(pathFileChanged, pathGenerated);
+        await Typescript.transpileUriToFile(uriGenerated, { sourceMaps: true });
+        pathGenerated = pathGenerated.replace('.ts', '.js');
+        StatusBar.setExtraText();
+      };
+      OPTIONS.default = async () => {
+        StatusBar.setExtraText(`Coping file ${filename}...`);
+        await Copy.file(pathFileChanged, pathGenerated);
+        StatusBar.setExtraText();
+      };
+    }
+
+    const fnExecute = OPTIONS[fileExtension] ?? OPTIONS.default;
+    await fnExecute?.();
+
+    if (Server.isStartedProduction()) {
+      await this.awaitLiveBuild();
+      pathGenerated = pathFileChanged.replace(this.fsPathGenerated, this.fsPathDist);
+      LiveServer.refresh(pathGenerated);
+    } else if (doRefresh) {
+      LiveServer.refresh(pathGenerated);
+    }
   }
 
-  private awaitLiveLess(): Promise<void> {
+  private awaitLiveLess(): Promise<Array<string>> {
     return new Promise((resolve) => {
       if (this.awaiterLess) {
         clearTimeout(this.awaiterLess);
       }
-      this.awaiterLess = setTimeout(() => {
-        window.withProgress(
-          {
-            location: ProgressLocation.Notification,
-            title: `ui5-tools > Building css files for`,
-            cancellable: false,
-          },
-          async (progress) => {
-            progress.report({ message: this.folderName });
-            await Less.build(this, this.fsPathWorking, this.fsPathGenerated);
-            resolve();
-          }
-        );
+      this.awaiterLess = setTimeout(async () => {
+        const aPaths = await Less.build(this, this.fsPathWorking, this.fsPathGenerated);
+        resolve(aPaths);
       }, 500);
     });
   }
@@ -279,13 +288,21 @@ export default class Ui5Project {
     });
   }
 
-  unwatch() {
-    this.watcher?.close();
-    this.watcher = undefined;
+  async unwatch() {
+    if (this.awaiterLess) {
+      clearTimeout(this.awaiterLess);
+    }
+
+    if (this.awaiterBuild) {
+      clearTimeout(this.awaiterBuild);
+    }
+    this.watcher?.unwatch('*');
+    await this.watcher?.close();
+    delete this.watcher; // = undefined;
   }
 
-  close() {
-    this.unwatch();
+  async close() {
+    await this.unwatch();
   }
 
   static async readManifest(manifestFsPath: string): Promise<Record<string, any>> {

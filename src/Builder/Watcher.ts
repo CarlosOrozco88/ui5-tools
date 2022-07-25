@@ -5,7 +5,7 @@ import Finder from '../Project/Finder';
 import LiveServer from '../Server/LiveServer';
 import Projects from '../Server/Projects';
 import StatusBar from '../StatusBar/StatusBar';
-import Utils from '../Utils/Extension';
+import Utils from '../Utils/ExtensionVscode';
 
 let watchApps: chokidar.FSWatcher | undefined;
 const awaiter: Record<string, ReturnType<typeof setTimeout>> = {};

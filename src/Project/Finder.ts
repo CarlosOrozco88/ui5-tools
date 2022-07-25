@@ -1,12 +1,12 @@
-import { workspace, RelativePattern, Uri, commands } from 'vscode';
+import { workspace, RelativePattern, Uri } from 'vscode';
 import path from 'path';
 
-import Config from '../Utils/Config';
+import Config from '../Utils/ConfigVscode';
 import { Ui5Projects, Ui5ProjectsArray } from '../Types/Types';
 import Ui5Project from './Ui5Project';
-import Utils from '../Utils/Extension';
+import Utils from '../Utils/ExtensionVscode';
 import Projects from '../Server/Projects';
-import Log from '../Utils/Log';
+import Log from '../Utils/LogVscode';
 import Menu from '../Menu/Menu';
 
 const ui5Projects: Ui5Projects = new Map();
@@ -20,9 +20,9 @@ const Finder = {
     return Array.from(ui5ProjectsMap.values());
   },
 
-  clearUi5Projects() {
+  async clearUi5Projects() {
     for (const ui5Project of ui5Projects.values()) {
-      ui5Project.close();
+      await ui5Project.close();
     }
     ui5Projects.clear();
   },
@@ -31,7 +31,7 @@ const Finder = {
     if (!getUi5ProjectssPromise || bRefresh) {
       getUi5ProjectssPromise = new Promise(async (resolve) => {
         Log.general(`Exploring ui5 projects...`);
-        Finder.clearUi5Projects();
+        await Finder.clearUi5Projects();
 
         const appFolder = Config.general('appFolder') as string;
         const libraryFolder = Config.general('libraryFolder') as string;
@@ -97,7 +97,7 @@ const Finder = {
 
         const sameProject = ui5Projects.get(ui5Project.serverPath);
         if (!sameProject || sameProject.priority < ui5Project.priority) {
-          sameProject?.close();
+          await sameProject?.close();
           ui5Projects.set(ui5Project.serverPath, ui5Project);
           return ui5Project;
         }
@@ -118,7 +118,7 @@ const Finder = {
 
   async removeUi5Project(ui5Project: Ui5Project) {
     Finder.ui5Projects.delete(ui5Project.serverPath);
-    ui5Project.close();
+    await ui5Project.close();
     Projects.unserveProject(ui5Project);
     await Menu.setContexts();
   },

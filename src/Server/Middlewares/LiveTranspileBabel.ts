@@ -1,15 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import path from 'path';
-import os from 'os';
-import { Uri, workspace } from 'vscode';
+import { Uri } from 'vscode';
 import minimatch from 'minimatch';
 
 import Babel from '../../Project/BuildSteps/Babel';
 import { Level } from '../../Types/Types';
-import Log from '../../Utils/Log';
+import Log from '../../Utils/LogVscode';
 import Ui5Project from '../../Project/Ui5Project';
 import Typescript from '../../Project/BuildSteps/Typescript';
-import Config from '../../Utils/Config';
+import Config from '../../Utils/ConfigVscode';
 import Server from '../Server';
 
 export function liveTranspileBabel(ui5Project: Ui5Project) {

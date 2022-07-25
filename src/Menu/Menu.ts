@@ -3,7 +3,7 @@ import Finder from '../Project/Finder';
 import Builder from '../Builder/Builder';
 import Deployer from '../Deployer/Deployer';
 import { Level } from '../Types/Types';
-import Log from '../Utils/Log';
+import Log from '../Utils/LogVscode';
 
 export default {
   async build(oResource: Uri): Promise<void> {

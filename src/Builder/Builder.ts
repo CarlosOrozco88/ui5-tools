@@ -1,6 +1,6 @@
 import { window, ProgressLocation, QuickPickItem } from 'vscode';
 
-import Log from '../Utils/Log';
+import Log from '../Utils/LogVscode';
 import Ui5Project from '../Project/Ui5Project';
 import Finder from '../Project/Finder';
 

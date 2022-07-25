@@ -1,5 +1,5 @@
 import { window, ConfigurationTarget, QuickPick, QuickPickItem } from 'vscode';
-import Config from '../Utils/Config';
+import Config from '../Utils/ConfigVscode';
 
 export default {
   async wizard(): Promise<void> {

@@ -3,11 +3,11 @@ import express, { Request, Response } from 'express';
 import path from 'path';
 import { marked } from 'marked';
 
-import Config from '../../Utils/Config';
-import Log from '../../Utils/Log';
+import Config from '../../Utils/ConfigVscode';
+import Log from '../../Utils/LogVscode';
 import { ServerOptions, Ui5ToolsData } from '../../Types/Types';
 import Finder from '../../Project/Finder';
-import Ui5 from '../../Utils/Ui5';
+import Ui5 from '../../Utils/Ui5Vscode';
 import Server from '../Server';
 
 export default {

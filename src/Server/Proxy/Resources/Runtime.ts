@@ -2,9 +2,9 @@ import express from 'express';
 import { Uri, workspace } from 'vscode';
 import Ui5Provider from '../../../Configurator/Ui5Provider';
 import { Level, ServerOptions } from '../../../Types/Types';
-import Config from '../../../Utils/Config';
-import Log from '../../../Utils/Log';
-import Utils from '../../../Utils/Extension';
+import Config from '../../../Utils/ConfigVscode';
+import Log from '../../../Utils/LogVscode';
+import Utils from '../../../Utils/ExtensionVscode';
 import { noCache, removeCacheBusterString } from './Middlewares';
 
 const Runtime = {

@@ -6,7 +6,7 @@ import { liveTranspileBabel } from './Middlewares/LiveTranspileBabel';
 import Ui5Project from '../Project/Ui5Project';
 import { createStaticMiddleware } from './Middlewares/Static';
 
-export default {
+const Projects = {
   async serve(oConfigParams: ServerOptions): Promise<void> {
     const { ui5Projects = [] } = oConfigParams;
     // Static serve all apps
@@ -49,3 +49,4 @@ export default {
     }
   },
 };
+export default Projects;

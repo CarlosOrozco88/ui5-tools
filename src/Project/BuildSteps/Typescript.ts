@@ -1,5 +1,5 @@
 import { RelativePattern, Uri, workspace } from 'vscode';
-import Log from '../../Utils/Log';
+import Log from '../../Utils/LogVscode';
 
 import { transformAsync, BabelFileResult, TransformOptions } from '@babel/core';
 // @ts-ignore

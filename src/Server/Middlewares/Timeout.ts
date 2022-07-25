@@ -1,7 +1,7 @@
 // @ts-ignore
 import expressTimeout from 'express-timeout-handler';
 import { Level, ServerOptions } from '../../Types/Types';
-import Log from '../../Utils/Log';
+import Log from '../../Utils/LogVscode';
 
 export function timeoutMiddleware(oConfigParams: ServerOptions) {
   return expressTimeout.handler({

@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
 
-import Config from './Config';
+import Config from './ConfigVscode';
 
 let extensionContext: ExtensionContext;
 // import { ProjectsView } from '../ActivityBar/ProjectsView';

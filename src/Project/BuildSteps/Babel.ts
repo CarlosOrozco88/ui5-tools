@@ -1,6 +1,6 @@
 import { RelativePattern, Uri, workspace } from 'vscode';
-import Config from '../../Utils/Config';
-import Log from '../../Utils/Log';
+import Config from '../../Utils/ConfigVscode';
+import Log from '../../Utils/LogVscode';
 
 import { transformAsync, BabelFileResult, TransformOptions } from '@babel/core';
 import presetEnv from '@babel/preset-env';

@@ -1,4 +1,4 @@
-import Config from '../../Utils/Config';
+import Config from '../../Utils/ConfigVscode';
 import { ServerOptions } from '../../Types/Types';
 import Gateway from './Odata/Gateway';
 import Other from './Odata/Other';

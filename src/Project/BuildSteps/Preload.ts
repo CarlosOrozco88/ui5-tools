@@ -1,12 +1,12 @@
 import path from 'path';
 import { Uri, workspace } from 'vscode';
 import Ui5Project from '../Ui5Project';
-import Config from '../../Utils/Config';
-import Log from '../../Utils/Log';
+import Config from '../../Utils/ConfigVscode';
+import Log from '../../Utils/LogVscode';
 
 //@ts-ignore
 import preload from 'openui5-preload';
-import Ui5 from '../../Utils/Ui5';
+import Ui5 from '../../Utils/Ui5Vscode';
 
 export default {
   async build(ui5Project: Ui5Project, srcPath: string, destPath: string): Promise<void> {

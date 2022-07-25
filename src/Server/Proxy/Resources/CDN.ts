@@ -1,10 +1,10 @@
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { window } from 'vscode';
 import { Level, ServerOptions } from '../../../Types/Types';
-import Config from '../../../Utils/Config';
+import Config from '../../../Utils/ConfigVscode';
 import Fetch from '../../../Utils/Fetch';
-import Log from '../../../Utils/Log';
-import Utils from '../../../Utils/Extension';
+import Log from '../../../Utils/LogVscode';
+import Utils from '../../../Utils/ExtensionVscode';
 import { noCache } from './Middlewares';
 
 const CDN = {

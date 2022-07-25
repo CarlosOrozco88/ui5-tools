@@ -1,7 +1,7 @@
 import { Uri, workspace } from 'vscode';
 
-import Config from '../../Utils/Config';
-import Utils from '../../Utils/Extension';
+import Config from '../../Utils/ConfigVscode';
+import Utils from '../../Utils/ExtensionVscode';
 import { SandboxFile, ServerOptions } from '../../Types/Types';
 import Gateway from './Resources/Gateway';
 import CDN from './Resources/CDN';

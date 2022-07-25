@@ -1,7 +1,7 @@
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { ServerOptions } from '../../../Types/Types';
-import Config from '../../../Utils/Config';
-import Log from '../../../Utils/Log';
+import Config from '../../../Utils/ConfigVscode';
+import Log from '../../../Utils/LogVscode';
 import { createAuthMiddleware } from './Middlewares';
 
 const Other = {

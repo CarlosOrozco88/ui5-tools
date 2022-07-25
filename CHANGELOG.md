@@ -1,3 +1,12 @@
+## 2.0.1 (25/07/2022)
+
+- Added more sandbox.js files for newer sapui5 versions | Launchpad
+- Fixed fioriSandboxConfig issues | Launchpad
+- Status bar bugs fixed
+- Hot reload bugs fixed
+- Changed urls to CDN: [more info here](https://blogs.sap.com/2022/07/20/short-and-powerful-convenient-urls-for-sapui5-openui5-cdn/)
+- Dependencies upgrade
+
 ## 2.0.0 (22/07/2022)
 
 - Full Typescript support

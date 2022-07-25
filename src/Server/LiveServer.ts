@@ -5,17 +5,15 @@ import https from 'https';
 import path from 'path';
 import { WebSocketServer, WebSocket } from 'ws';
 
-import Utils from '../Utils/Extension';
-import Config from '../Utils/Config';
-import Log from '../Utils/Log';
+import Utils from '../Utils/ExtensionVscode';
+import Config from '../Utils/ConfigVscode';
+import Log from '../Utils/LogVscode';
 import { ServerOptions } from '../Types/Types';
 import { NextFunction, Request, Response } from 'express';
 import Server from './Server';
 
-const DELAY_REFRESH = 500;
 let liveServer: http.Server | https.Server | undefined;
 let liveServerWS: WebSocketServer | undefined;
-let awaiterRefresh: NodeJS.Timeout;
 
 export default {
   liveServerWS: undefined,
@@ -168,21 +166,18 @@ export default {
   },
 
   sendAllClients(data: string): void {
-    clearTimeout(awaiterRefresh);
-    awaiterRefresh = setTimeout(() => {
-      liveServerWS?.clients.forEach((ws) => {
-        if (ws.readyState === WebSocket.OPEN) {
-          Log.server('Refreshing browser...');
-          this.debug('Sending: ' + data);
+    liveServerWS?.clients.forEach((ws) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        Log.server('Refreshing browser...');
+        this.debug('Sending: ' + data);
 
-          ws.send(data, (error) => {
-            if (error) {
-              this.debug(error.message);
-            }
-          });
-        }
-      });
-    }, DELAY_REFRESH);
+        ws.send(data, (error) => {
+          if (error) {
+            this.debug(error.message);
+          }
+        });
+      }
+    });
   },
 
   async stop(): Promise<void> {

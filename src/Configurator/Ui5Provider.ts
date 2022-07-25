@@ -10,19 +10,17 @@ import {
 } from 'vscode';
 import { HTMLElement, parse } from 'node-html-parser';
 import AdmZip from 'adm-zip';
-import { createHash } from 'crypto';
-import { minify, MinifyOutput } from 'terser';
 import ejs from 'ejs';
 import fs from 'fs';
 
-import Config from '../Utils/Config';
-import Utils from '../Utils/Extension';
-import Log from '../Utils/Log';
+import Config from '../Utils/ConfigVscode';
+import Utils from '../Utils/ExtensionVscode';
+import Log from '../Utils/LogVscode';
 import Server from '../Server/Server';
-import { Level, SandboxFile, VersionsItem, VersionsTree, VersionTree } from '../Types/Types';
+import { Level, VersionsItem, VersionsTree, VersionTree } from '../Types/Types';
 import path from 'path';
 import Fetch from '../Utils/Fetch';
-import Ui5 from '../Utils/Ui5';
+import { getRuntimeUrl, getUi5Versions, parseUi5Version } from '../Utils/Ui5';
 
 let panelLicence: WebviewPanel | undefined;
 
@@ -181,7 +179,8 @@ export default {
   async setUi5Version() {
     let versions: Array<any>;
     try {
-      versions = await this.getUi5Versions();
+      const framework = Utils.getFramework();
+      versions = await getUi5Versions(framework);
     } catch (error: any) {
       throw new Error(error);
     }
@@ -225,7 +224,7 @@ export default {
 
   async quickPickUi5VersionMajor(versionsMajor: Array<any>) {
     return new Promise(async (resolve, reject) => {
-      const ui5Version = String(Config.general('ui5Version'));
+      const ui5Version = Config.general('ui5Version') as string;
 
       const quickpick = await window.createQuickPick();
       quickpick.title = 'ui5-tools > Configurator > Ui5Provider: Select UI5 major version';
@@ -295,75 +294,6 @@ export default {
       });
       inputBox.show();
     });
-  },
-
-  async getUi5Versions(framework = Utils.getFramework()) {
-    const versions: Array<any> = [];
-    try {
-      if (framework !== 'None') {
-        const versionsValues = await Promise.all([this.getVersionOverview(framework), this.getNeoApp(framework)]);
-        const mapVersions: Record<string, any> = {};
-        versionsValues[0].versions.forEach((versionData: Record<string, any>) => {
-          if (versionData.version.length > 1) {
-            const cleanVersion = versionData.version.replace('.*', '');
-            let description = versionData.eom ? versionData.eom : versionData.support;
-            if (versionData.lts !== undefined) {
-              description = versionData.lts ? versionData.eom : versionData.support + ' ' + versionData.eom;
-            }
-            const cVersion = {
-              label: cleanVersion,
-              description: description,
-              patches: [],
-            };
-            mapVersions[cleanVersion] = cVersion;
-            versions.push(cVersion);
-          }
-        });
-        versionsValues[1].routes.forEach((versionData: Record<string, any>) => {
-          if (versionData.path.length > 1) {
-            const cleanVersion = versionData.path.replace('/', '');
-            const cleanVersionArray = cleanVersion.split('.');
-            cleanVersionArray.pop();
-            const cleanVersionMaster = cleanVersionArray.join('.');
-            if (mapVersions[cleanVersionMaster]) {
-              mapVersions[cleanVersionMaster].patches.push({
-                label: cleanVersion,
-                description: mapVersions[cleanVersionMaster].description,
-              });
-            } else {
-              const cVersion = {
-                label: cleanVersionMaster,
-                description: 'Out of Maintenance',
-                patches: [
-                  {
-                    label: cleanVersion,
-                    description: 'Out of Maintenance',
-                  },
-                ],
-              };
-              mapVersions[cleanVersionMaster] = cVersion;
-              versions.push(cVersion);
-            }
-          }
-        });
-      }
-    } catch (err: any) {
-      throw new Error(err);
-    }
-
-    return versions;
-  },
-
-  async getVersionOverview(framework = 'sapui5') {
-    const url = `https://${framework}.hana.ondemand.com/versionoverview.json`;
-    const fileString = await Fetch.file(url);
-    return JSON.parse(fileString);
-  },
-
-  async getNeoApp(framework = 'sapui5') {
-    const url = `https://${framework}.hana.ondemand.com/neo-app.json`;
-    const fileString = await Fetch.file(url);
-    return JSON.parse(fileString);
   },
 
   async configureGWVersion(sGatewayUri: string) {
@@ -467,12 +397,8 @@ export default {
     });
   },
 
-  getRuntimeUrl() {
-    return 'https://tools.hana.ondemand.com/';
-  },
-
   async getRuntimeFile(): Promise<HTMLElement> {
-    const url = this.getRuntimeUrl();
+    const url = getRuntimeUrl();
 
     const stringUrl = await Fetch.file(url);
 
@@ -495,7 +421,7 @@ export default {
       if (firstCol?.[0]?.innerHTML === 'Runtime') {
         const ui5Version = firstCol?.[1]?.innerHTML;
 
-        const { major, minor } = Ui5.parseVersion(ui5Version);
+        const { major, minor } = parseUi5Version(ui5Version);
         let parentVersion = '';
         if (major && minor) {
           parentVersion = `${major}.${minor}`;
@@ -516,12 +442,14 @@ export default {
             const runtimeFsPath = Utils.getRuntimeFsPath(true, ui5Version);
             const bInstalled = fs.existsSync(runtimeFsPath);
 
+            const runtimeUrl = getRuntimeUrl();
+
             versionsTreeHash[parentVersion].installed = versionsTreeHash[parentVersion].installed || bInstalled;
             versionsTreeHash[parentVersion].patches.push({
               version: ui5Version,
               size: size,
               installed: bInstalled,
-              url: `https://tools.hana.ondemand.com/${url}`,
+              url: `${runtimeUrl}/${url}`,
               oldVersion: row.classList.contains('oldVersionSapui5'),
             });
           }
@@ -573,7 +501,7 @@ export default {
 
   async acceptLicence(): Promise<void> {
     return new Promise(async (resolve, reject) => {
-      const runtimeUrl = this.getRuntimeUrl();
+      const runtimeUrl = getRuntimeUrl();
       const document = await this.getRuntimeFile();
       const eulaHeader = document.querySelector('#eula-dialog-header');
       const eulaHeaderHtml = eulaHeader?.innerHTML.replace('src="./', `src="${runtimeUrl}`);
@@ -691,65 +619,6 @@ export default {
       Log.configurator(sMessage, Level.ERROR);
       window.showErrorMessage(sMessage);
       throw oError;
-    }
-  },
-
-  async downloadSandbox() {
-    try {
-      const versions = await this.getUi5Versions('sapui5');
-      const sandboxComplete: SandboxFile = {
-        files: {},
-        versions: {},
-        default: '',
-      };
-
-      for (let i = 0; i < versions.length; i++) {
-        const majorV = versions[i];
-        // const lastMinor = majorV.patches[majorV.patches.length - 1];
-
-        for (let j = 0; j < majorV.patches.length; j++) {
-          const minorV = majorV.patches[j];
-
-          const urlSandbox = `https://sapui5.hana.ondemand.com/${minorV.label}/test-resources/sap/ushell/bootstrap/sandbox.js`;
-          const fileString = await Fetch.file(urlSandbox);
-          const fileMinified: MinifyOutput = await minify(fileString, {
-            compress: false,
-          });
-          const fileMinifiedString = fileMinified.code ?? '';
-          const hash = createHash('sha256');
-          hash.update(fileMinifiedString);
-
-          const hex = hash.digest('hex');
-          if (!sandboxComplete.files[hex]) {
-            sandboxComplete.files[hex] = fileMinifiedString;
-          }
-          sandboxComplete.versions[minorV.label] = hex;
-          if (!sandboxComplete.default) {
-            sandboxComplete.default = minorV.label;
-          }
-        }
-
-        // const oVersion = Utils.parseVersion(lastMinor?.label);
-        // const { major, minor, patch } = oVersion;
-        // let emptyVersions = [];
-        // for (let i = patch; i >= 0; i--) {
-        //   const cVersion = `${major}.${minor}.${patch}`;
-        //   if (!sandboxComplete.versions[cVersion]) {
-        //     emptyVersions.push(cVersion);
-        //   } else {
-        //     emptyVersions.forEach((version) => {
-        //       sandboxComplete.versions[version] = sandboxComplete.versions[cVersion];
-        //     });
-        //     emptyVersions = [];
-        //   }
-        // }
-      }
-      const fileStringified = JSON.stringify(sandboxComplete, null, 2);
-      const sandboxFsPath = Utils.getSandboxFsPath();
-      const sandboxUri = Uri.file(sandboxFsPath);
-      await workspace.fs.writeFile(sandboxUri, Buffer.from(fileStringified));
-    } catch (oError) {
-      // Don't do nothing
     }
   },
 };

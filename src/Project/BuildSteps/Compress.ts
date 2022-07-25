@@ -1,6 +1,6 @@
 import { RelativePattern, workspace } from 'vscode';
-import Config from '../../Utils/Config';
-import Log from '../../Utils/Log';
+import Config from '../../Utils/ConfigVscode';
+import Log from '../../Utils/LogVscode';
 
 import { minify, MinifyOutput } from 'terser';
 import { pd as prettyData } from 'pretty-data';

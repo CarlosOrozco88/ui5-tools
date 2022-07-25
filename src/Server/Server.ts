@@ -10,9 +10,9 @@ import portfinder from 'portfinder';
 import Projects from './Projects';
 import LiveServer from './LiveServer';
 import StatusBar from '../StatusBar/StatusBar';
-import Utils from '../Utils/Extension';
-import Log from '../Utils/Log';
-import Config from '../Utils/Config';
+import Utils from '../Utils/ExtensionVscode';
+import Log from '../Utils/LogVscode';
+import Config from '../Utils/ConfigVscode';
 import OdataProxy from './Proxy/Odata';
 import ResourcesProxy from './Proxy/Resources';
 import IndexUI5Tools from './Index/UI5Tools';
@@ -29,7 +29,7 @@ let status: ServerStatus = ServerStatus.STOPPED;
 let serverMode: ServerMode = ServerMode.DEV;
 let oConfigParams: ServerOptions | undefined;
 
-export default {
+const Server = {
   async startDevelopment(oParameters?: ServerParameter): Promise<void> {
     await this.stopAll();
 
@@ -116,11 +116,11 @@ export default {
         if (oConfigParams.watch) {
           await LiveServer.start(oConfigParams);
         }
+        await IndexLaunchpad.set(oConfigParams);
 
         await Projects.serve(oConfigParams);
 
         await IndexUI5Tools.set(oConfigParams);
-        await IndexLaunchpad.set(oConfigParams);
 
         if (oConfigParams.protocol === 'https') {
           server = https.createServer(Utils.getHttpsCert(), serverApp);
@@ -246,3 +246,4 @@ export default {
     return serverMode;
   },
 };
+export default Server;

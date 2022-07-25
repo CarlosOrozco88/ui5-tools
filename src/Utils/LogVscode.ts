@@ -1,9 +1,10 @@
 import { window } from 'vscode';
 
 import { Log as LogType, Level, LogTools } from '../Types/Types';
-import Utils from './Extension';
+import Utils from './ExtensionVscode';
 
 const ui5toolsOutput = window.createOutputChannel(`ui5-tools`);
+
 const Log: LogTools = {
   showOutput(): void {
     ui5toolsOutput.show();
@@ -14,7 +15,7 @@ const Log: LogTools = {
     const sDate = oDate.toLocaleTimeString();
     const sLevelExpanded = sLevel + '       '.slice(0, 7 - sLevel.length);
     const rootPath = Utils.getWorkspaceRootPath();
-    const sNewLine = `[${sLevelExpanded} - ${sDate}] ${sPrev}: ${sText}`.replace(rootPath, '');
+    const sNewLine = `[${sLevelExpanded} - ${sDate}] ${sPrev}: ${sText}`.split(rootPath).join('');
     ui5toolsOutput.appendLine(sNewLine);
     console.log(sNewLine);
     return sText;

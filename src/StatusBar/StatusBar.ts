@@ -1,67 +1,74 @@
 import { window, StatusBarAlignment, StatusBarItem } from 'vscode';
-import Config from '../Utils/Config';
+import Config from '../Utils/ConfigVscode';
 import Server from '../Server/Server';
 import Finder from '../Project/Finder';
-import Log from '../Utils/Log';
 
-let serverNavBar: StatusBarItem;
-export default {
-  serverNavBar: undefined,
+const serverNavBar = window.createStatusBarItem(StatusBarAlignment.Left, 100) as StatusBarItem;
+serverNavBar.command = 'ui5-tools.server.toggle';
+
+const StatusBar = {
+  serverNavBar,
+  text: '',
 
   async init(subscriptions: Array<any>) {
-    if (!serverNavBar && subscriptions) {
-      serverNavBar = window.createStatusBarItem(StatusBarAlignment.Left, 100);
-      serverNavBar.command = 'ui5-tools.server.toggle';
-      subscriptions.push(serverNavBar);
-      this.startText();
-      await this.checkVisibility(true);
+    if (subscriptions) {
+      subscriptions.push(StatusBar.serverNavBar);
+      StatusBar.startText();
+      await StatusBar.checkVisibility(true);
     }
   },
 
   async checkVisibility(bRefresh: boolean) {
-    const sOriginalText = serverNavBar.text;
-    serverNavBar.text = `$(loading~spin) Exploring ui5 projects...`;
-    this.show();
+    const sOriginalText = StatusBar.serverNavBar.text;
+    StatusBar.serverNavBar.text = `$(loading~spin) Exploring ui5 projects...`;
+    StatusBar.show();
     const ui5Projects = await Finder.getAllUI5Projects(bRefresh);
-    serverNavBar.text = sOriginalText;
+    StatusBar.serverNavBar.text = sOriginalText;
 
     if (!ui5Projects.size) {
-      this.hide();
+      StatusBar.hide();
     }
     return ui5Projects.size > 0;
   },
 
   show() {
-    serverNavBar.show();
+    StatusBar.serverNavBar.show();
   },
 
   hide() {
-    serverNavBar.hide();
+    StatusBar.serverNavBar.hide();
   },
 
-  setText(text: string) {
-    const serverName = String(Config.server('name'));
+  setText(text: string, extraText = '') {
+    const serverName = Config.server('name') as string;
     const serverMode = Server.getServerMode();
     const textReplaced = text.replace('<serverName>', serverName).replace('<serverMode>', serverMode);
-    serverNavBar.text = textReplaced;
-    Log.server(textReplaced);
+    StatusBar.text = textReplaced;
+    const textAdditional = extraText ? `: ${extraText}` : '';
+    StatusBar.serverNavBar.text = textReplaced + textAdditional;
+    return textReplaced;
+  },
+
+  setExtraText(extraText = '') {
+    const textReplaced = StatusBar.setText(StatusBar.text, extraText);
     return textReplaced;
   },
 
   startingText(message = '...') {
-    this.show();
-    return this.setText(`$(loading~spin) Starting <serverName>${message}`);
+    StatusBar.show();
+    return StatusBar.setText(`$(loading~spin) Starting <serverName>${message}`);
   },
 
   startText() {
-    return this.setText(`$(debug-start) Start <serverName> | <serverMode>`);
+    return StatusBar.setText(`$(debug-start) Start <serverName> | <serverMode>`);
   },
 
   stoppingText() {
-    return this.setText(`$(loading~spin) Stopping <serverName>...`);
+    return StatusBar.setText(`$(loading~spin) Stopping <serverName>...`);
   },
 
   stopText(port: number) {
-    return this.setText(`$(broadcast) <serverName> live at port ${port} | <serverMode>`);
+    return StatusBar.setText(`$(broadcast) <serverName> live at port ${port} | <serverMode>`);
   },
 };
+export default StatusBar;

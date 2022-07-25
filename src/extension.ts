@@ -18,9 +18,9 @@ import Menu from './Menu/Menu';
 // StatusBar
 import StatusBar from './StatusBar/StatusBar';
 // Utils
-import Config from './Utils/Config';
-import Log from './Utils/Log';
-import Extension from './Utils/Extension';
+import Config from './Utils/ConfigVscode';
+import Log from './Utils/LogVscode';
+import Extension from './Utils/ExtensionVscode';
 import Finder from './Project/Finder';
 
 export async function activate(context: ExtensionContext): Promise<void> {
