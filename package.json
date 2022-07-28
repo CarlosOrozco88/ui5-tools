@@ -141,9 +141,9 @@
         "mac": "alt+d alt+d"
       },
       {
-        "command": "ui5-tools.deployer.deployAll",
-        "key": "alt+d alt+a",
-        "mac": "alt+d alt+a"
+        "command": "ui5-tools.deployer.deployMultiple",
+        "key": "alt+d alt+m",
+        "mac": "alt+d alt+m"
       },
       {
         "command": "ui5-tools.general.showOutput",
@@ -209,8 +209,8 @@
         "title": "UI5 Tools: Builder > Generate UI5 project"
       },
       {
-        "command": "ui5-tools.deployer.deployAll",
-        "title": "UI5 Tools: Deployer > Deploy all UI5 projects"
+        "command": "ui5-tools.deployer.deployMultiple",
+        "title": "UI5 Tools: Deployer > Deploy multiple UI5 projects"
       },
       {
         "command": "ui5-tools.menu.builder.build",
@@ -568,8 +568,8 @@
     "@types/pretty-data": "0.40.0",
     "@types/vscode": "1.68.0",
     "@types/ws": "8.5.3",
-    "@typescript-eslint/eslint-plugin": "5.30.7",
-    "@typescript-eslint/parser": "5.30.7",
+    "@typescript-eslint/eslint-plugin": "5.31.0",
+    "@typescript-eslint/parser": "5.31.0",
     "babel-loader": "8.2.5",
     "clean-webpack-plugin": "4.0.0",
     "eslint": "8.20.0",

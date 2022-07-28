@@ -589,12 +589,16 @@ export default {
               const [name] = aFolders[i];
               await this.uninstallUi5Runtime(name);
             }
-            const sMessage = `Uninstall SAPUI5 Runtime: all SAPUI5 runtime versions uninstalled successfully`;
-            Log.configurator(sMessage);
+
+            const sMessage = Log.configurator(
+              `Uninstall SAPUI5 Runtime: all SAPUI5 runtime versions uninstalled successfully`
+            );
             window.showInformationMessage(sMessage);
           } catch (oError) {
-            const sMessage = `Uninstall SAPUI5 Runtime: unable to uninstall SAPUI5 Runtime`;
-            Log.configurator(sMessage, Level.ERROR);
+            const sMessage = Log.configurator(
+              `Uninstall SAPUI5 Runtime: unable to uninstall SAPUI5 Runtime`,
+              Level.ERROR
+            );
             window.showErrorMessage(sMessage);
           }
         }
@@ -611,12 +615,13 @@ export default {
       const fsVersionUri = Uri.file(fsVersionPath);
       await workspace.fs.delete(fsVersionUri, { recursive: true, useTrash: false });
 
-      const sMessage = `Uninstall SAPUI5 Runtime: ${ui5Version} uninstalled successfully`;
-      Log.configurator(sMessage);
+      const sMessage = Log.configurator(`Uninstall SAPUI5 Runtime: ${ui5Version} uninstalled successfully`);
       window.showInformationMessage(sMessage);
     } catch (oError) {
-      const sMessage = `Uninstall SAPUI5 Runtime: unable to uninstall ${ui5Version} version`;
-      Log.configurator(sMessage, Level.ERROR);
+      const sMessage = Log.configurator(
+        `Uninstall SAPUI5 Runtime: unable to uninstall ${ui5Version} version`,
+        Level.ERROR
+      );
       window.showErrorMessage(sMessage);
       throw oError;
     }

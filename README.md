@@ -151,11 +151,12 @@ VSCode extension for ui5 developers. This extension is not intended to replace u
 
 - `ui5-tools.builder.build`: Build ui5 project | Shortcut: `alt+b alt+b`
 - `ui5-tools.builder.buildAll`: Build workspace | Shortcut: `alt+b alt+a`
-- `ui5-tools.builder.generate`: Generate ui5 project
+- `ui5-tools.builder.generate`: Generate ui5 project: `alt+b alt+g`
 
 #### Deployer Commands
 
 - `ui5-tools.menu.deployer.deploy`: Build and deploy project | Shortcut: `alt+d alt+d`
+- `ui5-tools.menu.deployer.deployMultiple`: Build and deploy multiple projects | Shortcut: `alt+m alt+m`
 
 #### Configurator Commands
 

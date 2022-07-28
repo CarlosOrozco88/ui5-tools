@@ -1,8 +1,8 @@
 import path from 'path';
-import { Progress, ProgressLocation, Uri, window, workspace } from 'vscode';
+import { Progress, Uri, workspace } from 'vscode';
 import chokidar, { FSWatcher } from 'chokidar';
 
-import { BuildTasks, Ui5ToolsConfiguration } from '../Types/Types';
+import { BuildTasks, Level, Ui5ToolsConfiguration } from '../Types/Types';
 import Config from '../Utils/ConfigVscode';
 import Finder from './Finder';
 
@@ -150,27 +150,25 @@ export default class Ui5Project {
    * Generate de folder that we are serving in localhost
    */
   async generate() {
+    if (!this.isGenerated()) {
+      return;
+    }
     const sWorkingFolder = this.fsPathWorking;
     const sGeneratedFolder = this.fsPathGenerated;
 
-    await this.unwatch();
     try {
-      if (sWorkingFolder === sGeneratedFolder) {
-        await Less.build(this, sWorkingFolder, sGeneratedFolder);
-      } else {
-        StatusBar.setExtraText(`Generating project ${this.folderName}...`);
-        // When there are not generated folder (default: webapp/src-gen), we generate the folders
-        // in order to serve the files from here
+      StatusBar.setExtraText(`Generating project ${this.folderName}...`);
+      // When there are not generated folder (default: webapp/src-gen), we generate the folders
+      // in order to serve the files from here
 
-        await Clean.folder(sGeneratedFolder);
-        await Copy.folder(sWorkingFolder, sGeneratedFolder);
-        await Less.build(this, sWorkingFolder, sGeneratedFolder);
-        await Clean.removeLess(sGeneratedFolder);
-        await Typescript.build(sGeneratedFolder, { sourceMaps: true });
-        StatusBar.setExtraText();
-      }
-    } finally {
-      await this.watch();
+      await Clean.folder(sGeneratedFolder);
+      await Copy.folder(sWorkingFolder, sGeneratedFolder);
+      await Less.build(this, sWorkingFolder, sGeneratedFolder);
+      await Clean.removeLess(sGeneratedFolder);
+      await Typescript.build(sGeneratedFolder, { sourceMaps: true });
+      StatusBar.setExtraText();
+    } catch (oError: any) {
+      Log.builder(oError.message, Level.ERROR);
     }
   }
 

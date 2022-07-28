@@ -1,3 +1,8 @@
+## 2.0.2 (29/07/2022)
+
+- Command `ui5-tools.deployer.deployAll` replaced by `ui5-tools.deployer.deployMultiple`
+- Now generate at server launch only generates projects that have different `appFolder/libraryFolder` and `appSrcFolder/librarySrcFolder`
+
 ## 2.0.1 (25/07/2022)
 
 - Added more sandbox.js files for newer sapui5 versions | Launchpad

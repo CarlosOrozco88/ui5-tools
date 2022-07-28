@@ -60,7 +60,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   subscriptions.push(registerCommand('ui5-tools.builder.generate', () => Builder.askProjectToGenerate()));
 
   subscriptions.push(registerCommand('ui5-tools.deployer.deploy', () => Deployer.askProjectToDeploy()));
-  subscriptions.push(registerCommand('ui5-tools.deployer.deployAll', () => Deployer.deployAllProjects()));
+  subscriptions.push(registerCommand('ui5-tools.deployer.deployMultiple', () => Deployer.deployMultipleProjects()));
 
   subscriptions.push(registerCommand('ui5-tools.configurator.odataProvider', () => OdataProvider.wizard()));
   subscriptions.push(registerCommand('ui5-tools.configurator.ui5Provider', () => Ui5Provider.wizard()));

@@ -68,47 +68,167 @@ export default {
     }
   },
 
-  async deployAllProjects(): Promise<void> {
-    Log.deployer(`Deploy all ui5 projects`);
-    const ui5Projects = await Finder.getAllUI5ProjectsArray();
+  async deployMultipleProjects(bDefaultSelected = false): Promise<void> {
+    const allUi5Projects = await Finder.getAllUI5ProjectsArray();
+    if (!allUi5Projects.length) {
+      return;
+    }
+    const askOptions = [
+      {
+        label: `Ask individual deploy for every ui5 project`,
+        description: 'Ask',
+      },
+      {
+        label: `Create a new transport for every ui5 project`,
+        description: 'CreateEach',
+      },
+      {
+        label: `Use ui5tools.json config file for every ui5 project`,
+        description: 'UseTools',
+      },
+    ];
+
+    const selTransportOption: QuickPickItem = await new Promise(async (resolve, reject) => {
+      const selTransportOptionQp = await window.createQuickPick();
+      selTransportOptionQp.title = 'ui5-tools > Deployer > Deploy multiple ui5 projects';
+      selTransportOptionQp.items = askOptions;
+      selTransportOptionQp.placeholder = ``;
+      selTransportOptionQp.canSelectMany = false;
+      selTransportOptionQp.onDidAccept(async () => {
+        if (selTransportOptionQp.selectedItems.length) {
+          resolve(selTransportOptionQp.selectedItems[0]);
+        } else {
+          const sMessage = Log.deployer('No method selected', Level.ERROR);
+          window.showErrorMessage(sMessage);
+          reject(sMessage);
+        }
+        selTransportOptionQp.hide();
+      });
+      selTransportOptionQp.show();
+    });
+    const sMethod = selTransportOption.description ?? '';
+
+    let ui5Projects: Ui5Project[] = [];
+    Log.deployer(`Asking projects to deploy`);
+    try {
+      const qpOptions: Array<QuickPickItem> = [];
+      allUi5Projects.forEach((app) => {
+        qpOptions.push({
+          label: app.folderName,
+          description: app.namespace,
+        });
+      });
+
+      const ui5ProjectToDeployQp = await window.createQuickPick();
+      ui5ProjectToDeployQp.title = 'ui5-tools > Deployer > Select UI5 project';
+      ui5ProjectToDeployQp.items = qpOptions;
+
+      ui5ProjectToDeployQp.selectedItems = bDefaultSelected ? qpOptions : [];
+
+      ui5ProjectToDeployQp.placeholder = 'Select UI5 project to deploy';
+      ui5ProjectToDeployQp.canSelectMany = true;
+      ui5ProjectToDeployQp.show();
+
+      const ui5ProjectsToDeploy: readonly QuickPickItem[] = await new Promise((resolve, reject) => {
+        ui5ProjectToDeployQp.onDidAccept(() => {
+          ui5ProjectToDeployQp.hide();
+          if (ui5ProjectToDeployQp.selectedItems.length) {
+            resolve(ui5ProjectToDeployQp.selectedItems);
+          } else {
+            const sMessage = Log.deployer('No UI5 project selected', Level.ERROR);
+            window.showErrorMessage(sMessage);
+            reject(sMessage);
+          }
+        });
+      });
+
+      ui5Projects = ui5ProjectsToDeploy.reduce((acc, cur) => {
+        const ui5Project = allUi5Projects.find((ui5Project) => ui5Project.namespace == cur.description);
+        if (ui5Project) {
+          acc.push(ui5Project);
+        }
+        return acc;
+      }, ui5Projects);
+    } catch (e) {
+      ui5Projects = [];
+    }
+
     await window.withProgress(
       {
         location: ProgressLocation.Notification,
         title: `ui5-tools > Deploying all`,
         cancellable: true,
       },
-      async (progress, token) => {
+      async (progress) => {
         const oMassiveOptions: DeployMassive = {
-          deployWorkspace: true,
+          method: sMethod,
           transportno: '',
         };
         const oResults = {
           [DeployStatus.Success]: 0,
           [DeployStatus.Error]: 0,
-          [DeployStatus.Skipped]: 0,
         };
         progress.report({ increment: 0 });
-        for (let i = 0; i < ui5Projects.length; i++) {
-          if (token.isCancellationRequested) {
-            return;
-          }
-          progress.report({
-            increment: 100 / ui5Projects.length,
-            message: `${ui5Projects[i].folderName} (${i + 1}/${ui5Projects.length})`,
+
+        const oEnv = Utils.loadEnv();
+        const oUserPassword = {
+          auth: {
+            user: oEnv.UI5TOOLS_DEPLOY_USER || '',
+            pwd: oEnv.UI5TOOLS_DEPLOY_PASSWORD || '',
+          },
+        };
+        // @ts-ignore
+        await this.getUserPass(oUserPassword);
+
+        let transport_text = '';
+        if (sMethod === 'CreateEach') {
+          transport_text = await new Promise((resolve) => {
+            const inputBox = window.createInputBox();
+            inputBox.title = 'ui5-tools > Deployer > Enter generic transport text';
+            inputBox.placeholder = 'Enter transport text. Leave empty for custom transport text in every ui5 project';
+            inputBox.ignoreFocusOut = true;
+            inputBox.onDidAccept(() => {
+              resolve(inputBox.value);
+              inputBox.hide();
+            });
+            inputBox.show();
           });
+        }
+
+        for (let i = 0; i < ui5Projects.length; i++) {
+          const ui5Project = ui5Projects[i];
           try {
-            const deployed = await this.askCreateReuseTransport(ui5Projects[i], oMassiveOptions);
-            oResults[deployed]++;
-          } catch (oError) {
+            const ui5ProjectConfig = await ui5Project.getUi5ToolsFile();
+            const oDeployOptions = await this.getDeployOptions(ui5ProjectConfig);
+            const oDeployOptionsUserPass = {
+              ...oDeployOptions,
+              ...oUserPassword,
+            };
+            oDeployOptionsUserPass.ui5.transport_text = transport_text;
+
+            progress.report({
+              increment: 100 / ui5Projects.length,
+              message: `${ui5Project.folderName} (${i + 1}/${ui5Projects.length})`,
+            });
+
+            if (sMethod === 'Ask') {
+              await this.askCreateReuseTransport(ui5Project, oMassiveOptions);
+            } else if (sMethod === 'CreateEach') {
+              await this.createTransport(ui5Project, oDeployOptionsUserPass);
+              await this.deployProject(ui5Project, oDeployOptions, oMassiveOptions);
+            } else if (sMethod === 'UseTools') {
+              await this.deployProject(ui5Project, oDeployOptions, oMassiveOptions);
+            }
+            oResults[DeployStatus.Success]++;
+          } catch (oError: any) {
             oResults[DeployStatus.Error]++;
-            const sMessage = Log.deployer(`Project ${ui5Projects[i].folderName} not deployed`, Level.ERROR);
-            window.showErrorMessage(sMessage);
+            Log.deployer(oError.message, Level.ERROR);
           }
         }
         const sMessage = Log.deployer(
-          `Deploy finished with ${oResults[DeployStatus.Success]} projects deployed,
-        ${oResults[DeployStatus.Skipped]} skipped and
-        ${oResults[DeployStatus.Error]} not deployed`,
+          `Deploy finished with ${oResults[DeployStatus.Success]} projects deployed and ${
+            oResults[DeployStatus.Error]
+          } not deployed`,
           Level.SUCCESS
         );
         window.showInformationMessage(sMessage);
@@ -121,10 +241,6 @@ export default {
     try {
       if (ui5Project) {
         let ui5ProjectConfig = await ui5Project.getUi5ToolsFile();
-
-        if (oMassiveOptions?.deployWorkspace && ui5ProjectConfig?.deployer?.globalDeploy === false) {
-          return DeployStatus.Skipped;
-        }
 
         if (!ui5ProjectConfig) {
           ui5ProjectConfig = await this.createConfigFile(ui5Project);
@@ -188,7 +304,7 @@ export default {
           case '':
             throw new Error('Deploy canceled');
           case 'Create':
-            await this.createTransport(ui5Project, oDeployOptions, oMassiveOptions);
+            await this.createTransport(ui5Project, oDeployOptions);
             break;
           case 'Update':
             await this.updateTransport(ui5Project, oDeployOptions);
@@ -213,30 +329,32 @@ export default {
     return DeployStatus.Success;
   },
 
-  async createTransport(ui5Project: Ui5Project, oDeployOptions: DeployOptions, oMassiveOptions?: DeployMassive) {
+  async createTransport(ui5Project: Ui5Project, oDeployOptions: DeployOptions) {
     const sDate = new Date().toLocaleString();
     const sDefaultText = `${ui5Project.folderName}: ${sDate}`;
 
-    let transport_text: string;
-    try {
-      transport_text = await new Promise((resolve) => {
-        const inputBox = window.createInputBox();
-        inputBox.title = 'ui5-tools > Deployer > Create transport > Enter transport text';
-        inputBox.placeholder = 'Enter transport text';
-        inputBox.ignoreFocusOut = true;
-        inputBox.onDidAccept(() => {
-          resolve(inputBox.value);
-          inputBox.hide();
+    let transport_text = oDeployOptions.ui5.transport_text;
+    if (!transport_text) {
+      try {
+        transport_text = await new Promise((resolve) => {
+          const inputBox = window.createInputBox();
+          inputBox.title = 'ui5-tools > Deployer > Create transport > Enter transport text';
+          inputBox.placeholder = 'Enter transport text';
+          inputBox.ignoreFocusOut = true;
+          inputBox.onDidAccept(() => {
+            resolve(inputBox.value);
+            inputBox.hide();
+          });
+          inputBox.show();
         });
-        inputBox.show();
-      });
-    } catch (oError) {
-      throw new Error('Create transport canceled');
+      } catch (oError) {
+        throw new Error('Create transport canceled');
+      }
     }
 
     if (!transport_text) {
       transport_text = sDefaultText;
-    } else if (Config.deployer('autoPrefixBSP') && !oMassiveOptions?.deployWorkspace) {
+    } else if (Config.deployer('autoPrefixBSP')) {
       transport_text = `${oDeployOptions.ui5.bspcontainer}: ${transport_text}`;
     }
     oDeployOptions.ui5.transport_text = transport_text;
@@ -320,7 +438,7 @@ export default {
 
           const sMessage = Log.deployer(`Project ${ui5Project.folderName} deployed!`);
 
-          if (!oMassiveOptions?.deployWorkspace) {
+          if (!oMassiveOptions) {
             window.showInformationMessage(sMessage);
           }
         }

@@ -150,13 +150,12 @@ export interface DeployOptions {
 
 export interface DeployMassive {
   transportno?: string;
-  deployWorkspace?: boolean;
+  method: string;
 }
 
 export enum DeployStatus {
   Error = 0,
-  Skipped = 1,
-  Success = 2,
+  Success = 1,
 }
 
 export interface Ui5ToolsConfiguration {
