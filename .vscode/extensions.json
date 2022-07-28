@@ -1,7 +1,16 @@
 {
-	// See https://go.microsoft.com/fwlink/?LinkId=733558
-	// for the documentation about the extensions.json format
-	"recommendations": [
-		"dbaeumer.vscode-eslint"
-	]
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the extensions.json format
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "usernamehw.errorlens",
+    "editorconfig.editorconfig",
+    "eamodio.gitlens",
+    "ghmcadams.lintlens",
+    "zhuangtongfa.material-theme",
+    "pkief.material-icon-theme",
+    "esbenp.prettier-vscode",
+    "pflannery.vscode-versionlens",
+    "redhat.vscode-xml"
+  ]
 }
