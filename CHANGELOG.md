@@ -1,4 +1,4 @@
-## 2.0.2 (29/07/2022)
+## 2.0.2 (28/07/2022)
 
 - Command `ui5-tools.deployer.deployAll` replaced by `ui5-tools.deployer.deployMultiple`
 - Now generate at server launch only generates projects that have different `appFolder/libraryFolder` and `appSrcFolder/librarySrcFolder`
