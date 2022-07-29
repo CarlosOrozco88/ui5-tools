@@ -59,12 +59,8 @@ const Finder = {
           aWorkspacesResults.push(aManifestList);
         }
         const aWorkspacesList = await Promise.all(aWorkspacesResults);
-
-        await Finder.addManifests(aWorkspacesList);
-
-        for (const ui5Project of this.ui5Projects.values()) {
-          await ui5Project.watch();
-        }
+        const aManifestsUri = await Finder.getManifestsUri(aWorkspacesList);
+        await Finder.addManifests(aManifestsUri);
 
         Log.general(`${ui5Projects.size} ui5 projects found!`);
 
@@ -78,12 +74,66 @@ const Finder = {
     return getUi5ProjectssPromise;
   },
 
-  async addManifests(aWorkspacesList: Uri[][]) {
-    for (const aManifests of aWorkspacesList) {
-      for (const oManifest of aManifests) {
-        const { fsPath } = oManifest;
-        await Finder.addUi5Project(fsPath);
+  async getManifestsUri(aWorkspacesList: Uri[][]) {
+    const mapUris: Map<string, Uri> = new Map();
+
+    const librarySrcFolder = Config.general('librarySrcFolder') as string;
+    const libraryGenFolder = Config.general('libraryFolder') as string;
+    const appSrcFolder = Config.general('appSrcFolder') as string;
+    const appGenFolder = Config.general('appFolder') as string;
+    const distFolder = Config.general('distFolder') as string;
+    const PRIORITY: Record<string, number> = {
+      DEFAULT: 1,
+    };
+
+    PRIORITY[librarySrcFolder] = 100;
+    PRIORITY[libraryGenFolder] = 50;
+
+    PRIORITY[appSrcFolder] = 100;
+    PRIORITY[appGenFolder] = 50;
+
+    const workspaceRoot = Utils.getWorkspaceRootPath();
+
+    for (const aUris of aWorkspacesList) {
+      for (const oUri of aUris) {
+        const pathFromRoot = oUri.fsPath.replace(workspaceRoot, '');
+        const dirnameCurrent = path.dirname(pathFromRoot);
+        const folderNameCurrent = path.basename(dirnameCurrent);
+
+        const appHash = pathFromRoot
+          .split(`${path.sep}${librarySrcFolder}${path.sep}`)
+          .join(path.sep)
+          .split(`${path.sep}${libraryGenFolder}${path.sep}`)
+          .join(path.sep)
+          .split(`${path.sep}${appSrcFolder}${path.sep}`)
+          .join(path.sep)
+          .split(`${path.sep}${appGenFolder}${path.sep}`)
+          .join(path.sep)
+          .split(`${path.sep}${distFolder}${path.sep}`)
+          .join(path.sep);
+        const existingUri = mapUris.get(appHash);
+        let replace = false;
+        if (existingUri) {
+          const dirnameExisting = path.dirname(existingUri.fsPath.replace(workspaceRoot, ''));
+          const folderNameExisting = path.basename(dirnameExisting);
+
+          const existingPriority = PRIORITY[folderNameExisting] ?? PRIORITY.DEFAULT;
+          const currentPriority = PRIORITY[folderNameCurrent] ?? PRIORITY.DEFAULT;
+          replace = currentPriority > existingPriority;
+        }
+        if (!existingUri || replace) {
+          mapUris.set(appHash, oUri);
+        }
       }
+    }
+    const aManifestsUris = Array.from(mapUris.values());
+
+    return aManifestsUris;
+  },
+
+  async addManifests(aManifestsUri: Uri[] = []) {
+    for (const oUri of aManifestsUri) {
+      await Finder.addUi5Project(oUri.fsPath);
     }
   },
 

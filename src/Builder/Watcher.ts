@@ -57,7 +57,6 @@ export default {
       const ui5Project = await Finder.addUi5Project(sFilePath);
       if (ui5Project) {
         await Projects.serveProject(ui5Project);
-        await ui5Project.watch();
         await Menu.setContexts();
 
         await StatusBar.checkVisibility(false);

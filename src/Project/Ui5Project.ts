@@ -104,7 +104,7 @@ export default class Ui5Project {
     const fsPathDist = path.join(fsPathBase, distFolder);
 
     const sDeployFolder = Config.deployer('deployFolder') as string;
-    const fsPathDeploy = sDeployFolder === 'Dist Folder' ? fsPathDist : fsPathGenerated;
+    const fsPathDeploy = sDeployFolder === 'Dist Folder' ? fsPathDist : fsPathBase;
 
     const priority = Ui5Project.calcProjectPriority({
       isLibrary,
@@ -144,6 +144,8 @@ export default class Ui5Project {
     this.fsPathDist = props.fsPathDist;
     this.fsPathDeploy = props.fsPathDeploy;
     this.srcFolder = props.srcFolder;
+
+    this.watch();
   }
 
   /**

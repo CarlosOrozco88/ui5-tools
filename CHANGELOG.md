@@ -1,3 +1,8 @@
+## 2.0.3 (29/07/2022)
+
+- Some ui5 projects discovery performance improvements
+- Fixed deploy with `Project Folder`
+
 ## 2.0.2 (28/07/2022)
 
 - Command `ui5-tools.deployer.deployAll` replaced by `ui5-tools.deployer.deployMultiple`
