@@ -1,3 +1,9 @@
+## 2.0.4 (03/08/2022)
+
+- Fixed MS Windows watcher fsPaths
+- Fixed replace strings in ts files
+- Dependencies upgrade
+
 ## 2.0.3 (29/07/2022)
 
 - Some ui5 projects discovery performance improvements

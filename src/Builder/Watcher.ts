@@ -29,14 +29,15 @@ export default {
     this.watchApps = chokidar.watch([sWorkspaceRootPath], {
       ignoreInitial: true,
       ignored: (sPath: string) => {
-        const filename = path.basename(sPath);
+        const sPathResolved = path.resolve(sPath);
+        const filename = path.basename(sPathResolved);
 
         let bIgnore = filename.startsWith('.') || filename === 'node_modules';
 
         if (!bIgnore) {
           const ui5Projects = Array.from(Finder.ui5Projects.values());
           const ui5Project = ui5Projects.find(
-            (ui5Project) => ui5Project.fsPathBase !== sPath && sPath.startsWith(ui5Project.fsPathBase)
+            (ui5Project) => ui5Project.fsPathBase !== sPathResolved && sPathResolved.startsWith(ui5Project.fsPathBase)
           );
           bIgnore = !!ui5Project;
         }
@@ -53,32 +54,35 @@ export default {
   },
 
   async fileAdded(sFilePath: string) {
-    if (this.isManifest(sFilePath)) {
-      const ui5Project = await Finder.addUi5Project(sFilePath);
+    const sPathResolved = path.resolve(sFilePath);
+    if (this.isManifest(sPathResolved)) {
+      const ui5Project = await Finder.addUi5Project(sPathResolved);
       if (ui5Project) {
         await Projects.serveProject(ui5Project);
         await Menu.setContexts();
 
         await StatusBar.checkVisibility(false);
-        LiveServer.refresh(sFilePath);
+        LiveServer.refresh(sPathResolved);
       }
     }
   },
 
   async fileChanged(sFilePath: string) {
-    if (this.isManifest(sFilePath)) {
-      const ui5Project = await Finder.findUi5ProjectForWorkingFsPath(sFilePath);
+    const sPathResolved = path.resolve(sFilePath);
+    if (this.isManifest(sPathResolved)) {
+      const ui5Project = await Finder.findUi5ProjectForWorkingFsPath(sPathResolved);
       if (!ui5Project) {
-        this.fileAdded(sFilePath);
+        this.fileAdded(sPathResolved);
       }
     }
   },
 
   async fileDeleted(sFilePath: string) {
-    if (this.isManifest(sFilePath)) {
-      await Finder.removeUi5ProjectManifest(sFilePath);
+    const sPathResolved = path.resolve(sFilePath);
+    if (this.isManifest(sPathResolved)) {
+      await Finder.removeUi5ProjectManifest(sPathResolved);
       await StatusBar.checkVisibility(false);
-      LiveServer.refresh(sFilePath);
+      LiveServer.refresh(sPathResolved);
     }
   },
 

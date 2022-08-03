@@ -180,7 +180,8 @@ export default class Ui5Project {
       this.watcher = chokidar.watch([this.fsPathWorking], {
         ignoreInitial: true,
         ignored: (sPath: string) => {
-          const aPath = sPath.split(path.sep);
+          const sPathResolved = path.resolve(sPath);
+          const aPath = sPathResolved.split(path.sep);
           const bIgnore = aIgnored.some((f) => aPath.includes(f));
           return bIgnore;
         },
@@ -197,14 +198,15 @@ export default class Ui5Project {
   }
 
   async fileChanged(pathFileChanged: string) {
-    const filename = path.basename(pathFileChanged);
-    const fileExtension = path.extname(pathFileChanged).replace('.', '');
-    let pathGenerated = pathFileChanged.replace(this.fsPathWorking, this.fsPathGenerated);
+    const sPathResolved = path.resolve(pathFileChanged);
+    const filename = path.basename(sPathResolved);
+    const fileExtension = path.extname(sPathResolved).replace('.', '');
+    let pathGenerated = sPathResolved.replace(this.fsPathWorking, this.fsPathGenerated);
     let doRefresh = true;
 
     if (filename === 'manifest.json') {
       try {
-        const manifest = await Ui5Project.readManifest(pathFileChanged);
+        const manifest = await Ui5Project.readManifest(sPathResolved);
         const isValidManifest = Ui5Project.isValidManifest(manifest);
 
         if (isValidManifest) {
@@ -240,14 +242,14 @@ export default class Ui5Project {
     if (Server.isStartedDevelopment() && this.isGenerated()) {
       OPTIONS.ts = async () => {
         StatusBar.setExtraText(`Generating js file from ${filename}...`);
-        await Copy.file(pathFileChanged, pathGenerated);
+        await Copy.file(sPathResolved, pathGenerated);
         await Typescript.transpileUriToFile(uriGenerated, { sourceMaps: true });
         pathGenerated = pathGenerated.replace('.ts', '.js');
         StatusBar.setExtraText();
       };
       OPTIONS.default = async () => {
         StatusBar.setExtraText(`Coping file ${filename}...`);
-        await Copy.file(pathFileChanged, pathGenerated);
+        await Copy.file(sPathResolved, pathGenerated);
         StatusBar.setExtraText();
       };
     }
@@ -257,7 +259,7 @@ export default class Ui5Project {
 
     if (Server.isStartedProduction()) {
       await this.awaitLiveBuild();
-      pathGenerated = pathFileChanged.replace(this.fsPathGenerated, this.fsPathDist);
+      pathGenerated = sPathResolved.replace(this.fsPathGenerated, this.fsPathDist);
       LiveServer.refresh(pathGenerated);
     } else if (doRefresh) {
       LiveServer.refresh(pathGenerated);
