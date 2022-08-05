@@ -1,6 +1,5 @@
 import { ServerOptions } from '../Types/Types';
 import Server from './Server';
-import { ui5ProjectExcludeResources } from './Middlewares/Resources';
 import { cacheBusterIndex, cacheBusterMiddleware } from './Middlewares/Cachebuster';
 import { liveTranspileBabel } from './Middlewares/LiveTranspileBabel';
 import Ui5Project from '../Project/Ui5Project';
@@ -23,9 +22,9 @@ const Projects = {
     const ui5ProjectCacheBusterMiddleware = cacheBusterMiddleware();
     const ui5LiveTranspileMiddleware = liveTranspileBabel(ui5Project);
     const ui5StaticMiddleware = createStaticMiddleware(staticPath);
+
     oConfigParams?.serverApp?.use(
       ui5Project.serverPath,
-      ui5ProjectExcludeResources,
       ui5ProjectCacheBusterMiddleware,
       ui5LiveTranspileMiddleware,
       ui5StaticMiddleware

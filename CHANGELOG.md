@@ -1,3 +1,7 @@
+## 2.0.5 (05/08/2022)
+
+- Fixed Gateway resources proxy with odata proxy
+
 ## 2.0.4 (03/08/2022)
 
 - Fixed MS Windows watcher fsPaths
