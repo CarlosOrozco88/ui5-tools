@@ -77,7 +77,7 @@ export function parseUi5Version(ui5Version: string) {
   let major = 0;
   let minor = 0;
   let patch = 0;
-  const aVersionMatch = String(ui5Version).match(/^(\d+)\.(\d+)\.(\d+)$/);
+  const aVersionMatch = String(ui5Version).match(/^(\d+)\.(\d+)\.(\d+)(-.*)*$/);
   if (aVersionMatch) {
     major = parseInt(aVersionMatch[1], 10);
     minor = parseInt(aVersionMatch[2], 10);
