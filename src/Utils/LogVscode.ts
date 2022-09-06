@@ -37,6 +37,10 @@ const Log: LogTools = {
     return Log.log(`Deployer`, sText, sLevel);
   },
 
+  importer(sText: string, sLevel?: Level): string {
+    return Log.log(`Importer`, sText, sLevel);
+  },
+
   server(sText: string, sLevel?: Level): string {
     return Log.log(`Server`, sText, sLevel);
   },
@@ -51,6 +55,10 @@ const Log: LogTools = {
 
   newLogProviderDeployer(): LogType {
     return Log.newLogProvider(Log.deployer);
+  },
+
+  newLogProviderImporter(): LogType {
+    return Log.newLogProvider(Log.importer);
   },
 
   newLogProvider(fnLogger = Log.general): LogType {
