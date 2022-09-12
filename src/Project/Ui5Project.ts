@@ -318,7 +318,7 @@ export default class Ui5Project {
     const namespace = manifest?.['sap.app']?.id;
     const type = manifest?.['sap.app']?.type;
 
-    return namespace && type;
+    return !!(namespace && type);
   }
 
   /**
