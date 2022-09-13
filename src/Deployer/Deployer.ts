@@ -12,6 +12,7 @@ import Config from '../Utils/ConfigVscode';
 import { DeployMassive, DeployOptions, Level, DeployStatus, Ui5ToolsConfiguration } from '../Types/Types';
 import Ui5Project from '../Project/Ui5Project';
 import Finder from '../Project/Finder';
+import Fetch from '../Utils/Fetch';
 
 const oLogger = Log.newLogProviderDeployer();
 
@@ -362,7 +363,10 @@ export default {
     oDeployOptions.ui5.transportno = '';
     oDeployOptions.ui5.transport_use_user_match = false;
 
-    const processReject = this.setUnautorized(oDeployOptions);
+    const processReject = Fetch.setUnautorized(
+      oDeployOptions.conn?.useStrictSSL,
+      !!Config.deployer('rejectUnauthorized')
+    );
     const oTransportManager = this.getTransportManager(oDeployOptions);
 
     const transportno: string = await new Promise((resolve, reject) => {
@@ -469,7 +473,10 @@ export default {
 
       this.autoSaveOrder(ui5Project, oDeployOptions);
 
-      const processReject = this.setUnautorized(oDeployOptions);
+      const processReject = Fetch.setUnautorized(
+        oDeployOptions.conn?.useStrictSSL,
+        !!Config.deployer('rejectUnauthorized')
+      );
       try {
         const patternFiles = new RelativePattern(ui5Project.fsPathDeploy, `**/*`);
         const aProjectFiles = await workspace.findFiles(patternFiles);
@@ -782,17 +789,5 @@ export default {
       }
       oDeployOptions.auth.pwd = sPwd;
     }
-  },
-
-  setUnautorized(oDeployOptions: DeployOptions) {
-    const originalReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-    if (oDeployOptions.conn?.useStrictSSL === false && !Config.deployer('rejectUnauthorized')) {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    }
-    return {
-      restore: () => {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalReject;
-      },
-    };
   },
 };

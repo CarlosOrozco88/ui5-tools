@@ -26,5 +26,17 @@ const Fetch = {
     });
     return response.text();
   },
+
+  setUnautorized(useStrictSSL?: boolean, rejectUnauthorized?: boolean) {
+    const originalReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+    if (useStrictSSL === false && !rejectUnauthorized) {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    }
+    return {
+      restore: () => {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalReject;
+      },
+    };
+  },
 };
 export default Fetch;

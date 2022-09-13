@@ -72,6 +72,11 @@ export default {
           url: 'https://github.com/CarlosOrozco88',
         },
         {
+          src: 'https://avatars.githubusercontent.com/u/33299683?v=4',
+          tooltip: 'David Perez Bris',
+          url: 'https://github.com/dperezbr',
+        },
+        {
           src: 'https://avatars.githubusercontent.com/u/18210819?v=4',
           tooltip: 'Joaquim Monserrat Companys',
           url: 'https://github.com/jeremies',

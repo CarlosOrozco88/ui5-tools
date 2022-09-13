@@ -24,6 +24,10 @@ export default {
     return this.property(property, 'server');
   },
 
+  importer(property?: string): WorkspaceConfiguration | unknown {
+    return this.property(property, 'importer');
+  },
+
   builder(property?: string): WorkspaceConfiguration | unknown {
     return this.property(property, 'builder');
   },

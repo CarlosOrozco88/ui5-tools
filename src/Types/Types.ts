@@ -153,7 +153,6 @@ export interface DeployOptions {
 export interface ImportOptions {
   conn: {
     url: string;
-    baseurl: string;
     useStrictSSL?: boolean;
     proxy?: string;
     customQueryParams?: Record<string, string>;
@@ -161,9 +160,6 @@ export interface ImportOptions {
   auth: {
     user?: string;
     pwd?: string;
-  };
-  ui5: {
-    bsp_name: string;
   };
   workspace: {
     root: string;
@@ -235,4 +231,13 @@ export interface SandboxFile {
   files: Record<string, string>;
   versions: Record<string, string>;
   default: string;
+}
+export interface BSPData {
+  id: string;
+  title: string;
+  author: string;
+  contributor: string;
+  summary: string;
+  url: string;
+  contentUrl: string;
 }

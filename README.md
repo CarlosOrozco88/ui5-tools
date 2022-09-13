@@ -57,6 +57,10 @@ VSCode extension for ui5 developers. This extension is not intended to replace u
 - Deploy process uses [ui5-nwabap-deployer-core
   ](https://github.com/pfefferf/ui5-nwabap-deployer/blob/master/packages/ui5-nwabap-deployer-core), so the extension uses the same configuration in file ui5-tools.json (property deployer.options)
 
+#### Importer
+
+- **Import BSP** directly from Gateway systems `alt+i alt+i`
+
 ### String replacer
 
 - **Default replace patterns** `<% TIMESTAMP %>`, `<% ISODATE %>`, `<% DMY %>`, `<% YMD %>`, `<% MYD %>`
@@ -129,6 +133,10 @@ VSCode extension for ui5 developers. This extension is not intended to replace u
 - `ui5-tools.deployer.autoPrefixBSP`: Auto prefix BSP name in all transport texts while creation | default: `false`
 - `ui5-tools.deployer.rejectUnauthorized`: Reject deployments in servers with misconfigured certificates
 
+#### Importer Settings
+
+- `ui5-tools.importer.importUri`: Source gateway system to import BSPs | default: ``
+
 ## Commands
 
 ---
@@ -155,8 +163,12 @@ VSCode extension for ui5 developers. This extension is not intended to replace u
 
 #### Deployer Commands
 
-- `ui5-tools.menu.deployer.deploy`: Build and deploy project | Shortcut: `alt+d alt+d`
-- `ui5-tools.menu.deployer.deployMultiple`: Build and deploy multiple projects | Shortcut: `alt+m alt+m`
+- `ui5-tools.deployer.deploy`: Build and deploy project | Shortcut: `alt+d alt+d`
+- `ui5-tools.deployer.deployMultiple`: Build and deploy multiple projects | Shortcut: `alt+m alt+m`
+
+#### Importer Commands
+
+- `ui5-tools.importer.import`: Import BSP from Gateway system | Shortcut: `alt+i alt+i`
 
 #### Configurator Commands
 
