@@ -26,35 +26,31 @@ let panelLicence: WebviewPanel | undefined;
 
 export default {
   async wizard() {
-    try {
-      const ui5Provider = await this.quickPickUi5Provider();
-      if (ui5Provider === 'Gateway') {
-        //@ts-ignore
-        await Config.server().update('resourcesProxy', ui5Provider, ConfigurationTarget.Workspace);
-        Log.configurator(`Set resourcesProxy value to ${ui5Provider}`);
+    const ui5Provider = await this.quickPickUi5Provider();
+    if (ui5Provider === 'Gateway') {
+      //@ts-ignore
+      await Config.server().update('resourcesProxy', ui5Provider, ConfigurationTarget.Workspace);
+      Log.configurator(`Set resourcesProxy value to ${ui5Provider}`);
 
-        await this.inputBoxGatewayUri();
-        await this.setGatewayUi5Version();
-      } else if (ui5Provider === 'Runtime') {
-        //@ts-ignore
-        await Config.server().update('resourcesProxy', ui5Provider, ConfigurationTarget.Workspace);
-        Log.configurator(`Set resourcesProxy value to ${ui5Provider}`);
+      await this.inputBoxGatewayUri();
+      await this.setGatewayUi5Version();
+    } else if (ui5Provider === 'Runtime') {
+      //@ts-ignore
+      await Config.server().update('resourcesProxy', ui5Provider, ConfigurationTarget.Workspace);
+      Log.configurator(`Set resourcesProxy value to ${ui5Provider}`);
 
-        await this.quickPickUi5RuntimeVersion();
-      } else if (ui5Provider === 'CDN SAPUI5' || ui5Provider === 'CDN OpenUI5') {
-        //@ts-ignore
-        await Config.server().update('resourcesProxy', ui5Provider, ConfigurationTarget.Workspace);
-        Log.configurator(`Set resourcesProxy value to ${ui5Provider}`);
+      await this.quickPickUi5RuntimeVersion();
+    } else if (ui5Provider === 'CDN SAPUI5' || ui5Provider === 'CDN OpenUI5') {
+      //@ts-ignore
+      await Config.server().update('resourcesProxy', ui5Provider, ConfigurationTarget.Workspace);
+      Log.configurator(`Set resourcesProxy value to ${ui5Provider}`);
 
-        await this.setUi5Version();
-      } else if (ui5Provider) {
-        await this.setDestination(ui5Provider);
-        await this.setGatewayUi5Version();
-      }
-      Server.restart();
-    } catch (error: any) {
-      throw new Error(error);
+      await this.setUi5Version();
+    } else if (ui5Provider) {
+      await this.setDestination(ui5Provider);
+      await this.setGatewayUi5Version();
     }
+    Server.restart();
   },
 
   async setGatewayUi5Version() {
@@ -184,42 +180,33 @@ export default {
     } catch (error: any) {
       throw new Error(error);
     }
-    return new Promise(async (resolve, reject) => {
-      let ui5Version;
-      try {
-        let ui5Version;
-        if (versions) {
-          ui5Version = await this.quickPickUi5Version(versions);
-        } else {
-          ui5Version = await this.inputBoxUi5Version();
-        }
-        //@ts-ignore
-        await Config.general().update('ui5Version', ui5Version, ConfigurationTarget.Workspace);
 
-        Log.configurator(`Set ui5Version value ${ui5Version}`);
-        resolve(ui5Version);
-      } catch (sError: any) {
-        Log.configurator(sError.message, Level.ERROR);
-        reject(sError);
+    try {
+      let ui5Version;
+      if (versions) {
+        ui5Version = await this.quickPickUi5Version(versions);
+      } else {
+        ui5Version = await this.inputBoxUi5Version();
       }
-      resolve(ui5Version);
-    });
+      //@ts-ignore
+      await Config.general().update('ui5Version', ui5Version, ConfigurationTarget.Workspace);
+
+      Log.configurator(`Set ui5Version value ${ui5Version}`);
+      return ui5Version;
+    } catch (oError: any) {
+      Log.configurator(oError.message, Level.ERROR);
+      throw oError;
+    }
   },
 
   async quickPickUi5Version(versionsMajor: Array<any>) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const major = await this.quickPickUi5VersionMajor(versionsMajor);
-        const versionsMinor = versionsMajor.find((versionData) => {
-          return versionData.label === major;
-        });
-        const version = await this.quickPickUi5VersionMinor(versionsMinor.patches);
-
-        resolve(version);
-      } catch (error) {
-        reject(error);
-      }
+    const major = await this.quickPickUi5VersionMajor(versionsMajor);
+    const versionsMinor = versionsMajor.find((versionData) => {
+      return versionData.label === major;
     });
+    const version = await this.quickPickUi5VersionMinor(versionsMinor.patches);
+
+    return version;
   },
 
   async quickPickUi5VersionMajor(versionsMajor: Array<any>) {
@@ -311,25 +298,19 @@ export default {
   },
 
   async quickPickUi5RuntimeVersion() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const versions = await this.getRuntimeVersions();
-        const major = await this.quickPickUi5RuntimeVersionMajor(versions);
+    const versions = await this.getRuntimeVersions();
+    const major = await this.quickPickUi5RuntimeVersionMajor(versions);
 
-        const version = await this.quickPickUi5RuntimeVersionMinor(major.patches);
+    const version = await this.quickPickUi5RuntimeVersionMinor(major.patches);
 
-        //@ts-ignore
-        await Config.general().update('ui5Version', version.version, ConfigurationTarget.Workspace);
-        Log.configurator(`Set ui5Version value ${version.version}`);
+    //@ts-ignore
+    await Config.general().update('ui5Version', version.version, ConfigurationTarget.Workspace);
+    Log.configurator(`Set ui5Version value ${version.version}`);
 
-        if (!version.installed) {
-          await this.downloadRuntime(version);
-        }
-        resolve(version);
-      } catch (error) {
-        reject(error);
-      }
-    });
+    if (!version.installed) {
+      await this.downloadRuntime(version);
+    }
+    return version;
   },
 
   async quickPickUi5RuntimeVersionMajor(versions: Array<any>): Promise<VersionTree> {

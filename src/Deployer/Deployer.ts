@@ -529,6 +529,7 @@ export default {
 
   async createConfigFile(ui5Project: Ui5Project) {
     const ui5ProjectConfig = await ui5Project.getUi5ToolsFile();
+    let bChange = !!ui5ProjectConfig;
 
     const oConfigFile: Ui5ToolsConfiguration = deepmerge(
       {
@@ -586,6 +587,7 @@ export default {
     }
 
     if (!oConfigFile.deployer.options.conn.server) {
+      bChange = true;
       const sServer: string = await new Promise((resolve) => {
         const inputBox = window.createInputBox();
         inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Server Url';
@@ -607,6 +609,7 @@ export default {
     }
 
     if (!oConfigFile.deployer.options.conn.client) {
+      bChange = true;
       let sClient: string | undefined;
       try {
         sClient = await new Promise((resolve) => {
@@ -632,6 +635,7 @@ export default {
     }
 
     if (!oConfigFile.deployer.options.ui5.language) {
+      bChange = true;
       const sLanguage: string = await new Promise((resolve) => {
         const inputBox = window.createInputBox();
         inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Language';
@@ -651,7 +655,9 @@ export default {
       Log.deployer(`ui5-tools.json: Language ${sLanguage}`);
       oConfigFile.deployer.options.ui5.language = sLanguage;
     }
+
     if (!oConfigFile.deployer.options.ui5.package) {
+      bChange = true;
       const sPackage: string = await new Promise((resolve) => {
         const inputBox = window.createInputBox();
         inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Package for the BSP';
@@ -673,6 +679,7 @@ export default {
     }
 
     if (!oConfigFile.deployer.options.ui5.bspcontainer) {
+      bChange = true;
       const sBspContainer: string = await new Promise((resolve) => {
         const inputBox = window.createInputBox();
         inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Package for the BSP (max 15 chars)';
@@ -699,6 +706,7 @@ export default {
     }
 
     if (!oConfigFile.deployer.options.ui5.bspcontainer_text) {
+      bChange = true;
       const sBspContainerText: string = await new Promise((resolve) => {
         const inputBox = window.createInputBox();
         inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > BSP Description';
@@ -719,10 +727,13 @@ export default {
       oConfigFile.deployer.options.ui5.bspcontainer_text = sBspContainerText;
     }
     if (oConfigFile.deployer.options.ui5.calc_appindex == null) {
+      bChange = true;
       oConfigFile.deployer.options.ui5.calc_appindex = true;
     }
 
-    await ui5Project.setUi5ToolsFile(oConfigFile);
+    if (bChange) {
+      await ui5Project.setUi5ToolsFile(oConfigFile);
+    }
 
     return oConfigFile;
   },
