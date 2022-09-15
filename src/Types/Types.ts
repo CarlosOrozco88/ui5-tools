@@ -127,7 +127,7 @@ export interface BuildTasks {
 export interface DeployOptions {
   conn: {
     server: string;
-    client: number;
+    client: string;
     useStrictSSL?: boolean;
     proxy?: string;
     customQueryParams?: Record<string, string>;
@@ -153,6 +153,7 @@ export interface DeployOptions {
 export interface ImportOptions {
   conn: {
     url: string;
+    client: string;
     useStrictSSL?: boolean;
     proxy?: string;
     customQueryParams?: Record<string, string>;

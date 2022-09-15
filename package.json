@@ -215,6 +215,10 @@
         "title": "UI5 Tools: Builder > Generate UI5 project"
       },
       {
+        "command": "ui5-tools.deployer.deploy",
+        "title": "UI5 Tools: Deployer > Deploy multiple UI5 projects"
+      },
+      {
         "command": "ui5-tools.deployer.deployMultiple",
         "title": "UI5 Tools: Deployer > Deploy multiple UI5 projects"
       },
@@ -545,10 +549,20 @@
           "default": "Dist Folder",
           "description": "Deploy folder"
         },
-        "ui5-tools.importer.importUri": {
+        "ui5-tools.importer.uri": {
           "type": "string",
           "default": "",
-          "description": "Your gateway server url (example: http://srvaspgwd.com:8080/) to import BSPs."
+          "description": "Your gateway server url (example: http://srvaspgwd.com:8080/) to import BSPs"
+        },
+        "ui5-tools.importer.client": {
+          "type": "string",
+          "default": "",
+          "description": "Your gateway client"
+        },
+        "ui5-tools.importer.generateConfig": {
+          "type": "boolean",
+          "default": true,
+          "description": "Generate automatically the 'ui5-tools.json' file"
         }
       }
     }

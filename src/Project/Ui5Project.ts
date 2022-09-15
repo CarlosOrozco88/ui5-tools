@@ -486,7 +486,12 @@ export default class Ui5Project {
     const sConfigFile = JSON.stringify(oConfigFile, undefined, 2);
     await workspace.fs.writeFile(uri, Buffer.from(sConfigFile));
 
+    Log.deployer(`ui5-tools.json: File created!`);
     return oConfigFile;
+  }
+
+  isFolderName(sFolderName: string) {
+    return this.folderName === sFolderName;
   }
 
   isFileInFsPath(sFsFilePath: string) {

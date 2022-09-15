@@ -1,4 +1,6 @@
 import fetch, { RequestInit } from 'node-fetch';
+import https from 'https';
+const originalReject = https.globalAgent.options.rejectUnauthorized;
 
 const Fetch = {
   async fetch(url: string, options: RequestInit = {}) {
@@ -28,13 +30,12 @@ const Fetch = {
   },
 
   setUnautorized(useStrictSSL?: boolean, rejectUnauthorized?: boolean) {
-    const originalReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
     if (useStrictSSL === false && !rejectUnauthorized) {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+      https.globalAgent.options.rejectUnauthorized = false;
     }
     return {
       restore: () => {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalReject;
+        https.globalAgent.options.rejectUnauthorized = originalReject;
       },
     };
   },

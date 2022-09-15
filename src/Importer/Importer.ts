@@ -5,11 +5,12 @@ import { Headers } from 'node-fetch';
 import Fetch from '../Utils/Fetch';
 import https from 'https';
 import Utils from '../Utils/ExtensionVscode';
-import { BSPData, ImportOptions, Level } from '../Types/Types';
+import { BSPData, ImportOptions, Level, Ui5ToolsConfiguration } from '../Types/Types';
 import { XMLParser } from 'fast-xml-parser';
 import { URL } from 'url';
 import path from 'path';
 import ImporterProvider from '../Configurator/ImporterProvider';
+import Finder from '../Project/Finder';
 
 export default {
   async askBSPToImport(): Promise<void> {
@@ -57,40 +58,48 @@ export default {
   },
 
   async getBSPList(oImportOptions: ImportOptions): Promise<Array<BSPData>> {
-    const importUri = String(Config.importer('importUri'));
+    const uri = String(Config.importer('uri'));
+    const client = String(Config.importer('client'));
 
-    const jsonData = await this.getXMLFile(`${importUri}/sap/bc/adt/filestore/ui5-bsp/objects`, oImportOptions);
-    return jsonData['atom:feed']['atom:entry'].map((oEntry: Record<string, any>) => {
+    const bspDataXML = await this.getXMLFile(
+      `${uri}/sap/bc/adt/filestore/ui5-bsp/objects?sap-client=${client}`,
+      oImportOptions
+    );
+
+    return bspDataXML['atom:feed']['atom:entry'].map((oEntry: Record<string, any>) => {
       const bspData: BSPData = {
         id: oEntry['atom:id'],
         title: oEntry['atom:title'] ?? '',
         author: oEntry['atom:author'] ?? '',
         contributor: oEntry['atom:contributor'] ?? '',
         summary: oEntry['atom:summary']['#text'] ?? '',
-        contentUrl: new URL('/sap/bc/adt/filestore/ui5-bsp/objects/', importUri).toString(),
-        url: new URL(path.join(oEntry['@_xml:base'], oEntry['atom:content']['@_src']), importUri).toString(),
+        contentUrl: new URL(`/sap/bc/adt/filestore/ui5-bsp/objects/?sap-client=${client}`, uri).toString(),
+        url: new URL(path.join(oEntry['@_xml:base'], oEntry['atom:content']['@_src']), uri).toString(),
       };
       return bspData;
     });
   },
 
   async getImportOptions() {
-    let importUri = String(Config.importer('importUri'));
-    if (!importUri) {
+    let uri = String(Config.importer('uri'));
+    let client = String(Config.importer('client'));
+    if (!uri || !client) {
       await ImporterProvider.wizard();
-      importUri = String(Config.importer('importUri'));
+      uri = String(Config.importer('uri'));
+      client = String(Config.importer('client'));
     }
 
     const oEnv = Utils.loadEnv();
 
     const oImportOptions: ImportOptions = {
       auth: {
-        user: oEnv.UI5TOOLS_DEPLOY_USER || '',
-        pwd: oEnv.UI5TOOLS_DEPLOY_PASSWORD || '',
+        user: oEnv.UI5TOOLS_IMPORT_USER || '',
+        pwd: oEnv.UI5TOOLS_IMPORT_PASSWORD || '',
       },
       conn: {
-        url: importUri,
-        useStrictSSL: false,
+        url: uri,
+        useStrictSSL: !!Config.deployer('rejectUnauthorized'),
+        client: client,
       },
       workspace: {
         root: Utils.getWorkspaceRootPath(),
@@ -135,8 +144,51 @@ export default {
 
     await this.processEntry(bspInfo['atom:feed']['atom:entry'], oBSP, oImportOptions);
 
+    try {
+      await this.generateConfigFile(oBSP, oImportOptions);
+    } catch (error: any) {
+      Log.importer(error.message, Level.ERROR);
+    }
+
     const sMessage = Log.importer(`BSP ${oBSP.title} imported!`, Level.SUCCESS);
     window.showInformationMessage(sMessage);
+  },
+
+  async generateConfigFile(oBSP: BSPData, oImportOptions: ImportOptions): Promise<void> {
+    const generateConfig = !!Config.importer('generateConfig');
+    if (generateConfig) {
+      Log.importer(`Generating 'ui5-tools.json' file for ${oBSP.title}...`);
+
+      const ui5Project = await Finder.findUi5ProjectForFolderName(oBSP.title);
+      if (!ui5Project) {
+        throw new Error(`Ui5 project '${oBSP.title}' not found`);
+      }
+
+      const oConfigFile = await ui5Project.getUi5ToolsFile();
+      if (!oConfigFile) {
+        const oConfigFile: Ui5ToolsConfiguration = {
+          deployer: {
+            type: 'Gateway',
+            options: {
+              conn: {
+                server: oImportOptions.conn.url,
+                client: oImportOptions.conn.client,
+              },
+              auth: {},
+              ui5: {
+                language: 'EN',
+                bspcontainer: oBSP.title,
+                bspcontainer_text: oBSP.summary,
+                package: '',
+                calc_appindex: true,
+              },
+            },
+          },
+        };
+        ui5Project.setUi5ToolsFile(oConfigFile);
+        Log.importer(`File 'ui5-tools.json' for ${oBSP.title} generated!`, Level.SUCCESS);
+      }
+    }
   },
 
   async getXMLFile(url: string, oImportOptions: ImportOptions) {
@@ -187,12 +239,14 @@ export default {
     const uriFsPath = Uri.file(sFsPath);
     if (type === 'folder') {
       //go inside folder
+      Log.importer(`Creating folder ${uriFsPath}...`);
       await workspace.fs.createDirectory(uriFsPath);
 
       const data = await this.getXMLFile(sPath, oImportOptions);
 
       await this.processEntry(data['atom:feed']['atom:entry'], oBSP, oImportOptions);
     } else {
+      Log.importer(`Creating file ${uriFsPath}...`);
       const filedata = await this.getFile(sPath, oImportOptions);
       workspace.fs.writeFile(uriFsPath, Buffer.from(filedata));
     }

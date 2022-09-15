@@ -13,6 +13,7 @@ export default {
       } else if (odataProxyValue) {
         await this.setDestination(odataProxyValue);
       }
+      await this.inputBoxImportClient();
     } catch (error: any) {
       throw new Error(error);
     }
@@ -61,22 +62,48 @@ export default {
 
   async inputBoxImportUri(): Promise<string> {
     return new Promise(async (resolve, reject) => {
-      const importUri = String(Config.importer('importUri'));
+      const uri = String(Config.importer('uri'));
       const inputBox: InputBox = window.createInputBox();
-      inputBox.title = 'ui5-tools > Configurator > oDataProvider: Enter gateway url';
+      inputBox.title = 'ui5-tools > Configurator > Importer: Enter gateway url';
       inputBox.step = 1;
       inputBox.totalSteps = 1;
-      inputBox.placeholder = importUri;
-      inputBox.value = importUri;
+      inputBox.placeholder = uri;
+      inputBox.value = uri;
       inputBox.ignoreFocusOut = true;
       inputBox.onDidAccept(async () => {
         if (inputBox.value) {
           //@ts-ignore
-          await Config.importer()?.update('importUri', inputBox.value, ConfigurationTarget.Workspace);
-          Log.configurator(`Set importUri value to ${inputBox.value}`);
+          await Config.importer()?.update('uri', inputBox.value, ConfigurationTarget.Workspace);
+          Log.configurator(`Set uri value to ${inputBox.value}`);
           resolve(inputBox.value);
         } else {
           const sMessage = Log.configurator('No gateway url configured');
+          reject(sMessage);
+        }
+        inputBox.hide();
+      });
+      inputBox.show();
+    });
+  },
+
+  async inputBoxImportClient(): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      const client = String(Config.importer('client'));
+      const inputBox: InputBox = window.createInputBox();
+      inputBox.title = 'ui5-tools > Configurator > Importer: Enter gateway client';
+      inputBox.step = 1;
+      inputBox.totalSteps = 1;
+      inputBox.placeholder = client;
+      inputBox.value = client;
+      inputBox.ignoreFocusOut = true;
+      inputBox.onDidAccept(async () => {
+        if (inputBox.value) {
+          //@ts-ignore
+          await Config.importer()?.update('client', inputBox.value, ConfigurationTarget.Workspace);
+          Log.configurator(`Set client value to ${inputBox.value}`);
+          resolve(inputBox.value);
+        } else {
+          const sMessage = Log.configurator('No import client configured');
           reject(sMessage);
         }
         inputBox.hide();
@@ -98,7 +125,7 @@ export default {
     const proxyDestination = await this.getDestination(destinationName);
     if (proxyDestination) {
       //@ts-ignore
-      await Config.importer()?.update('importUri', proxyDestination.url ?? 'Gateway', ConfigurationTarget.Workspace);
+      await Config.importer()?.update('uri', proxyDestination.url ?? 'Gateway', ConfigurationTarget.Workspace);
       Log.importer(`Set importuri value to ${proxyDestination.url ?? 'Gateway'}`);
     }
   },
