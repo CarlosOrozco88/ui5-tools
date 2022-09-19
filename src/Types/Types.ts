@@ -80,10 +80,12 @@ export interface LogTools {
   configurator(sText: string, sLevel?: Level): string;
   builder(sText: string, sLevel?: Level): string;
   deployer(sText: string, sLevel?: Level): string;
+  importer(sText: string, sLevel?: Level): string;
   server(sText: string, sLevel?: Level): string;
   proxy(sText: string, sLevel?: Level): string;
   newLogProviderProxy(): Log;
   newLogProviderDeployer(): Log;
+  newLogProviderImporter(): Log;
   newLogProvider(fnLogger?: (sText: string, sLevel?: Level) => string): Log;
 }
 
@@ -125,7 +127,7 @@ export interface BuildTasks {
 export interface DeployOptions {
   conn: {
     server: string;
-    client: number;
+    client: string;
     useStrictSSL?: boolean;
     proxy?: string;
     customQueryParams?: Record<string, string>;
@@ -145,6 +147,23 @@ export interface DeployOptions {
     transport_use_user_match?: boolean;
     transport_use_locked?: boolean;
     calc_appindex?: boolean;
+  };
+}
+
+export interface ImportOptions {
+  conn: {
+    url: string;
+    client: string;
+    useStrictSSL?: boolean;
+    proxy?: string;
+    customQueryParams?: Record<string, string>;
+  };
+  auth: {
+    user?: string;
+    pwd?: string;
+  };
+  workspace: {
+    root: string;
   };
 }
 
@@ -213,4 +232,13 @@ export interface SandboxFile {
   files: Record<string, string>;
   versions: Record<string, string>;
   default: string;
+}
+export interface BSPData {
+  id: string;
+  title: string;
+  author: string;
+  contributor: string;
+  summary: string;
+  url: string;
+  contentUrl: string;
 }

@@ -16,11 +16,16 @@
     "a262d7bedba67b51a4cb5e7c6471fa524bbc670f8dcec9c98f8d59f2e21bcfa7": "// @copyright@\nthis.sap=this.sap||{};(function(){\"use strict\";sap.ushell=sap.ushell||{};function e(i,t,a){var s=a?JSON.parse(JSON.stringify(t)):t;if(typeof t!==\"object\"){return}Object.keys(s).forEach((function(t){if(Object.prototype.toString.apply(i[t])===\"[object Object]\"&&Object.prototype.toString.apply(s[t])===\"[object Object]\"){e(i[t],s[t],false);return}i[t]=s[t]}))}function i(i){var t,a,s,o;function n(e){var i=[],t;if(!e||!e.applications||typeof e.applications!==\"object\"){return i}for(t in e.applications){if(e.applications.hasOwnProperty(t)&&t!==\"\"){i.push(t)}}return i}function r(e,i,t){var a=e.title||e.additionalInformation.replace(\"SAPUI5.Component=\",\"\").split(\".\").pop();return{id:\"sap_ushell_generated_tile_id_\"+i,title:a,size:\"1x1\",tileType:\"sap.ushell.ui.tile.StaticTile\",properties:{chipId:\"sap_ushell_generated_chip_id\",title:a,info:e.description,targetURL:\"#\"+t}}}t=n(i);if(t.length){a=jQuery.sap.getObject(\"services.LaunchPage.adapter.config\",0,i);if(!a.groups){a.groups=[]}o={id:\"sap_ushell_generated_group_id\",title:\"Generated Group\",tiles:[]};a.groups.unshift(o);t.forEach((function(e,t){o.tiles.push(r(i.applications[e],t,e))}));s=jQuery.sap.getObject(\"services.NavTargetResolution.adapter.config.applications\",0,i);e(s,i.applications,true);delete i.applications}return i}function t(i){var t=jQuery.sap.endsWithIgnoreCase(i,\".json\")?i:i+\".json\",a;jQuery.sap.log.info(\"Mixing/Overwriting sandbox configuration from \"+t+\".\");a=jQuery.sap.sjax({url:t,dataType:\"json\"});if(a.success){jQuery.sap.log.debug(\"Evaluating fiori launchpad sandbox config JSON: \"+JSON.stringify(a.data));e(window[\"sap-ushell-config\"],a.data,true)}else if(a.statusCode!==404){jQuery.sap.log.error(\"Failed to load Fiori Launchpad Sandbox configuration from \"+t+\": status: \"+a.status+\"; error: \"+a.error)}}function a(){var e,i,t,a;i=window.document.getElementById(\"sap-ushell-bootstrap\");if(!i){e=window.document.getElementsByTagName(\"script\");i=e[e.length-1]}t=i.src;a=t.split(\"?\")[0].split(\"/\").slice(0,-1).join(\"/\")+\"/\";return a}function s(e){var i=window[\"sap-ushell-config\"],t;if(typeof e===\"string\"&&e!==\"\"){i.defaultRenderer=e}t=jQuery.sap.getObject(\"services.NavTargetResolution.adapter.config.applications\",5,i);if(typeof t===\"object\"&&i.defaultRenderer!==\"fiorisandbox\"){delete t[\"\"]}}function o(e){var o=jQuery.sap.getUriParameters().get(\"sap-ushell-sandbox-config\",true),n=jQuery.sap.getUriParameters().get(\"sap-ushell-sandbox-renderer\"),r,p,l,u;jQuery.sap.require(\"sap.ushell.services.Container\");jQuery.sap.registerModulePath(\"sap.ushell.renderers.fiorisandbox\",a()+\"../renderers/fiorisandbox/\");t(a()+\"../shells/sandbox/fioriSandboxConfig.json\");if(o&&o.length>0){for(r=0;r<o.length;r=r+1){t(o[r])}}else{t(\"/appconfig/fioriSandboxConfig.json\")}s(n);window[\"sap-ushell-config\"]=i(window[\"sap-ushell-config\"]);l=jQuery.sap.getObject(\"renderers.fiori2.componentData.config\",0,window[\"sap-ushell-config\"]);if(!l.rootIntent){l.rootIntent=\"Shell-home\"}u=jQuery.sap.getObject(\"services.Ui5ComponentLoader.config\",0,window[\"sap-ushell-config\"]);if(!u.hasOwnProperty(\"amendedLoading\")){u.amendedLoading=false}p=jQuery.sap.getObject(\"services.ClientSideTargetResolution.adapter.config\",0,window[\"sap-ushell-config\"]);p.applications=jQuery.sap.getObject(\"services.NavTargetResolution.adapter.config.applications\",undefined,window[\"sap-ushell-config\"]);sap.ushell.bootstrap(\"local\").done(e)}window[\"sap-ui-config\"]={\"xx-bootTask\":o};sap.ushell.__sandbox__=sap.ushell.__sandbox__||{};sap.ushell.__sandbox__._adjustApplicationConfiguration=i;sap.ushell.__sandbox__._applyJsonApplicationConfig=t;sap.ushell.__sandbox__._evaluateCustomRenderer=s;sap.ushell.__sandbox__._bootstrap=o})();"
   },
   "versions": {
+    "1.106.0": "196c66d3b1d4b5a25a1b5e840a2b6c3c4193adc037043eb501fd4ffb30b17044",
+    "1.105.1": "196c66d3b1d4b5a25a1b5e840a2b6c3c4193adc037043eb501fd4ffb30b17044",
+    "1.105.0": "196c66d3b1d4b5a25a1b5e840a2b6c3c4193adc037043eb501fd4ffb30b17044",
     "1.104.2": "196c66d3b1d4b5a25a1b5e840a2b6c3c4193adc037043eb501fd4ffb30b17044",
     "1.104.1": "196c66d3b1d4b5a25a1b5e840a2b6c3c4193adc037043eb501fd4ffb30b17044",
     "1.104.0": "196c66d3b1d4b5a25a1b5e840a2b6c3c4193adc037043eb501fd4ffb30b17044",
     "1.103.1": "196c66d3b1d4b5a25a1b5e840a2b6c3c4193adc037043eb501fd4ffb30b17044",
     "1.103.0": "196c66d3b1d4b5a25a1b5e840a2b6c3c4193adc037043eb501fd4ffb30b17044",
+    "1.102.7": "196c66d3b1d4b5a25a1b5e840a2b6c3c4193adc037043eb501fd4ffb30b17044",
+    "1.102.6": "196c66d3b1d4b5a25a1b5e840a2b6c3c4193adc037043eb501fd4ffb30b17044",
     "1.102.5": "196c66d3b1d4b5a25a1b5e840a2b6c3c4193adc037043eb501fd4ffb30b17044",
     "1.102.4": "196c66d3b1d4b5a25a1b5e840a2b6c3c4193adc037043eb501fd4ffb30b17044",
     "1.102.3": "196c66d3b1d4b5a25a1b5e840a2b6c3c4193adc037043eb501fd4ffb30b17044",
@@ -41,6 +46,8 @@
     "1.97.2": "6e4dd7f9a116d9fdd02ce58502ebcc9a9e1a0829ba31c9c6ba036aeb47bf6fff",
     "1.97.1": "6e4dd7f9a116d9fdd02ce58502ebcc9a9e1a0829ba31c9c6ba036aeb47bf6fff",
     "1.97.0": "6e4dd7f9a116d9fdd02ce58502ebcc9a9e1a0829ba31c9c6ba036aeb47bf6fff",
+    "1.96.13": "6e4dd7f9a116d9fdd02ce58502ebcc9a9e1a0829ba31c9c6ba036aeb47bf6fff",
+    "1.96.12": "6e4dd7f9a116d9fdd02ce58502ebcc9a9e1a0829ba31c9c6ba036aeb47bf6fff",
     "1.96.11": "6e4dd7f9a116d9fdd02ce58502ebcc9a9e1a0829ba31c9c6ba036aeb47bf6fff",
     "1.96.10": "6e4dd7f9a116d9fdd02ce58502ebcc9a9e1a0829ba31c9c6ba036aeb47bf6fff",
     "1.96.9": "6e4dd7f9a116d9fdd02ce58502ebcc9a9e1a0829ba31c9c6ba036aeb47bf6fff",
@@ -107,6 +114,7 @@
     "1.85.2": "1dce5c27d289c5bc02f549f79041a5f6b3a014878020f37588054eed236370b1",
     "1.85.1": "1dce5c27d289c5bc02f549f79041a5f6b3a014878020f37588054eed236370b1",
     "1.85.0": "1dce5c27d289c5bc02f549f79041a5f6b3a014878020f37588054eed236370b1",
+    "1.84.28": "3790c0a57fe438b17f4d58aa170656a7abd77b19f34ce73e2d0dcd7b8e44ec2a",
     "1.84.27": "3790c0a57fe438b17f4d58aa170656a7abd77b19f34ce73e2d0dcd7b8e44ec2a",
     "1.84.26": "3790c0a57fe438b17f4d58aa170656a7abd77b19f34ce73e2d0dcd7b8e44ec2a",
     "1.84.25": "3790c0a57fe438b17f4d58aa170656a7abd77b19f34ce73e2d0dcd7b8e44ec2a",
@@ -205,6 +213,7 @@
     "1.72.2": "b0390924e6d90af31590d4720e41aee1c6092a213a25ade5ea6a405d7b1a1eff",
     "1.72.1": "b0390924e6d90af31590d4720e41aee1c6092a213a25ade5ea6a405d7b1a1eff",
     "1.72.0": "b0390924e6d90af31590d4720e41aee1c6092a213a25ade5ea6a405d7b1a1eff",
+    "1.71.50": "b0390924e6d90af31590d4720e41aee1c6092a213a25ade5ea6a405d7b1a1eff",
     "1.71.49": "b0390924e6d90af31590d4720e41aee1c6092a213a25ade5ea6a405d7b1a1eff",
     "1.71.48": "b0390924e6d90af31590d4720e41aee1c6092a213a25ade5ea6a405d7b1a1eff",
     "1.71.47": "b0390924e6d90af31590d4720e41aee1c6092a213a25ade5ea6a405d7b1a1eff",
@@ -513,6 +522,7 @@
     "1.40.10": "bcee726c25dc23dc381d9c0a735009ee9d641f8b28fff453e364e0d5d90f7a39",
     "1.40.9": "bcee726c25dc23dc381d9c0a735009ee9d641f8b28fff453e364e0d5d90f7a39",
     "1.40.8": "bcee726c25dc23dc381d9c0a735009ee9d641f8b28fff453e364e0d5d90f7a39",
+    "1.38.58": "a262d7bedba67b51a4cb5e7c6471fa524bbc670f8dcec9c98f8d59f2e21bcfa7",
     "1.38.57": "a262d7bedba67b51a4cb5e7c6471fa524bbc670f8dcec9c98f8d59f2e21bcfa7",
     "1.38.56": "a262d7bedba67b51a4cb5e7c6471fa524bbc670f8dcec9c98f8d59f2e21bcfa7",
     "1.38.55": "a262d7bedba67b51a4cb5e7c6471fa524bbc670f8dcec9c98f8d59f2e21bcfa7",
@@ -681,5 +691,5 @@
     "1.22.6": "1ebb36b2170f5c932f0849d0de106ca326ecdcebfec5658d6b33262ca0390b1d",
     "1.22.5": "1ebb36b2170f5c932f0849d0de106ca326ecdcebfec5658d6b33262ca0390b1d"
   },
-  "default": "1.104.2"
+  "default": "1.106.0"
 }

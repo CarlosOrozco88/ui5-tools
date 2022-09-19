@@ -12,6 +12,7 @@ import Config from '../Utils/ConfigVscode';
 import { DeployMassive, DeployOptions, Level, DeployStatus, Ui5ToolsConfiguration } from '../Types/Types';
 import Ui5Project from '../Project/Ui5Project';
 import Finder from '../Project/Finder';
+import Fetch from '../Utils/Fetch';
 
 const oLogger = Log.newLogProviderDeployer();
 
@@ -240,11 +241,11 @@ export default {
     let oDeployOptions: DeployOptions;
     try {
       if (ui5Project) {
-        let ui5ProjectConfig = await ui5Project.getUi5ToolsFile();
+        // let ui5ProjectConfig = await ui5Project.getUi5ToolsFile();
 
-        if (!ui5ProjectConfig) {
-          ui5ProjectConfig = await this.createConfigFile(ui5Project);
-        }
+        // if (!ui5ProjectConfig) {
+        const ui5ProjectConfig = await this.createConfigFile(ui5Project);
+        // }
 
         const oDeployOptionsFs = await this.getDeployOptions(ui5ProjectConfig);
         let sOption;
@@ -362,7 +363,10 @@ export default {
     oDeployOptions.ui5.transportno = '';
     oDeployOptions.ui5.transport_use_user_match = false;
 
-    const processReject = this.setUnautorized(oDeployOptions);
+    const processReject = Fetch.setUnautorized(
+      oDeployOptions.conn?.useStrictSSL,
+      !!Config.deployer('rejectUnauthorized')
+    );
     const oTransportManager = this.getTransportManager(oDeployOptions);
 
     const transportno: string = await new Promise((resolve, reject) => {
@@ -469,7 +473,10 @@ export default {
 
       this.autoSaveOrder(ui5Project, oDeployOptions);
 
-      const processReject = this.setUnautorized(oDeployOptions);
+      const processReject = Fetch.setUnautorized(
+        oDeployOptions.conn?.useStrictSSL,
+        !!Config.deployer('rejectUnauthorized')
+      );
       try {
         const patternFiles = new RelativePattern(ui5Project.fsPathDeploy, `**/*`);
         const aProjectFiles = await workspace.findFiles(patternFiles);
@@ -521,85 +528,72 @@ export default {
   },
 
   async createConfigFile(ui5Project: Ui5Project) {
-    Log.deployer(`Create ui5-tools.json file?`);
-    const qpOptions = [
-      {
-        label: `Yes`,
-      },
-      {
-        label: `No`,
-      },
-    ];
+    const ui5ProjectConfig = await ui5Project.getUi5ToolsFile();
+    let bChange = !!ui5ProjectConfig;
 
-    const selTransportOption: QuickPickItem = await new Promise(async (resolve, reject) => {
-      const selTransportOptionQp = await window.createQuickPick();
-      selTransportOptionQp.title = 'ui5-tools > Deployer > Create ui5-tools.json file?';
-      selTransportOptionQp.items = qpOptions;
-      selTransportOptionQp.placeholder = `Project ${ui5Project.folderName} does not have a ui5-tools.json file, create it now?`;
-      selTransportOptionQp.canSelectMany = false;
-      selTransportOptionQp.onDidAccept(async () => {
-        if (selTransportOptionQp.selectedItems.length) {
-          resolve(selTransportOptionQp.selectedItems[0]);
-        } else {
-          reject('No UI5 project selected');
-        }
-        selTransportOptionQp.hide();
-      });
-      selTransportOptionQp.show();
-    });
-    if (!selTransportOption || selTransportOption.label !== 'Yes') {
-      Log.deployer(`Abort creation`);
-      throw new Error(`File ui5tools.json not found for project ${ui5Project.folderName}`);
-    }
-    Log.deployer(`Collecting data...`);
-
-    const oConfigFile: Ui5ToolsConfiguration = {
-      deployer: {
-        type: 'Gateway',
-        options: {
-          conn: {
-            server: '',
-            client: 0,
-          },
-          auth: {},
-          ui5: {
-            language: 'EN',
-            bspcontainer: '',
-            bspcontainer_text: '',
-            package: '',
-            calc_appindex: true,
+    const oConfigFile: Ui5ToolsConfiguration = deepmerge(
+      {
+        deployer: {
+          type: 'Gateway',
+          options: {
+            conn: {
+              server: '',
+              client: '100',
+            },
+            // auth: {},
+            ui5: {
+              language: 'EN',
+              package: '',
+              bspcontainer: '',
+              bspcontainer_text: '',
+              calc_appindex: true,
+            },
           },
         },
       },
-    };
+      ui5ProjectConfig
+    );
+    if (!ui5ProjectConfig) {
+      Log.deployer(`Create ui5-tools.json file?`);
+      const qpOptions = [
+        {
+          label: `Yes`,
+        },
+        {
+          label: `No`,
+        },
+      ];
 
-    const sServer: string = await new Promise((resolve) => {
-      const inputBox = window.createInputBox();
-      inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Server Url';
-      inputBox.step = 1;
-      inputBox.totalSteps = 6;
-      inputBox.placeholder = `protocol://host:port`;
-      inputBox.ignoreFocusOut = true;
-      inputBox.onDidAccept(() => {
-        resolve(inputBox.value);
-        inputBox.hide();
+      const selTransportOption: QuickPickItem = await new Promise(async (resolve, reject) => {
+        const selTransportOptionQp = await window.createQuickPick();
+        selTransportOptionQp.title = 'ui5-tools > Deployer > Create ui5-tools.json file?';
+        selTransportOptionQp.items = qpOptions;
+        selTransportOptionQp.placeholder = `Project ${ui5Project.folderName} does not have a ui5-tools.json file, create it now?`;
+        selTransportOptionQp.canSelectMany = false;
+        selTransportOptionQp.onDidAccept(async () => {
+          if (selTransportOptionQp.selectedItems.length) {
+            resolve(selTransportOptionQp.selectedItems[0]);
+          } else {
+            reject('No UI5 project selected');
+          }
+          selTransportOptionQp.hide();
+        });
+        selTransportOptionQp.show();
       });
-      inputBox.show();
-    });
-    if (!sServer) {
-      throw new Error(`No server url found`);
+      if (!selTransportOption || selTransportOption.label !== 'Yes') {
+        Log.deployer(`Abort creation`);
+        throw new Error(`File ui5tools.json not found for project ${ui5Project.folderName}`);
+      }
     }
-    Log.deployer(`ui5-tools.json: Server ${sServer}`);
-    oConfigFile.deployer.options.conn.server = sServer;
 
-    let sClient;
-    try {
-      sClient = await new Promise((resolve) => {
+    if (!oConfigFile.deployer.options.conn.server) {
+      bChange = true;
+      const sServer: string = await new Promise((resolve) => {
         const inputBox = window.createInputBox();
-        inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Client';
-        inputBox.step = 2;
+        inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Server Url';
+        inputBox.step = 1;
         inputBox.totalSteps = 6;
-        inputBox.placeholder = 'Enter client number';
+        inputBox.placeholder = `protocol://host:port`;
         inputBox.ignoreFocusOut = true;
         inputBox.onDidAccept(() => {
           resolve(inputBox.value);
@@ -607,99 +601,139 @@ export default {
         });
         inputBox.show();
       });
-    } catch (oError) {
-      sClient = undefined;
-    }
-    if (sClient && !isNaN(Number(sClient))) {
-      Log.deployer(`ui5-tools.json: Client ${sClient}`);
-      oConfigFile.deployer.options.conn.client = Number(sClient);
+      if (!sServer) {
+        throw new Error(`No server url found`);
+      }
+      Log.deployer(`ui5-tools.json: Server ${sServer}`);
+      oConfigFile.deployer.options.conn.server = sServer;
     }
 
-    const sLanguage: string = await new Promise((resolve) => {
-      const inputBox = window.createInputBox();
-      inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Language';
-      inputBox.step = 3;
-      inputBox.totalSteps = 6;
-      inputBox.placeholder = `EN`;
-      inputBox.ignoreFocusOut = true;
-      inputBox.onDidAccept(() => {
-        resolve(inputBox.value);
-        inputBox.hide();
+    if (!oConfigFile.deployer.options.conn.client) {
+      bChange = true;
+      let sClient: string | undefined;
+      try {
+        sClient = await new Promise((resolve) => {
+          const inputBox = window.createInputBox();
+          inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Client';
+          inputBox.step = 2;
+          inputBox.totalSteps = 6;
+          inputBox.placeholder = 'Enter client number';
+          inputBox.ignoreFocusOut = true;
+          inputBox.onDidAccept(() => {
+            resolve(inputBox.value);
+            inputBox.hide();
+          });
+          inputBox.show();
+        });
+      } catch (oError) {
+        sClient = undefined;
+      }
+      if (sClient && !isNaN(Number(sClient))) {
+        Log.deployer(`ui5-tools.json: Client ${sClient}`);
+        oConfigFile.deployer.options.conn.client = sClient.padStart(3, '0');
+      }
+    }
+
+    if (!oConfigFile.deployer.options.ui5.language) {
+      bChange = true;
+      const sLanguage: string = await new Promise((resolve) => {
+        const inputBox = window.createInputBox();
+        inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Language';
+        inputBox.step = 3;
+        inputBox.totalSteps = 6;
+        inputBox.placeholder = `EN`;
+        inputBox.ignoreFocusOut = true;
+        inputBox.onDidAccept(() => {
+          resolve(inputBox.value);
+          inputBox.hide();
+        });
+        inputBox.show();
       });
-      inputBox.show();
-    });
-    if (!sLanguage) {
-      throw new Error(`No language configured`);
+      if (!sLanguage) {
+        throw new Error(`No language configured`);
+      }
+      Log.deployer(`ui5-tools.json: Language ${sLanguage}`);
+      oConfigFile.deployer.options.ui5.language = sLanguage;
     }
-    Log.deployer(`ui5-tools.json: Language ${sLanguage}`);
-    oConfigFile.deployer.options.ui5.language = sLanguage;
 
-    const sPackage: string = await new Promise((resolve) => {
-      const inputBox = window.createInputBox();
-      inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Package for the BSP';
-      inputBox.step = 4;
-      inputBox.totalSteps = 6;
-      inputBox.placeholder = `ZPACKAGE`;
-      inputBox.ignoreFocusOut = true;
-      inputBox.onDidAccept(() => {
-        resolve(inputBox.value);
-        inputBox.hide();
+    if (!oConfigFile.deployer.options.ui5.package) {
+      bChange = true;
+      const sPackage: string = await new Promise((resolve) => {
+        const inputBox = window.createInputBox();
+        inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Package for the BSP';
+        inputBox.step = 4;
+        inputBox.totalSteps = 6;
+        inputBox.placeholder = `ZPACKAGE`;
+        inputBox.ignoreFocusOut = true;
+        inputBox.onDidAccept(() => {
+          resolve(inputBox.value);
+          inputBox.hide();
+        });
+        inputBox.show();
       });
-      inputBox.show();
-    });
-    if (!sPackage) {
-      throw new Error(`No package configured`);
+      if (!sPackage) {
+        throw new Error(`No package configured`);
+      }
+      Log.deployer(`ui5-tools.json: Package ${sPackage}`);
+      oConfigFile.deployer.options.ui5.package = sPackage;
     }
-    Log.deployer(`ui5-tools.json: Package ${sPackage}`);
-    oConfigFile.deployer.options.ui5.package = sPackage;
 
-    const sBspContainer: string = await new Promise((resolve) => {
-      const inputBox = window.createInputBox();
-      inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Package for the BSP (max 15 chars)';
-      inputBox.step = 5;
-      inputBox.totalSteps = 6;
-      inputBox.placeholder = `ZBSPCONTAINER`;
-      inputBox.ignoreFocusOut = true;
-      inputBox.onDidChangeValue(() => {
-        if (inputBox.value && inputBox.value.length > 15) {
-          inputBox.value = inputBox.value.slice(0, 15);
-        }
+    if (!oConfigFile.deployer.options.ui5.bspcontainer) {
+      bChange = true;
+      const sBspContainer: string = await new Promise((resolve) => {
+        const inputBox = window.createInputBox();
+        inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > Package for the BSP (max 15 chars)';
+        inputBox.step = 5;
+        inputBox.totalSteps = 6;
+        inputBox.placeholder = `ZBSPCONTAINER`;
+        inputBox.ignoreFocusOut = true;
+        inputBox.onDidChangeValue(() => {
+          if (inputBox.value && inputBox.value.length > 15) {
+            inputBox.value = inputBox.value.slice(0, 15);
+          }
+        });
+        inputBox.onDidAccept(() => {
+          resolve(inputBox.value);
+          inputBox.hide();
+        });
+        inputBox.show();
       });
-      inputBox.onDidAccept(() => {
-        resolve(inputBox.value);
-        inputBox.hide();
-      });
-      inputBox.show();
-    });
-    if (!sBspContainer) {
-      throw new Error(`No BSP container configured`);
+      if (!sBspContainer) {
+        throw new Error(`No BSP container configured`);
+      }
+      Log.deployer(`ui5-tools.json: BSP Container ${sBspContainer}`);
+      oConfigFile.deployer.options.ui5.bspcontainer = sBspContainer;
     }
-    Log.deployer(`ui5-tools.json: BSP Container ${sBspContainer}`);
-    oConfigFile.deployer.options.ui5.bspcontainer = sBspContainer;
 
-    const sBspContainerText: string = await new Promise((resolve) => {
-      const inputBox = window.createInputBox();
-      inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > BSP Description';
-      inputBox.step = 6;
-      inputBox.totalSteps = 6;
-      inputBox.placeholder = `The description of the BSP container`;
-      inputBox.ignoreFocusOut = true;
-      inputBox.onDidAccept(() => {
-        resolve(inputBox.value);
-        inputBox.hide();
+    if (!oConfigFile.deployer.options.ui5.bspcontainer_text) {
+      bChange = true;
+      const sBspContainerText: string = await new Promise((resolve) => {
+        const inputBox = window.createInputBox();
+        inputBox.title = 'ui5-tools > Deployer > Create ui5-tools.json file > BSP Description';
+        inputBox.step = 6;
+        inputBox.totalSteps = 6;
+        inputBox.placeholder = `The description of the BSP container`;
+        inputBox.ignoreFocusOut = true;
+        inputBox.onDidAccept(() => {
+          resolve(inputBox.value);
+          inputBox.hide();
+        });
+        inputBox.show();
       });
-      inputBox.show();
-    });
-    if (!sBspContainerText) {
-      throw new Error(`No BSP container text configured`);
+      if (!sBspContainerText) {
+        throw new Error(`No BSP container text configured`);
+      }
+      Log.deployer(`ui5-tools.json: BSP Container Text ${sBspContainerText}`);
+      oConfigFile.deployer.options.ui5.bspcontainer_text = sBspContainerText;
     }
-    Log.deployer(`ui5-tools.json: BSP Container Text ${sBspContainerText}`);
-    oConfigFile.deployer.options.ui5.bspcontainer_text = sBspContainerText;
+    if (oConfigFile.deployer.options.ui5.calc_appindex == null) {
+      bChange = true;
+      oConfigFile.deployer.options.ui5.calc_appindex = true;
+    }
 
-    oConfigFile.deployer.options.ui5.calc_appindex = true;
-
-    await ui5Project.setUi5ToolsFile(oConfigFile);
-    Log.deployer(`ui5-tools.json: File created!`);
+    if (bChange) {
+      await ui5Project.setUi5ToolsFile(oConfigFile);
+    }
 
     return oConfigFile;
   },
@@ -782,17 +816,5 @@ export default {
       }
       oDeployOptions.auth.pwd = sPwd;
     }
-  },
-
-  setUnautorized(oDeployOptions: DeployOptions) {
-    const originalReject = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-    if (oDeployOptions.conn?.useStrictSSL === false && !Config.deployer('rejectUnauthorized')) {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    }
-    return {
-      restore: () => {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalReject;
-      },
-    };
   },
 };

@@ -13,6 +13,8 @@ import Builder from './Builder/Builder';
 import Watcher from './Builder/Watcher';
 // Deployer
 import Deployer from './Deployer/Deployer';
+// Importer
+import Importer from './Importer/Importer';
 // Menu
 import Menu from './Menu/Menu';
 // StatusBar
@@ -61,6 +63,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   subscriptions.push(registerCommand('ui5-tools.deployer.deploy', () => Deployer.askProjectToDeploy()));
   subscriptions.push(registerCommand('ui5-tools.deployer.deployMultiple', () => Deployer.deployMultipleProjects()));
+
+  subscriptions.push(registerCommand('ui5-tools.menu.importer.import', () => Importer.askBSPToImport()));
 
   subscriptions.push(registerCommand('ui5-tools.configurator.odataProvider', () => OdataProvider.wizard()));
   subscriptions.push(registerCommand('ui5-tools.configurator.ui5Provider', () => Ui5Provider.wizard()));

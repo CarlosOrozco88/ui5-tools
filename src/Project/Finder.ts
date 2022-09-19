@@ -200,6 +200,13 @@ const Finder = {
 
     return oUi5Project;
   },
+
+  async findUi5ProjectForFolderName(folderName: string) {
+    const ui5Projects = await Finder.getAllUI5ProjectsArray();
+    const oUi5Project = ui5Projects.find((ui5Project) => ui5Project.isFolderName(folderName));
+
+    return oUi5Project;
+  },
 };
 
 export default Finder;

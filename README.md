@@ -23,7 +23,17 @@ VSCode extension for ui5 developers. This extension is not intended to replace u
 
 - **Handles AppCachebuster** in localhost (by default only in PROD mode).
 - Configurable **proxy** to one o multiple **odata service** (Gateway, Other, None). Command `alt+c alt+o`
-- Supports `.env` file for odata service authentication. `UI5TOOLS_ODATA_USER - UI5TOOLS_ODATA_PASSWORD`, `UI5TOOLS_ODATA_USER_2 - UI5TOOLS_ODATA_PASSWORD_2`, etc.
+- Supports `.env` file for odata service authentication. Example of `.env` file:
+
+```json
+UI5TOOLS_ODATA_USER=
+UI5TOOLS_ODATA_PASSWORD=
+UI5TOOLS_ODATA_USER_2=
+UI5TOOLS_ODATA_PASSWORD_2=
+UI5TOOLS_ODATA_USER_N=
+UI5TOOLS_ODATA_PASSWORD_N=
+```
+
 - Configurable **proxy** to **resources** (Gateway, CDN SAPUI5, CDN OpenUI5, Local Runtime, None). Command `alt+c alt+u`
 - Configurable UI5 version (when using gateway proxy, extension will detect sapui5 version automatically)
 - **Live reload browser**, css and images hot reload
@@ -53,9 +63,25 @@ VSCode extension for ui5 developers. This extension is not intended to replace u
 - **ui5-tools.json** file located at project folder, with deployment configuration: [ui5-tools.json example](workspaceExample/Z_APP1/ui5-tools.json)
 - **Create, update and save** last order in ui5-tools.json file (configurable)
 - **Autoprefix** BSP name in order text while creation (optional)
-- Supports `.env` file for gateway authentication. `UI5TOOLS_DEPLOY_USER - UI5TOOLS_DEPLOY_PASSWORD`
+- Supports `.env` file for gateway authentication.
+
+```json
+UI5TOOLS_DEPLOY_USER=
+UI5TOOLS_DEPLOY_PASSWORD=
+```
+
 - Deploy process uses [ui5-nwabap-deployer-core
   ](https://github.com/pfefferf/ui5-nwabap-deployer/blob/master/packages/ui5-nwabap-deployer-core), so the extension uses the same configuration in file ui5-tools.json (property deployer.options)
+
+#### Importer
+
+- **Import BSP** directly from Gateway systems `alt+i alt+i`
+- Supports `.env` file for gateway authentication.
+
+```json
+UI5TOOLS_IMPORT_USER=
+UI5TOOLS_IMPORT_PASSWORD=
+```
 
 ### String replacer
 
@@ -129,6 +155,10 @@ VSCode extension for ui5 developers. This extension is not intended to replace u
 - `ui5-tools.deployer.autoPrefixBSP`: Auto prefix BSP name in all transport texts while creation | default: `false`
 - `ui5-tools.deployer.rejectUnauthorized`: Reject deployments in servers with misconfigured certificates
 
+#### Importer Settings
+
+- `ui5-tools.importer.uri`: Source gateway system to import BSPs | default: ``
+
 ## Commands
 
 ---
@@ -155,8 +185,12 @@ VSCode extension for ui5 developers. This extension is not intended to replace u
 
 #### Deployer Commands
 
-- `ui5-tools.menu.deployer.deploy`: Build and deploy project | Shortcut: `alt+d alt+d`
-- `ui5-tools.menu.deployer.deployMultiple`: Build and deploy multiple projects | Shortcut: `alt+m alt+m`
+- `ui5-tools.deployer.deploy`: Build and deploy project | Shortcut: `alt+d alt+d`
+- `ui5-tools.deployer.deployMultiple`: Build and deploy multiple projects | Shortcut: `alt+m alt+m`
+
+#### Importer Commands
+
+- `ui5-tools.importer.import`: Import BSP from Gateway system | Shortcut: `alt+i alt+i`
 
 #### Configurator Commands
 
