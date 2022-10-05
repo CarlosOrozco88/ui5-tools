@@ -25,7 +25,6 @@ export default {
           description: bsp.summary,
         });
       });
-      console.log(bspList);
 
       const aBspList: readonly QuickPickItem[] = await new Promise(async (resolve, reject) => {
         const bspQP = await window.createQuickPick();
@@ -47,7 +46,7 @@ export default {
       if (!aBspList.length) {
         throw new Error('No BSP selected');
       }
-      console.log(aBspList);
+
       const aBSP = aBspList.map(({ label }) => {
         return bspList.find((oBsp) => oBsp.title === label) as BSPData;
       });
@@ -57,26 +56,38 @@ export default {
     }
   },
 
-  async getBSPList(oImportOptions: ImportOptions): Promise<Array<BSPData>> {
+  getBSPList(oImportOptions: ImportOptions): Promise<Array<BSPData>> {
     const uri = String(Config.importer('uri'));
     const client = String(Config.importer('client'));
 
-    const bspDataXML = await this.getXMLFile(
-      `${uri}/sap/bc/adt/filestore/ui5-bsp/objects?sap-client=${client}`,
-      oImportOptions
-    );
+    return new Promise((resolve) => {
+      window.withProgress(
+        {
+          location: ProgressLocation.Window,
+          title: `ui5-tools > Importing BSP List...`,
+          cancellable: false,
+        },
+        async () => {
+          const bspDataXML = await this.getXMLFile(
+            `${uri}/sap/bc/adt/filestore/ui5-bsp/objects?sap-client=${client}`,
+            oImportOptions
+          );
 
-    return bspDataXML['atom:feed']['atom:entry'].map((oEntry: Record<string, any>) => {
-      const bspData: BSPData = {
-        id: oEntry['atom:id'],
-        title: oEntry['atom:title'] ?? '',
-        author: oEntry['atom:author'] ?? '',
-        contributor: oEntry['atom:contributor'] ?? '',
-        summary: oEntry['atom:summary']['#text'] ?? '',
-        contentUrl: new URL(`/sap/bc/adt/filestore/ui5-bsp/objects/?sap-client=${client}`, uri).toString(),
-        url: new URL(path.join(oEntry['@_xml:base'], oEntry['atom:content']['@_src']), uri).toString(),
-      };
-      return bspData;
+          const bspData = bspDataXML['atom:feed']['atom:entry'].map((oEntry: Record<string, any>) => {
+            const bspData: BSPData = {
+              id: oEntry['atom:id'],
+              title: oEntry['atom:title'] ?? '',
+              author: oEntry['atom:author'] ?? '',
+              contributor: oEntry['atom:contributor'] ?? '',
+              summary: oEntry['atom:summary']['#text'] ?? '',
+              contentUrl: new URL(`/sap/bc/adt/filestore/ui5-bsp/objects/?sap-client=${client}`, uri).toString(),
+              url: new URL(path.join(oEntry['@_xml:base'], oEntry['atom:content']['@_src']), uri).toString(),
+            };
+            return bspData;
+          });
+          resolve(bspData);
+        }
+      );
     });
   },
 
@@ -124,8 +135,8 @@ export default {
         title: `ui5-tools > Importing BSP...`,
         cancellable: true,
       },
-      async (progress) => {
-        for (let i = 0; i < aBSP.length; i++) {
+      async (progress, token) => {
+        for (let i = 0; !token.isCancellationRequested && i < aBSP.length; i++) {
           const oBSP = aBSP[i];
 
           progress.report({

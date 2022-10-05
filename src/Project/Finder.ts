@@ -64,7 +64,7 @@ const Finder = {
 
         Log.general(`${ui5Projects.size} ui5 projects found!`);
 
-        await Menu.setContexts();
+        Menu.setContexts();
 
         // ProjectsView.refresh();
 
@@ -148,6 +148,8 @@ const Finder = {
         const sameProject = ui5Projects.get(ui5Project.serverPath);
         if (!sameProject || sameProject.priority < ui5Project.priority) {
           await sameProject?.close();
+          Projects.unserveProject(ui5Project);
+
           ui5Projects.set(ui5Project.serverPath, ui5Project);
           return ui5Project;
         }
@@ -170,7 +172,7 @@ const Finder = {
     Finder.ui5Projects.delete(ui5Project.serverPath);
     await ui5Project.close();
     Projects.unserveProject(ui5Project);
-    await Menu.setContexts();
+    Menu.setContexts();
   },
 
   fsPathToServerPath(fsPathBase: string) {

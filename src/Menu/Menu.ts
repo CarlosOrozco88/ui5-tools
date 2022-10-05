@@ -45,7 +45,7 @@ export default {
     }
   },
 
-  async setContexts() {
+  setContexts() {
     const ui5Projects = Array.from(Finder.ui5Projects.values());
 
     const aResourcesDirname = ui5Projects.map((app) => app.fsPathBase);

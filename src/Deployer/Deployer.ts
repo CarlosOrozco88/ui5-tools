@@ -160,7 +160,7 @@ export default {
         title: `ui5-tools > Deploying all`,
         cancellable: true,
       },
-      async (progress) => {
+      async (progress, token) => {
         const oMassiveOptions: DeployMassive = {
           method: sMethod,
           transportno: '',
@@ -196,7 +196,7 @@ export default {
           });
         }
 
-        for (let i = 0; i < ui5Projects.length; i++) {
+        for (let i = 0; !token.isCancellationRequested && i < ui5Projects.length; i++) {
           const ui5Project = ui5Projects[i];
           try {
             const ui5ProjectConfig = await ui5Project.getUi5ToolsFile();

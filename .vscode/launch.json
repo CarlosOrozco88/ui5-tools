@@ -11,28 +11,26 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "--disable-extensions",
-        "--extensionDevelopmentPath=${workspaceRoot}"],
-      "stopOnEntry": false,
-      "outFiles": [
-          "${workspaceRoot}/dist/src/**/*.js"
+        // "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceRoot}"
       ],
+      "outFiles": ["${workspaceRoot}/dist/src/**/*.js"],
       "sourceMaps": true,
       "preLaunchTask": "npm: watch"
     },
-		{
-			"name": "Run Extension Tests",
-			"type": "extensionHost",
-			"request": "launch",
-			"runtimeExecutable": "${execPath}",
-			"args": [
-        "--disable-extensions",
-				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/dist/test/suite/index"
-			],
-			"outFiles": ["${workspaceFolder}/dist/test/**/*.js"],
+    {
+      "name": "Run Extension Tests",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        // "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionTestsPath=${workspaceFolder}/dist/test/suite/index"
+      ],
+      "outFiles": ["${workspaceFolder}/dist/test/**/*.js"],
       "sourceMaps": true,
-			"preLaunchTask": "npm: watch"
-		}
+      "preLaunchTask": "npm: watch"
+    }
   ]
 }

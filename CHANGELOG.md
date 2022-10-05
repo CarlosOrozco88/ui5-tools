@@ -1,3 +1,8 @@
+## 2.1.1 (05/10/2022)
+
+- Fixed Progress Notifications for `ui5-tools.menu.importer.import`
+- Dependencies upgrade
+
 ## 2.1.0 (19/09/2022)
 
 - New command `ui5-tools.menu.importer.import` (`alt+i alt+i`). Now it is possible to import BSPs from Gateway systems. Thanks to [dperezbr](https://github.com/dperezbr)!!

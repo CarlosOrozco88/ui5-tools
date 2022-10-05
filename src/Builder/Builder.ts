@@ -117,11 +117,8 @@ export default {
       },
       async (progress, token) => {
         progress.report({ increment: 0 });
-        for (let i = 0; i < ui5Projects.length; i++) {
+        for (let i = 0; !token.isCancellationRequested && i < ui5Projects.length; i++) {
           const ui5Project = ui5Projects[i];
-          if (token.isCancellationRequested) {
-            return;
-          }
           progress.report({
             increment: 100 / ui5Projects.length,
             message: `${ui5Project.folderName} (${i + 1}/${ui5Projects.length})`,
