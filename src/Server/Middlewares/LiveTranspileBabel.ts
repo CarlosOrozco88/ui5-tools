@@ -21,9 +21,11 @@ export function liveTranspileBabel(ui5Project: Ui5Project) {
     const babelSourcesExclude = Config.builder('babelSourcesExclude') as string;
     const aBabelExclude = babelSourcesExclude?.split(',') ?? [];
 
-    const sInnerPath = req.url;
+    const sInnerPath = req.originalUrl;
 
-    let bTranspile = sInnerPath.endsWith('.js') && !sInnerPath.endsWith('-preload.js');
+    let bTranspile =
+      (sInnerPath.endsWith('.js') || sInnerPath.endsWith('.ts')) &&
+      (!sInnerPath.endsWith('-preload.js') || !sInnerPath.endsWith('-preload.ts'));
     for (let i = 0; bTranspile && i < aBabelExclude.length; i++) {
       const sExclude = aBabelExclude[i];
       bTranspile = !minimatch(sInnerPath, sExclude);
@@ -40,39 +42,14 @@ export function liveTranspileBabel(ui5Project: Ui5Project) {
 
       const uriJs = Uri.file(fsPathJs);
 
-      let response = '';
-      if (ui5Project.isGenerated()) {
-        const pathGeneratedTs = fsPathJs.replace('.js', '.ts');
-        try {
-          const pathWorkingTs = pathGeneratedTs.replace(ui5Project.fsPathGenerated, ui5Project.fsPathWorking);
-          const uriWorkingTs = Uri.file(pathWorkingTs);
-          const babelified = await Typescript.transpileUriLive(uriWorkingTs, {
-            filename: path.basename(pathGeneratedTs),
-            sourceFileName: path.basename(pathGeneratedTs),
-          });
-          response = babelified?.code ?? '';
-        } catch (error: any) {
-          // Does not exist ts file
-          console.error(error.message);
-        }
-      }
-      if (!response) {
-        try {
-          const babelified = await Babel.transpileUriLive(uriJs);
-          response = babelified?.code ?? '';
-        } catch (error: any) {
-          // Does not exist js file
-          console.error(error.message);
-        }
-      }
-      if (response) {
-        Log.server(`LiveTranspile: ${fsPathJs} transpiled successfully`, Level.INFO);
-        res.send(response);
-        return;
-      }
+      const babelified = await Babel.transpileUriLive(uriJs);
+      const response = babelified?.code ?? '';
+      Log.server(`LiveTranspile: ${fsPathJs} transpiled successfully`, Level.INFO);
+      res.send(response);
     } catch (error: any) {
-      Log.server(`LiveTranspile: ${error.message}`, Level.WARNING);
+      // Does not exist js file
+      Log.server(`LiveTranspile: ${error.message}`, Level.ERROR);
+      next();
     }
-    next();
   };
 }

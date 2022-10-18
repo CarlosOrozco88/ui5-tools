@@ -5,7 +5,7 @@ import { Level, ServerOptions } from '../../../Types/Types';
 import Config from '../../../Utils/ConfigVscode';
 import Log from '../../../Utils/LogVscode';
 import Utils from '../../../Utils/ExtensionVscode';
-import { noCache, removeCacheBusterString } from './Middlewares';
+import { removeCacheBusterString } from './Middlewares';
 
 const Runtime = {
   async set({ serverApp }: ServerOptions) {
@@ -22,14 +22,17 @@ const Runtime = {
       await Runtime.downloadRuntime(ui5Version);
     }
 
-    serverApp.use(
-      ['/resources', '/**/resources'],
-      removeCacheBusterString,
-      noCache,
-      express.static(runtimeFsPath, {
-        maxAge: '0',
-      })
-    );
+    const staticExpress = express.static(runtimeFsPath, {
+      maxAge: '0',
+      cacheControl: false,
+    });
+    serverApp.use(['/resources', '/**/resources'], removeCacheBusterString, (req, res, next) => {
+      if (req.originalUrl.split('/resources').length > 2) {
+        req.url = req.originalUrl.slice(req.originalUrl.indexOf('/resources/') + 10, req.originalUrl.length);
+      }
+
+      staticExpress(req, res, next);
+    });
   },
 
   async downloadRuntime(ui5Version: string) {

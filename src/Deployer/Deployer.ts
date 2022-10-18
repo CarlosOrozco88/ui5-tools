@@ -551,7 +551,7 @@ export default {
           },
         },
       },
-      ui5ProjectConfig
+      ui5ProjectConfig ?? {}
     );
     if (!ui5ProjectConfig) {
       Log.deployer(`Create ui5-tools.json file?`);

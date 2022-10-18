@@ -6,11 +6,10 @@ import { transformAsync, BabelFileResult, TransformOptions } from '@babel/core';
 import presetTypescript from '@babel/preset-typescript';
 // @ts-ignore
 import presetUi5 from 'babel-preset-transform-ui5';
-// @ts-ignore
-import transformAsyncToPromises from 'babel-plugin-transform-async-to-promises';
 
 import os from 'os';
 import path from 'path';
+import Babel from './Babel';
 
 export default {
   async build(folderPath: string, options: TransformOptions = {}): Promise<void> {
@@ -29,24 +28,6 @@ export default {
     } catch (error: any) {
       throw new Error(error);
     }
-  },
-
-  async transpileUriLive(tsUri: Uri, options: TransformOptions = {}): Promise<BabelFileResult | null> {
-    const innerOptions = {
-      ...options,
-    };
-
-    innerOptions.plugins = innerOptions.plugins ?? [
-      [
-        transformAsyncToPromises,
-        {
-          inlineHelpers: true,
-        },
-      ],
-    ];
-    innerOptions.sourceMaps = 'inline';
-
-    return this.transpileUri(tsUri, innerOptions);
   },
 
   async transpileUriToFile(tsUri: Uri, options: TransformOptions = {}) {

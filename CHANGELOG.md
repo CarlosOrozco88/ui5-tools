@@ -1,3 +1,11 @@
+## 2.1.2 (18/10/2022)
+
+- Fixed `babelSourcesLive` with typescript (no sourcemaps support)
+- Fixed `Runtime` when the url has 2+ resources paths (ex. viz charts templates)
+- Fixed deployment errors
+- Extension published to Open VSX
+- Dependencies upgrade
+
 ## 2.1.1 (05/10/2022)
 
 - Fixed Progress Notifications for `ui5-tools.menu.importer.import`

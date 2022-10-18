@@ -51,7 +51,8 @@ export default {
         },
       ],
     ];
-    innerOptions.sourceMaps = 'inline';
+    innerOptions.sourceMaps = false;
+
     return this.transpileUri(fsUri, innerOptions);
   },
 
