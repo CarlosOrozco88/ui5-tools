@@ -1,3 +1,8 @@
+## 2.1.3 (20/10/2022)
+
+- Setting up github actions
+- Dependencies upgrade
+
 ## 2.1.2 (18/10/2022)
 
 - Fixed `babelSourcesLive` with typescript (no sourcemaps support)
