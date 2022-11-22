@@ -52,6 +52,9 @@ async function downloadSandbox() {
         console.log(`Sandbox file fetched!`);
         const fileMinified: MinifyOutput = await minify(fileString, {
           compress: false,
+          format: {
+            comments: false,
+          },
         });
         const fileMinifiedString = fileMinified.code ?? '';
         const hash = createHash('sha256');
