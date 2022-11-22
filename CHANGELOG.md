@@ -1,3 +1,8 @@
+## 2.1.4 (22/11/2022)
+
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 2.1.3 (20/10/2022)
 
 - Setting up github actions
