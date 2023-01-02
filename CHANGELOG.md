@@ -1,3 +1,8 @@
+## 2.1.5 (02/01/2023)
+
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 2.1.4 (22/11/2022)
 
 - Updated sandbox.js files
