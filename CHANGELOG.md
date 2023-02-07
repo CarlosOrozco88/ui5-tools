@@ -1,3 +1,9 @@
+## 2.1.6 (07/02/2023)
+
+- Fixed gateway proxy. Changed from `/sap/opu/odata/sap` to `/sap/opu/odata/`. Thanks to [sergioogra](https://github.com/sergioogra)!!
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 2.1.5 (02/01/2023)
 
 - Updated sandbox.js files
