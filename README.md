@@ -112,6 +112,7 @@ UI5TOOLS_IMPORT_PASSWORD=
 - `ui5-tools.libraryFolder`: Transpiled folder for libraries (js) | default: `src-gen`
 - `ui5-tools.distFolder`: Destination folder in your project (final build) | default: `dist`
 - `ui5-tools.ui5Version`: UI5 library version for CDN proxy in server and build correct preload files: `1.71.42`
+- `ui5-tools.verbose`: Log al messages `false`
 
 #### Server Settings
 
@@ -186,6 +187,7 @@ UI5TOOLS_IMPORT_PASSWORD=
 #### Deployer Commands
 
 - `ui5-tools.deployer.deploy`: Build and deploy project | Shortcut: `alt+d alt+d`
+- `ui5-tools.deployer.deployOnly`: Deploy project | Shortcut: `alt+d alt+o`
 - `ui5-tools.deployer.deployMultiple`: Build and deploy multiple projects | Shortcut: `alt+m alt+m`
 
 #### Importer Commands
@@ -206,6 +208,7 @@ UI5TOOLS_IMPORT_PASSWORD=
 - `ui5-tools.menu.builder.build`: Build option in project folder menu (right click)
 - `ui5-tools.menu.builder.generate`: Generate the project from `appSrcFolder/librarySrcFolder` to `appFolder/libraryFolder` (right click)
 - `ui5-tools.menu.deployer.deploy`: Build and deploy option in project folder menu (right click)
+- `ui5-tools.menu.deployer.deployOnly`: Deploy option in project folder menu (right click)
 
 ## Credits
 
