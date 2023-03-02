@@ -17,10 +17,10 @@ const Other = {
         Log.server(`Creating resourcesProxy to Other ${targets[i]}`);
 
         const proxy = createProxyMiddleware({
-          pathRewrite: function (i: number, path: string) {
-            const nPath = path.replace(mpaths[i], '');
-            return nPath;
-          }.bind(this, i),
+          // pathRewrite: function (i: number, path: string) {
+          //   const nPath = path.replace(mpaths[i], '');
+          //   return nPath;
+          // }.bind(this, i),
           target: targets[i],
           secure: !!Config.server('odataSecure'),
           changeOrigin: true,

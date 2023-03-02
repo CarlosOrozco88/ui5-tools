@@ -17,7 +17,7 @@ import Fetch from '../Utils/Fetch';
 const oLogger = Log.newLogProviderDeployer();
 
 export default {
-  async askProjectToDeploy(): Promise<void> {
+  async askProjectToDeploy(oOptions?: { skipBuild?: boolean }): Promise<void> {
     let ui5Project: Ui5Project | undefined;
     try {
       Log.deployer(`Asking project to deploy`);
@@ -62,7 +62,7 @@ export default {
     }
     try {
       if (ui5Project) {
-        await this.askCreateReuseTransport(ui5Project);
+        await this.askCreateReuseTransport(ui5Project, oOptions);
       }
     } catch (oError: any) {
       Log.deployer(oError.message, Level.ERROR);
@@ -317,7 +317,7 @@ export default {
             await this.updateTransport(ui5Project, oDeployOptions, sOption);
             break;
         }
-        if (oMassiveOptions) {
+        if (oMassiveOptions?.method) {
           oMassiveOptions.transportno = String(oDeployOptions.ui5.transportno);
         }
         await this.deployProject(ui5Project, oDeployOptions, oMassiveOptions);
@@ -437,12 +437,14 @@ export default {
             throw new Error('Deploy canceled');
           });
 
-          await ui5Project.build({ progress, multiplier: 0.5 });
+          if (!oMassiveOptions?.skipBuild) {
+            await ui5Project.build({ progress, multiplier: 0.5 });
+          }
           await this.deploy({ ui5Project, oDeployOptions, progress, multiplier: 0.5 });
 
           const sMessage = Log.deployer(`Project ${ui5Project.folderName} deployed!`);
 
-          if (!oMassiveOptions) {
+          if (oMassiveOptions?.method) {
             window.showInformationMessage(sMessage);
           }
         }

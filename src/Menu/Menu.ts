@@ -19,13 +19,13 @@ export default {
     }
   },
 
-  async deploy(oResource: Uri): Promise<void> {
+  async deploy(oResource: Uri, oOptions?: { skipBuild?: boolean }): Promise<void> {
     const ui5Projects = await Finder.getAllUI5ProjectsArray();
     const ui5Project = ui5Projects.find((app) => app.fsPathBase === oResource.fsPath);
 
     if (ui5Project) {
       try {
-        await Deployer.askCreateReuseTransport(ui5Project);
+        await Deployer.askCreateReuseTransport(ui5Project, oOptions);
       } catch (oError: any) {
         Log.deployer(oError.message, Level.ERROR);
       }

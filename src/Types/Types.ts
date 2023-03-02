@@ -105,6 +105,7 @@ export enum ServerStatus {
 }
 export enum Level {
   LOG = 'LOG',
+  VERBOSE = 'VERBOSE',
   ERROR = 'ERROR',
   SUCCESS = 'SUCCESS',
   DEBUG = 'DEBUG',
@@ -169,7 +170,8 @@ export interface ImportOptions {
 
 export interface DeployMassive {
   transportno?: string;
-  method: string;
+  method?: string;
+  skipBuild?: boolean;
 }
 
 export enum DeployStatus {

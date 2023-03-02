@@ -1,3 +1,11 @@
+## 2.2.0 (02/03/2023)
+
+- Changed Other Proxy behaviour, now respects the entire path configured without doing replacements
+- Added new commands `ui5-tools.deployer.deployOnly` (alt+d alt+o), `ui5-tools.menu.deployer.deployOnly`
+- Added new configuration property `ui5-tools.verbose`
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 2.1.6 (07/02/2023)
 
 - Fixed gateway proxy. Changed from `/sap/opu/odata/sap` to `/sap/opu/odata/`. Thanks to [sergioogra](https://github.com/sergioogra)!!

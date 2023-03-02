@@ -1,6 +1,7 @@
 import { window } from 'vscode';
 
 import { Log as LogType, Level, LogTools } from '../Types/Types';
+import ConfigVscode from './ConfigVscode';
 import Utils from './ExtensionVscode';
 
 const ui5toolsOutput = window.createOutputChannel(`ui5-tools`);
@@ -66,8 +67,10 @@ const Log: LogTools = {
       log: (sMessage: string) => {
         return fnLogger(sMessage, Level.LOG);
       },
-      logVerbose: () => {
-        // console.log(oParam)
+      logVerbose: (sMessage: string) => {
+        if (ConfigVscode.general('verbose')) {
+          return fnLogger(sMessage, Level.VERBOSE);
+        }
         return '';
       },
       debug: (sMessage: string) => {
