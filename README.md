@@ -60,7 +60,7 @@ UI5TOOLS_ODATA_PASSWORD_N=
 #### Deployer
 
 - **Gateway deploy**, process includes build process. Deploy your project doing right click in project folder or `alt+d alt+d` and select project
-- **ui5-tools.json** file located at project folder, with deployment configuration: [ui5-tools.json example](workspaceExample/Z_APP1/ui5-tools.json)
+- **ui5-tools.json** file located at project folder, with deployment configuration: [ui5-tools.json example](https://github.com/CarlosOrozco88/ui5-tools-examples/blob/main/single-project/ui5-tools.json)
 - **Create, update and save** last order in ui5-tools.json file (configurable)
 - **Autoprefix** BSP name in order text while creation (optional)
 - Supports `.env` file for gateway authentication.
