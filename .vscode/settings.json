@@ -17,5 +17,6 @@
   "xml.format.splitAttributesIndentSize": 1,
   "editor.fontFamily": "'Cascadia Code', Menlo, Monaco, 'Courier New', monospace",
   "editor.fontLigatures": true,
-  "workbench.colorTheme": "One Dark Pro Flat"
+  "workbench.colorTheme": "One Dark Pro Flat",
+  "ui5-tools.builder.babelSources": false
 }

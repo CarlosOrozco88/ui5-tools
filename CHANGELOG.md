@@ -1,3 +1,9 @@
+## 2.2.1 (4/04/2023)
+
+- Updated default `ui5-tools.ui5Version` from 1.71.46 to 1.71.55
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 2.2.0 (02/03/2023)
 
 - Changed Other Proxy behaviour, now respects the entire path configured without doing replacements
