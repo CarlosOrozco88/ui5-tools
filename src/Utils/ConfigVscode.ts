@@ -35,4 +35,12 @@ export default {
   deployer(property?: string): WorkspaceConfiguration | unknown {
     return this.property(property, 'deployer');
   },
+
+  async getExcludedFiles() {
+    const exclude = [
+      ...Object.keys((await workspace.getConfiguration('search', null).get('exclude')) || {}),
+      ...Object.keys((await workspace.getConfiguration('files', null).get('exclude')) || {}),
+    ];
+    return exclude;
+  },
 };

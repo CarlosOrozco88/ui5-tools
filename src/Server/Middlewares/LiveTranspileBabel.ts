@@ -1,15 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import path from 'path';
 import { Uri } from 'vscode';
-import minimatch from 'minimatch';
 
 import Babel from '../../Project/BuildSteps/Babel';
 import { Level } from '../../Types/Types';
 import Log from '../../Utils/LogVscode';
 import Ui5Project from '../../Project/Ui5Project';
-import Typescript from '../../Project/BuildSteps/Typescript';
 import Config from '../../Utils/ConfigVscode';
 import Server from '../Server';
+import Extension from '../../Utils/ExtensionVscode';
 
 export function liveTranspileBabel(ui5Project: Ui5Project) {
   return async function ui5ProjectLiveTranspileBabel(req: Request, res: Response, next: NextFunction) {
@@ -26,10 +25,8 @@ export function liveTranspileBabel(ui5Project: Ui5Project) {
     let bTranspile =
       (sInnerPath.endsWith('.js') || sInnerPath.endsWith('.ts')) &&
       (!sInnerPath.endsWith('-preload.js') || !sInnerPath.endsWith('-preload.ts'));
-    for (let i = 0; bTranspile && i < aBabelExclude.length; i++) {
-      const sExclude = aBabelExclude[i];
-      bTranspile = !minimatch(sInnerPath, sExclude);
-    }
+
+    bTranspile = bTranspile && !Extension.excluder(sInnerPath, aBabelExclude);
 
     if (!bTranspile) {
       next();

@@ -6,6 +6,8 @@ import LiveServer from '../Server/LiveServer';
 import Projects from '../Server/Projects';
 import StatusBar from '../StatusBar/StatusBar';
 import Utils from '../Utils/ExtensionVscode';
+import ConfigVscode from '../Utils/ConfigVscode';
+import Extension from '../Utils/ExtensionVscode';
 
 let watchApps: chokidar.FSWatcher | undefined;
 const awaiter: Record<string, ReturnType<typeof setTimeout>> = {};
@@ -26,13 +28,13 @@ export default {
 
     const sWorkspaceRootPath = path.join(Utils.getWorkspaceRootPath());
 
+    const excludedFiles = await ConfigVscode.getExcludedFiles();
     this.watchApps = chokidar.watch([sWorkspaceRootPath], {
       ignoreInitial: true,
       ignored: (sPath: string) => {
         const sPathResolved = path.resolve(sPath);
-        const filename = path.basename(sPathResolved);
 
-        let bIgnore = filename.startsWith('.') || filename === 'node_modules';
+        let bIgnore = Extension.excluder(sPath, excludedFiles);
 
         if (!bIgnore) {
           const ui5Projects = Array.from(Finder.ui5Projects.values());

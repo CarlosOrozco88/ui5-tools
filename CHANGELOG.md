@@ -1,4 +1,11 @@
-## 2.2.1 (4/04/2023)
+## 2.2.2 (08/05/2023)
+
+- Exclude files from chokidar watcher with `search.exclude` and `files.exclude` vscode config.
+- Updated default `ui5-tools.ui5Version` from 1.71.55 to 1.71.56
+- Updated sandbox.js files
+- Dependencies upgrade
+
+## 2.2.1 (04/04/2023)
 
 - Updated default `ui5-tools.ui5Version` from 1.71.46 to 1.71.55
 - Updated sandbox.js files

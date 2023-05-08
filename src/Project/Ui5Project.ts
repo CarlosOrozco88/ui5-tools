@@ -19,6 +19,8 @@ import LiveServer from '../Server/LiveServer';
 import Server from '../Server/Server';
 import StatusBar from '../StatusBar/StatusBar';
 import Log from '../Utils/LogVscode';
+import Extension from '../Utils/ExtensionVscode';
+import ConfigVscode from '../Utils/ConfigVscode';
 
 const DEFAULT_TASKS_BUILD: BuildTasks = {
   cleanFolder: true,
@@ -175,14 +177,13 @@ export default class Ui5Project {
   }
 
   watch(): Promise<void> {
-    return new Promise((resolve) => {
-      const aIgnored = ['.git', '.svn', '.hg', '.DS_Store', 'node_modules'];
+    return new Promise(async (resolve) => {
+      const aIgnored = await ConfigVscode.getExcludedFiles();
+
       this.watcher = chokidar.watch([this.fsPathWorking], {
         ignoreInitial: true,
         ignored: (sPath: string) => {
-          const sPathResolved = path.resolve(sPath);
-          const aPath = sPathResolved.split(path.sep);
-          const bIgnore = aIgnored.some((f) => aPath.includes(f));
+          const bIgnore = Extension.excluder(sPath, aIgnored);
           return bIgnore;
         },
         usePolling: false,

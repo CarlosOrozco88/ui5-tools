@@ -4,6 +4,7 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 
 import Config from './ConfigVscode';
+import { minimatch } from 'minimatch';
 
 let extensionContext: ExtensionContext;
 // import { ProjectsView } from '../ActivityBar/ProjectsView';
@@ -94,6 +95,15 @@ const Extension = {
 
   getGlobalStorageFsPath(): string {
     return this.getGlobalStorageUri().fsPath;
+  },
+
+  excluder(path: string, patterns: string[]) {
+    let bFound = false;
+    for (let i = 0; !bFound && i < patterns.length; i++) {
+      const sExclude = patterns[i];
+      bFound = minimatch(path, sExclude);
+    }
+    return bFound;
   },
 };
 
