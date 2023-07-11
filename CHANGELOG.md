@@ -1,3 +1,8 @@
+## 2.2.3 (11/07/2023)
+
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 2.2.2 (08/05/2023)
 
 - Exclude files from chokidar watcher with `search.exclude` and `files.exclude` vscode config.
