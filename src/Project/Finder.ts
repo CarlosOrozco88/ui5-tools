@@ -35,14 +35,12 @@ const Finder = {
 
         const appFolder = Config.general('appFolder') as string;
         const libraryFolder = Config.general('libraryFolder') as string;
-        const appSrcFolder = Config.general('appSrcFolder') as string;
-        const librarySrcFolder = Config.general('librarySrcFolder') as string;
-        const distFolder = Config.general('distFolder') as string;
 
-        let pathToLook = `**/{${appFolder},${libraryFolder},${appSrcFolder},${librarySrcFolder}}`;
+        let pathToLook = `**/{${appFolder},${libraryFolder}}`;
         const aExclude = ['node_modules', '.git'];
-        if (!appFolder || !libraryFolder || !appSrcFolder || !librarySrcFolder) {
+        if (!appFolder || !libraryFolder) {
           pathToLook = '**';
+          const distFolder = Config.general('distFolder') as string;
           if (distFolder) {
             aExclude.push(`${distFolder}`);
           }
@@ -77,51 +75,26 @@ const Finder = {
   async getManifestsUri(aWorkspacesList: Uri[][]) {
     const mapUris: Map<string, Uri> = new Map();
 
-    const librarySrcFolder = Config.general('librarySrcFolder') as string;
     const libraryGenFolder = Config.general('libraryFolder') as string;
-    const appSrcFolder = Config.general('appSrcFolder') as string;
     const appGenFolder = Config.general('appFolder') as string;
     const distFolder = Config.general('distFolder') as string;
-    const PRIORITY: Record<string, number> = {
-      DEFAULT: 1,
-    };
-
-    PRIORITY[librarySrcFolder] = 100;
-    PRIORITY[libraryGenFolder] = 50;
-
-    PRIORITY[appSrcFolder] = 100;
-    PRIORITY[appGenFolder] = 50;
 
     const workspaceRoot = Utils.getWorkspaceRootPath();
 
     for (const aUris of aWorkspacesList) {
       for (const oUri of aUris) {
         const pathFromRoot = oUri.fsPath.replace(workspaceRoot, '');
-        const dirnameCurrent = path.dirname(pathFromRoot);
-        const folderNameCurrent = path.basename(dirnameCurrent);
 
         const appHash = pathFromRoot
-          .split(`${path.sep}${librarySrcFolder}${path.sep}`)
-          .join(path.sep)
           .split(`${path.sep}${libraryGenFolder}${path.sep}`)
-          .join(path.sep)
-          .split(`${path.sep}${appSrcFolder}${path.sep}`)
           .join(path.sep)
           .split(`${path.sep}${appGenFolder}${path.sep}`)
           .join(path.sep)
           .split(`${path.sep}${distFolder}${path.sep}`)
           .join(path.sep);
         const existingUri = mapUris.get(appHash);
-        let replace = false;
-        if (existingUri) {
-          const dirnameExisting = path.dirname(existingUri.fsPath.replace(workspaceRoot, ''));
-          const folderNameExisting = path.basename(dirnameExisting);
 
-          const existingPriority = PRIORITY[folderNameExisting] ?? PRIORITY.DEFAULT;
-          const currentPriority = PRIORITY[folderNameCurrent] ?? PRIORITY.DEFAULT;
-          replace = currentPriority > existingPriority;
-        }
-        if (!existingUri || replace) {
+        if (!existingUri) {
           mapUris.set(appHash, oUri);
         }
       }
@@ -146,13 +119,12 @@ const Finder = {
         const ui5Project = new Ui5Project(manifestFsPath, manifest);
 
         const sameProject = ui5Projects.get(ui5Project.serverPath);
-        if (!sameProject || sameProject.priority < ui5Project.priority) {
+        if (sameProject) {
           await sameProject?.close();
           Projects.unserveProject(ui5Project);
-
-          ui5Projects.set(ui5Project.serverPath, ui5Project);
-          return ui5Project;
         }
+        ui5Projects.set(ui5Project.serverPath, ui5Project);
+        return ui5Project;
       }
     } catch (error: any) {
       Log.general(error.message);

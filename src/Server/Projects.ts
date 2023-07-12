@@ -1,7 +1,7 @@
 import { ServerOptions } from '../Types/Types';
 import Server from './Server';
 import { cacheBusterIndex, cacheBusterMiddleware } from './Middlewares/Cachebuster';
-import { liveTranspileBabel } from './Middlewares/LiveTranspileBabel';
+import { liveTranspileTypescript } from './Middlewares/LiveTranspileTypescript';
 import Ui5Project from '../Project/Ui5Project';
 import { createStaticMiddleware } from './Middlewares/Static';
 
@@ -17,17 +17,15 @@ const Projects = {
   async serveProject(ui5Project: Ui5Project, oConfigParams = Server.getServerOptions()) {
     const staticPath = ui5Project.getServedPath(oConfigParams?.bServeProduction);
 
-    await ui5Project.generate();
-
     const ui5ProjectCacheBusterMiddleware = cacheBusterMiddleware();
-    const ui5LiveTranspileMiddleware = liveTranspileBabel(ui5Project);
+    const ui5TypeScriptMiddleware = liveTranspileTypescript(ui5Project);
     const ui5StaticMiddleware = createStaticMiddleware(staticPath);
 
     oConfigParams?.serverApp?.use(
       ui5Project.serverPath,
       ui5ProjectCacheBusterMiddleware,
-      ui5LiveTranspileMiddleware,
-      ui5StaticMiddleware
+      ui5StaticMiddleware,
+      ui5TypeScriptMiddleware
     );
     const bCacheBuster = Server.isCachebusterOn();
     if (bCacheBuster) {

@@ -1,3 +1,15 @@
+## 3.0.0 (13/07/2023)
+- Updated default `ui5-tools.ui5Version` from 1.71.46 to 1.71.56
+- Typescript support: changed from old behaviour with dual combination of folders (`src --> webapp` and `src --> src-gen`) to new behaviour with simpler folders (`webapp` and `src`).
+- It is possible to migrate to typescript file by file, there is no need to change all javascript files at once. At local server mode, javascript files has priority over typescript files when the has the same filename.
+- ❌ **Breaking changes** related to typescript support:
+  - Removed command `ui5-tools.builder.generate`
+  - Removed configuration properties `ui5-tools.appSrcFolder` and `ui5-tools.librarySrcFolder`
+  - Restored default value for property `ui5-tools.libraryFolder` to `src`
+- Due to Internet Explorer end of life, babel support has been dropped. For me, it only has sense in older computers with older sap gui versions and HTML Viewer inside. Consider upgrading and using new HTML Viewer (Edge), the only problem now is with sapevent + https, but it is going to be solved soon.
+- ❌ **Babel is now unsuported** (a.k.a. internet explorer 10 support)! **Breaking changes**:
+  - Removed configuration properties `ui5-tools.server.babelSourcesLive` and `ui5-tools.builder.babelSourcesExclude`
+
 ## 2.2.3 (11/07/2023)
 
 - Updated sandbox.js files

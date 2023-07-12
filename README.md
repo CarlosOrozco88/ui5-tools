@@ -21,7 +21,7 @@ VSCode extension for ui5 developers. This extension is not intended to replace u
 
 #### Server
 
-- **Handles AppCachebuster** in localhost (by default only in PROD mode).
+- **Handles AppCachebuster** in localhost (by default only in PROD mode). Only use this feature to test your cachebuster behaviour with no deployment needed.
 - Configurable **proxy** to one o multiple **odata service** (Gateway, Other, None). Command `alt+c alt+o`
 - Supports `.env` file for odata service authentication. Example of `.env` file:
 
@@ -106,12 +106,10 @@ UI5TOOLS_IMPORT_PASSWORD=
 
 #### General Settings
 
-- `ui5-tools.appSrcFolder`: Source folder for applications (ts) | default: `src`
 - `ui5-tools.appFolder`: Transpiled folder for applications (js) | default: `webapp`
-- `ui5-tools.librarySrcFolder`: Source folder for libraries (ts) | default: `src`
-- `ui5-tools.libraryFolder`: Transpiled folder for libraries (js) | default: `src-gen`
+- `ui5-tools.libraryFolder`: Transpiled folder for libraries (js) | default: `src`
 - `ui5-tools.distFolder`: Destination folder in your project (final build) | default: `dist`
-- `ui5-tools.ui5Version`: UI5 library version for CDN proxy in server and build correct preload files: `1.71.42`
+- `ui5-tools.ui5Version`: UI5 library version for CDN proxy in server and build correct preload files: `1.71.56`
 - `ui5-tools.verbose`: Log al messages `false`
 
 #### Server Settings
@@ -132,13 +130,10 @@ UI5TOOLS_IMPORT_PASSWORD=
 - `ui5-tools.server.resourcesUri`: Your resources server url (example: http://srvaspgwd.com:8080/)
 - `ui5-tools.server.proxyDestinations`: Your own list of destinations | default: `[]`
 - `ui5-tools.server.resourcesSecure`: Verify resourcesProxy SSL Certs | default: `false`
-- `ui5-tools.server.babelSourcesLive`: Live transform es6 to es5 (server in DEV mode), internet explorer 11 compat: `false`
 - `ui5-tools.server.cacheBuster`: Activate cacheBuster in server mode: | Default: `None`
 
 #### Builder Settings
 
-- `ui5-tools.builder.babelSources`: Transform es6 to es5, internet explorer 11 compat | default: `false`
-- `ui5-tools.builder.babelSourcesExclude`: Exclude uri for babel, generate a RelativePattern to exclude, can be n separated by comma | default: ``
 - `ui5-tools.builder.debugSources`: Create debug js files when building | default: `true`
 - `ui5-tools.builder.uglifyPreload`: Uglify Component-preload.js when building. If uglifySources is activated, this flag is redundant | default: `false`
 - `ui5-tools.builder.uglifySources`: Uglify Component-preload.js and all js files when building | default: `true`
@@ -182,7 +177,6 @@ UI5TOOLS_IMPORT_PASSWORD=
 
 - `ui5-tools.builder.build`: Build ui5 project | Shortcut: `alt+b alt+b`
 - `ui5-tools.builder.buildAll`: Build workspace | Shortcut: `alt+b alt+a`
-- `ui5-tools.builder.generate`: Generate ui5 project: `alt+b alt+g`
 
 #### Deployer Commands
 
@@ -206,7 +200,6 @@ UI5TOOLS_IMPORT_PASSWORD=
 ---
 
 - `ui5-tools.menu.builder.build`: Build option in project folder menu (right click)
-- `ui5-tools.menu.builder.generate`: Generate the project from `appSrcFolder/librarySrcFolder` to `appFolder/libraryFolder` (right click)
 - `ui5-tools.menu.deployer.deploy`: Build and deploy option in project folder menu (right click)
 - `ui5-tools.menu.deployer.deployOnly`: Deploy option in project folder menu (right click)
 

@@ -32,26 +32,10 @@ export default {
     }
   },
 
-  async generate(oResource: Uri): Promise<void> {
-    const ui5Projects = await Finder.getAllUI5ProjectsArray();
-    const ui5Project = ui5Projects.find((app) => app.fsPathBase === oResource.fsPath);
-
-    if (ui5Project) {
-      try {
-        await Builder.generateProject(ui5Project);
-      } catch (oError: any) {
-        Log.builder(oError.message, Level.ERROR);
-      }
-    }
-  },
-
   setContexts() {
     const ui5Projects = Array.from(Finder.ui5Projects.values());
 
     const aResourcesDirname = ui5Projects.map((app) => app.fsPathBase);
     commands.executeCommand('setContext', 'ui5-tools:resourcesPath', aResourcesDirname);
-
-    const aGeneratedDirname = ui5Projects.filter((project) => project.isGenerated()).map((app) => app.fsPathBase);
-    commands.executeCommand('setContext', 'ui5-tools:generatorPath', aGeneratedDirname);
   },
 };

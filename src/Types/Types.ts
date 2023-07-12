@@ -32,8 +32,7 @@ export interface Ui5Properties {
   namespace: string;
   type: string;
   isLibrary: boolean;
-  /** In order to get the correct project folder, to avoid getting the generated instead of src */
-  priority: number;
+
   /** The actual path of the working folder that contains the manifest file */
   fsPathWorking: string;
   /** Actual folder name that contains the manifest.json (webapp, src, ...) */
@@ -49,10 +48,6 @@ export interface Ui5Properties {
   fsPathConfig: string;
   /** Path where the server serves the project */
   serverPath: string;
-  /** Path that should contain the sources of the project */
-  fsPathSource: string;
-  /** Path that contains the auto-generated project (served content) */
-  fsPathGenerated: string;
   /** Path that contains the build of the project */
   fsPathDist: string;
   /** Path that contains the deploy files */
@@ -117,8 +112,6 @@ export interface BuildTasks {
   copyFolder: boolean;
   replaceStrings: boolean;
   compileLess: boolean;
-  transpileTSFiles: boolean;
-  babelifyJSFiles: boolean;
   compressFiles: boolean;
   createDebugFiles: boolean;
   cleanFiles: boolean;

@@ -9,7 +9,6 @@ import presetUi5 from 'babel-preset-transform-ui5';
 
 import os from 'os';
 import path from 'path';
-import Babel from './Babel';
 
 export default {
   async build(folderPath: string, options: TransformOptions = {}): Promise<void> {

@@ -12,24 +12,10 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         // "--disable-extensions",
-        "--extensionDevelopmentPath=${workspaceRoot}"
+        "--extensionDevelopmentPath=${workspaceFolder}"
       ],
-      "outFiles": ["${workspaceRoot}/dist/src/**/*.js"],
       "sourceMaps": true,
-      "preLaunchTask": "npm: watch"
-    },
-    {
-      "name": "Run Extension Tests",
-      "type": "extensionHost",
-      "request": "launch",
-      "runtimeExecutable": "${execPath}",
-      "args": [
-        // "--disable-extensions",
-        "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/dist/test/suite/index"
-      ],
-      "outFiles": ["${workspaceFolder}/dist/test/**/*.js"],
-      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "preLaunchTask": "npm: watch"
     }
   ]

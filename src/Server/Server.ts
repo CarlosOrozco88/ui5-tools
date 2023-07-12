@@ -101,8 +101,6 @@ const Server = {
           isLaunchpadMounted: Utils.isLaunchpadMounted(),
           bCacheBuster: [sServerMode, 'Allways'].includes(Config.server('cacheBuster') as string),
           restarting: !!oParameters?.restarting,
-          bBabelSourcesLive: !!Config.server('babelSourcesLive'),
-          sBabelSourcesExclude: Config.builder('babelSourcesExclude') as string,
         };
         oConfigParams = newConfigParams;
 

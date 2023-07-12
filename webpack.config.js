@@ -10,7 +10,7 @@ module.exports = {
 
   entry: './src/extension.ts',
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'out'),
     filename: 'extension.js',
     libraryTarget: 'commonjs2',
     devtoolModuleFilenameTemplate: '../[resource-path]',
@@ -22,7 +22,7 @@ module.exports = {
     'utf-8-validate': 'commonjs utf-8-validate',
     'clean-css': 'commonjs clean-css',
     babylon: 'commonjs babylon',
-    'source-map': 'commonjs source-map'
+    'source-map': 'commonjs source-map',
   },
   resolve: {
     alias: {},

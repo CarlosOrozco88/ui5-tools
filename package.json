@@ -44,28 +44,23 @@
   "activationEvents": [
     "onStartupFinished"
   ],
-  "main": "./dist/extension.js",
+  "main": "./out/extension.js",
   "contributes": {
     "menus": {
       "explorer/context": [
         {
           "command": "ui5-tools.menu.builder.build",
-          "group": "ui5-tools-build",
+          "group": "ui5-tools",
           "when": "explorerResourceIsFolder && resourcePath in ui5-tools:resourcesPath"
         },
         {
-          "command": "ui5-tools.menu.builder.generate",
-          "group": "ui5-tools-build",
-          "when": "explorerResourceIsFolder && resourcePath in ui5-tools:generatorPath"
-        },
-        {
           "command": "ui5-tools.menu.deployer.deploy",
-          "group": "ui5-tools-deploy",
+          "group": "ui5-tools",
           "when": "explorerResourceIsFolder && resourcePath in ui5-tools:resourcesPath"
         },
         {
           "command": "ui5-tools.menu.deployer.deployOnly",
-          "group": "ui5-tools-deploy",
+          "group": "ui5-tools",
           "when": "explorerResourceIsFolder && resourcePath in ui5-tools:resourcesPath"
         }
       ]
@@ -130,11 +125,6 @@
         "command": "ui5-tools.builder.build",
         "key": "alt+b alt+b",
         "mac": "alt+b alt+b"
-      },
-      {
-        "command": "ui5-tools.builder.generate",
-        "key": "alt+b alt+g",
-        "mac": "alt+b alt+g"
       },
       {
         "command": "ui5-tools.builder.buildAll",
@@ -221,10 +211,6 @@
         "title": "UI5 Tools: Builder > Build all UI5 projects"
       },
       {
-        "command": "ui5-tools.builder.generate",
-        "title": "UI5 Tools: Builder > Generate UI5 project"
-      },
-      {
         "command": "ui5-tools.deployer.deploy",
         "title": "UI5 Tools: Deployer > Deploy multiple UI5 projects"
       },
@@ -234,19 +220,15 @@
       },
       {
         "command": "ui5-tools.menu.builder.build",
-        "title": "UI5 Tools: Build UI5 project"
-      },
-      {
-        "command": "ui5-tools.menu.builder.generate",
-        "title": "UI5 Tools: Generate UI5 project"
+        "title": "UI5 Tools: Build"
       },
       {
         "command": "ui5-tools.menu.deployer.deploy",
-        "title": "UI5 Tools: Build and Deploy UI5 project"
+        "title": "UI5 Tools: Build and Deploy"
       },
       {
         "command": "ui5-tools.menu.deployer.deployOnly",
-        "title": "UI5 Tools: Deploy UI5 project"
+        "title": "UI5 Tools: Deploy"
       },
       {
         "command": "ui5-tools.general.showOutput",
@@ -265,17 +247,7 @@
           "default": "webapp",
           "description": "App folder"
         },
-        "ui5-tools.appSrcFolder": {
-          "type": "string",
-          "default": "src",
-          "description": "Source folder in your app (src)"
-        },
         "ui5-tools.libraryFolder": {
-          "type": "string",
-          "default": "src-gen",
-          "description": "Source folder in your library (src)"
-        },
-        "ui5-tools.librarySrcFolder": {
           "type": "string",
           "default": "src",
           "description": "Source folder in your library (src)"
@@ -420,11 +392,6 @@
           "default": false,
           "description": "Verify resourcesProxy SSL Certs"
         },
-        "ui5-tools.server.babelSourcesLive": {
-          "type": "boolean",
-          "default": false,
-          "description": "Live transform es6 to es5 (server in DEV mode), internet explorer 11 compat"
-        },
         "ui5-tools.server.cacheBuster": {
           "type": "string",
           "enum": [
@@ -441,16 +408,6 @@
           ],
           "default": "None",
           "description": "Activate cacheBuster in server mode:"
-        },
-        "ui5-tools.builder.babelSources": {
-          "type": "boolean",
-          "default": false,
-          "description": "Transform es6 to es5, internet explorer 11 compat"
-        },
-        "ui5-tools.builder.babelSourcesExclude": {
-          "type": "string",
-          "default": "",
-          "description": "Exclude uri for babel, generate a RelativePattern to exclude, can be n separated by comma"
         },
         "ui5-tools.builder.debugSources": {
           "type": "boolean",

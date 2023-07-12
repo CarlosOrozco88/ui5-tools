@@ -2,7 +2,7 @@ import path from 'path';
 import { Progress, Uri, workspace } from 'vscode';
 import chokidar, { FSWatcher } from 'chokidar';
 
-import { BuildTasks, Level, Ui5ToolsConfiguration } from '../Types/Types';
+import { BuildTasks, Ui5ToolsConfiguration } from '../Types/Types';
 import Config from '../Utils/ConfigVscode';
 import Finder from './Finder';
 
@@ -11,7 +11,6 @@ import Copy from './BuildSteps/Copy';
 import Less from './BuildSteps/Less';
 import Typescript from './BuildSteps/Typescript';
 import Replacer from './BuildSteps/Replacer';
-import Babel from './BuildSteps/Babel';
 import Preload from './BuildSteps/Preload';
 import Debug from './BuildSteps/Debug';
 import Compress from './BuildSteps/Compress';
@@ -27,8 +26,6 @@ const DEFAULT_TASKS_BUILD: BuildTasks = {
   copyFolder: true,
   replaceStrings: true,
   compileLess: true,
-  transpileTSFiles: true,
-  babelifyJSFiles: true,
   compressFiles: true,
   createDebugFiles: true,
   cleanFiles: true,
@@ -41,8 +38,7 @@ export default class Ui5Project {
   public namespace: string;
   public type: string;
   public isLibrary: boolean;
-  /** In order to get the correct project folder, to avoid getting the generated instead of src */
-  public priority: number;
+
   /** The actual path of the working folder that contains the manifest file */
   public fsPathWorking: string;
   /** Actual folder name that contains the manifest.json (webapp, src, ...) */
@@ -58,16 +54,10 @@ export default class Ui5Project {
   public fsPathConfig: string;
   /** Path where the server serves the project */
   public serverPath: string;
-  /** Path that should contain the sources of the project */
-  public fsPathSource: string;
-  /** Path that contains the auto-generated project (served content) */
-  public fsPathGenerated: string;
   /** Path that contains the build of the project */
   public fsPathDist: string;
   /** Path that contains the deploy files */
   public fsPathDeploy: string;
-  /** If src folder exists, it should be named like `srcFolder` */
-  public srcFolder: string;
 
   private watcher: undefined | FSWatcher;
   private awaiterBuild: NodeJS.Timeout | undefined;
@@ -82,23 +72,14 @@ export default class Ui5Project {
     const fsPathWorking = path.dirname(manifestFsPath);
     const workingFolder = path.basename(fsPathWorking);
 
-    const appSrcFolder = Config.general('appSrcFolder') as string;
-    const librarySrcFolder = Config.general('librarySrcFolder') as string;
     const appGenFolder = Config.general('appFolder') as string;
     const libraryGenFolder = Config.general('libraryFolder') as string;
 
-    const isPlainFolder = ![appSrcFolder, librarySrcFolder, appGenFolder, libraryGenFolder].includes(workingFolder);
+    const isPlainFolder = ![appGenFolder, libraryGenFolder].includes(workingFolder);
     const fsPathBase = isPlainFolder ? fsPathWorking : path.resolve(fsPathWorking, '..');
 
     const folderName = path.basename(fsPathBase);
     const fsPathConfig = path.join(fsPathBase, 'ui5-tools.json');
-
-    const srcFolder = isLibrary ? librarySrcFolder : appSrcFolder;
-    const fsPathSource = path.join(fsPathBase, srcFolder);
-
-    const generatedFolder = isLibrary ? libraryGenFolder : appGenFolder;
-
-    const fsPathGenerated = path.join(fsPathBase, generatedFolder);
 
     const serverPath = Finder.fsPathToServerPath(fsPathBase);
 
@@ -108,72 +89,33 @@ export default class Ui5Project {
     const sDeployFolder = Config.deployer('deployFolder') as string;
     const fsPathDeploy = sDeployFolder === 'Dist Folder' ? fsPathDist : fsPathBase;
 
-    const priority = Ui5Project.calcProjectPriority({
-      isLibrary,
-      workingFolder,
-    });
-
     const props = {
       manifest,
       namespace,
       type,
       isLibrary,
-      priority,
       fsPathWorking,
       workingFolder,
       fsPathBase,
       folderName,
       fsPathConfig,
       serverPath,
-      fsPathSource,
-      fsPathGenerated,
       fsPathDist,
       fsPathDeploy,
-      srcFolder,
     };
     this.namespace = props.namespace;
     this.type = props.type;
     this.isLibrary = props.isLibrary;
-    this.priority = props.priority;
     this.fsPathWorking = props.fsPathWorking;
     this.workingFolder = props.workingFolder;
     this.fsPathBase = props.fsPathBase;
     this.folderName = props.folderName;
     this.fsPathConfig = props.fsPathConfig;
     this.serverPath = props.serverPath;
-    this.fsPathSource = props.fsPathSource;
-    this.fsPathGenerated = props.fsPathGenerated;
     this.fsPathDist = props.fsPathDist;
     this.fsPathDeploy = props.fsPathDeploy;
-    this.srcFolder = props.srcFolder;
 
     this.watch();
-  }
-
-  /**
-   * Generate de folder that we are serving in localhost
-   */
-  async generate() {
-    if (!this.isGenerated()) {
-      return;
-    }
-    const sWorkingFolder = this.fsPathWorking;
-    const sGeneratedFolder = this.fsPathGenerated;
-
-    try {
-      StatusBar.setExtraText(`Generating project ${this.folderName}...`);
-      // When there are not generated folder (default: webapp/src-gen), we generate the folders
-      // in order to serve the files from here
-
-      await Clean.folder(sGeneratedFolder);
-      await Copy.folder(sWorkingFolder, sGeneratedFolder);
-      await Less.build(this, sWorkingFolder, sGeneratedFolder);
-      await Clean.removeLess(sGeneratedFolder);
-      await Typescript.build(sGeneratedFolder, { sourceMaps: true });
-      StatusBar.setExtraText();
-    } catch (oError: any) {
-      Log.builder(oError.message, Level.ERROR);
-    }
   }
 
   watch(): Promise<void> {
@@ -202,7 +144,7 @@ export default class Ui5Project {
     const sPathResolved = path.resolve(pathFileChanged);
     const filename = path.basename(sPathResolved);
     const fileExtension = path.extname(sPathResolved).replace('.', '');
-    let pathGenerated = sPathResolved.replace(this.fsPathWorking, this.fsPathGenerated);
+    let pathWorking = this.fsPathWorking;
     let doRefresh = true;
 
     if (filename === 'manifest.json') {
@@ -222,35 +164,18 @@ export default class Ui5Project {
         return;
       }
     }
-    const uriGenerated = Uri.file(pathGenerated);
 
     const OPTIONS: Record<string, () => void> = {};
 
     const buildless = Config.builder('buildLess') as boolean;
     const isServerStarted = Server.isStarted();
-    const isSameFolder = this.fsPathWorking === this.fsPathGenerated;
 
-    if (buildless && (isServerStarted || isSameFolder)) {
+    if (buildless && isServerStarted) {
       OPTIONS.less = async () => {
         StatusBar.setExtraText(`Generating css for ${this.folderName}...`);
         const [firstPath, ...otherPaths] = await this.awaitLiveLess();
-        pathGenerated = firstPath && !otherPaths.length ? firstPath : pathGenerated.replace('.less', '.css');
-        doRefresh = !isSameFolder;
-        StatusBar.setExtraText();
-      };
-    }
-
-    if (Server.isStartedDevelopment() && this.isGenerated()) {
-      OPTIONS.ts = async () => {
-        StatusBar.setExtraText(`Generating js file from ${filename}...`);
-        await Copy.file(sPathResolved, pathGenerated);
-        await Typescript.transpileUriToFile(uriGenerated, { sourceMaps: true });
-        pathGenerated = pathGenerated.replace('.ts', '.js');
-        StatusBar.setExtraText();
-      };
-      OPTIONS.default = async () => {
-        StatusBar.setExtraText(`Coping file ${filename}...`);
-        await Copy.file(sPathResolved, pathGenerated);
+        pathWorking = firstPath && !otherPaths.length ? firstPath : pathWorking.replace('.less', '.css');
+        doRefresh = true;
         StatusBar.setExtraText();
       };
     }
@@ -260,10 +185,10 @@ export default class Ui5Project {
 
     if (Server.isStartedProduction()) {
       await this.awaitLiveBuild();
-      pathGenerated = sPathResolved.replace(this.fsPathGenerated, this.fsPathDist);
-      LiveServer.refresh(pathGenerated);
+      pathWorking = sPathResolved.replace(this.fsPathWorking, this.fsPathDist);
+      LiveServer.refresh(pathWorking);
     } else if (doRefresh) {
-      LiveServer.refresh(pathGenerated);
+      LiveServer.refresh(pathWorking);
     }
   }
 
@@ -273,7 +198,7 @@ export default class Ui5Project {
         clearTimeout(this.awaiterLess);
       }
       this.awaiterLess = setTimeout(async () => {
-        const aPaths = await Less.build(this, this.fsPathWorking, this.fsPathGenerated);
+        const aPaths = await Less.build(this, this.fsPathWorking, this.fsPathWorking);
         resolve(aPaths);
       }, 500);
     });
@@ -349,8 +274,6 @@ export default class Ui5Project {
         copyFolder,
         replaceStrings,
         compileLess,
-        babelifyJSFiles,
-        transpileTSFiles,
         compressFiles,
         createDebugFiles,
         cleanFiles,
@@ -359,7 +282,6 @@ export default class Ui5Project {
 
       // Config
       replaceStrings = replaceStrings && !!Config.builder('replaceStrings');
-      babelifyJSFiles = babelifyJSFiles && !!Config.builder('babelSources');
       compressFiles = compressFiles && !!Config.builder('uglifySources');
       createDebugFiles = createDebugFiles && !!Config.builder('debugSources');
       createPreload = createPreload && !!Config.builder('buildPreload');
@@ -370,8 +292,6 @@ export default class Ui5Project {
         copyFolder = false;
         replaceStrings = false;
         compileLess = true;
-        babelifyJSFiles = false;
-        transpileTSFiles = false;
         compressFiles = false;
         createDebugFiles = false;
         cleanFiles = false;
@@ -419,22 +339,12 @@ export default class Ui5Project {
 
       // transpile ts files
       increment += 10 * multiplier;
-      if (transpileTSFiles) {
-        progress?.report({ increment: increment, message: `${folderName} Transpile ts files` });
-        await Typescript.build(sDestFolder, { sourceMaps: false });
-        increment = 0;
-      }
-
-      // babel js files
-      increment += 5 * multiplier;
-      if (babelifyJSFiles) {
-        progress?.report({ increment: increment, message: `${folderName} Babelify js files` });
-        await Babel.build(sDestFolder);
-        increment = 0;
-      }
+      progress?.report({ increment: increment, message: `${folderName} Transpile ts files` });
+      await Typescript.build(sDestFolder, { sourceMaps: false });
+      increment = 0;
 
       // create dbg files
-      increment += 5 * multiplier;
+      increment += 10 * multiplier;
       if (createDebugFiles) {
         progress?.report({ increment: increment, message: `${folderName} Creating dbg files` });
         await Debug.build(sDestFolder, sDestFolder);
@@ -465,7 +375,7 @@ export default class Ui5Project {
 
   /** Returns the current served fs path */
   getServedPath(bServeProduction = false) {
-    const fsServedPath = bServeProduction ? this.fsPathDist : this.fsPathGenerated;
+    const fsServedPath = bServeProduction ? this.fsPathDist : this.fsPathWorking;
     return fsServedPath;
   }
 
@@ -499,36 +409,8 @@ export default class Ui5Project {
     return sFsFilePath.indexOf(this.fsPathBase) === 0;
   }
 
-  isFileInFsPathGenerated(sFsFilePath: string) {
-    return sFsFilePath.indexOf(this.fsPathGenerated) === 0;
-  }
-
   isFileInFsPathWorking(sFsFilePath: string) {
     return sFsFilePath.indexOf(this.fsPathWorking) === 0;
-  }
-
-  isGenerated(): boolean {
-    return this.fsPathWorking !== this.fsPathGenerated && this.workingFolder === this.srcFolder;
-  }
-
-  static calcProjectPriority({ isLibrary, workingFolder }: { isLibrary: boolean; workingFolder: string }) {
-    let priority = 0;
-    const PRIORITY: Record<string, number> = {};
-    if (isLibrary) {
-      const librarySrcFolder = Config.general('librarySrcFolder') as string;
-      const libraryGenFolder = Config.general('libraryFolder') as string;
-
-      PRIORITY[librarySrcFolder] = 100;
-      PRIORITY[libraryGenFolder] = 50;
-    } else {
-      const appSrcFolder = Config.general('appSrcFolder') as string;
-      const appGenFolder = Config.general('appFolder') as string;
-
-      PRIORITY[appSrcFolder] = 100;
-      PRIORITY[appGenFolder] = 50;
-    }
-    priority = PRIORITY[workingFolder] || 1;
-    return priority;
   }
 
   toJSON() {
@@ -537,15 +419,12 @@ export default class Ui5Project {
       namespace: this.namespace,
       type: this.type,
       isLibrary: this.isLibrary,
-      priority: this.priority,
       fsPathWorking: this.fsPathWorking,
       workingFolder: this.workingFolder,
       fsPathBase: this.fsPathBase,
       folderName: this.folderName,
       fsPathConfig: this.fsPathConfig,
       serverPath: this.serverPath,
-      fsPathSource: this.fsPathSource,
-      fsPathGenerated: this.fsPathGenerated,
       fsPathDist: this.fsPathDist,
       fsPathDeploy: this.fsPathDeploy,
     };

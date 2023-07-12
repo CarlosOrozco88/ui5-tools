@@ -1,20 +1,15 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
-		"target": "es2019",
-		"lib": [ "ES2020.Promise","ES2020" ],
-		"outDir": "dist",
-		"sourceMap": true,
-		"strict": true,
-		"rootDir": "src",
-		"esModuleInterop": true,
-		"resolveJsonModule": true,
-		"skipLibCheck": true
-	},
-	"exclude": [
-		"node_modules",
-		".vscode-test",
-		"webpack.config.js",
-		"runtime"
-	]
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020",
+    "lib": ["es2020"],
+    "outDir": "out",
+    "sourceMap": true,
+    "strict": true,
+    "rootDir": "src",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules", ".vscode-test", "webpack.config.js", "runtime"]
 }

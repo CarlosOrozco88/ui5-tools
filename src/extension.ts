@@ -59,7 +59,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   subscriptions.push(registerCommand('ui5-tools.builder.build', () => Builder.askProjectToBuild()));
   subscriptions.push(registerCommand('ui5-tools.builder.buildAll', () => Builder.buildAllProjects()));
-  subscriptions.push(registerCommand('ui5-tools.builder.generate', () => Builder.askProjectToGenerate()));
 
   subscriptions.push(registerCommand('ui5-tools.deployer.deploy', () => Deployer.askProjectToDeploy()));
   subscriptions.push(
@@ -77,7 +76,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
   );
 
   subscriptions.push(registerCommand('ui5-tools.menu.builder.build', (oResource) => Menu.build(oResource)));
-  subscriptions.push(registerCommand('ui5-tools.menu.builder.generate', (oResource) => Menu.generate(oResource)));
   subscriptions.push(registerCommand('ui5-tools.menu.deployer.deploy', (oResource) => Menu.deploy(oResource)));
   subscriptions.push(
     registerCommand('ui5-tools.menu.deployer.deployOnly', (oResource) => Menu.deploy(oResource, { skipBuild: true }))
