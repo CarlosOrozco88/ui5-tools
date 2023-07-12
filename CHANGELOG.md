@@ -1,4 +1,4 @@
-## 3.0.0 (13/07/2023)
+## 3.0.0 (12/07/2023)
 - Updated default `ui5-tools.ui5Version` from 1.71.46 to 1.71.56
 - Typescript support: changed from old behaviour with dual combination of folders (`src --> webapp` and `src --> src-gen`) to new behaviour with simpler folders (`webapp` and `src`).
 - It is possible to migrate to typescript file by file, there is no need to change all javascript files at once. At local server mode, javascript files has priority over typescript files when the has the same filename.
