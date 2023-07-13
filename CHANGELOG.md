@@ -1,6 +1,6 @@
 ## 3.0.1 (13/07/2023)
 
-- Fixed extension release version number from 2.2.3 to 3.0.0
+- Fixed extension release version number from 2.2.3 to 3.0.1
 
 ## 3.0.0 (12/07/2023)
 
