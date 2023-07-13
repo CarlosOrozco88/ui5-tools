@@ -37,7 +37,7 @@ export function liveTranspileTypescript(ui5Project: Ui5Project) {
 
       let response = cachedResource.code;
       if (stat.mtime > cachedResource.mtime) {
-        const babelified = await Typescript.transpileUri(uriTs);
+        const babelified = await Typescript.transpileUri(uriTs, { sourceMaps: 'inline' });
         response = babelified?.code ?? '';
         TranspileTypescriptCache.set(fsPathTs, { mtime: stat.mtime, code: response });
         Log.server(`LiveTranspileTypescript: ${fsPathTs} transpiled successfully`, Level.INFO);

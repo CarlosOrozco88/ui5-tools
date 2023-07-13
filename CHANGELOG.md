@@ -1,3 +1,7 @@
+## 3.0.2 (13/07/2023)
+
+- Fixed typescript sourceMaps
+
 ## 3.0.1 (13/07/2023)
 
 - Fixed extension release version number from 2.2.3 to 3.0.1
