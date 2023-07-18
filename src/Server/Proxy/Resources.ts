@@ -43,7 +43,11 @@ export default {
       case 'Runtime':
         serverApp.get('/flp/test-resources/sap/ushell/bootstrap/sandbox.js', async (req, res) => {
           const ui5Version = '' + Config.general('ui5Version');
-          const hash = sandboxData.versions[ui5Version] || sandboxData.versions[sandboxData.default];
+          const [major, minor] = ui5Version.split('.');
+          const hash =
+            sandboxData.versions[ui5Version] ||
+            sandboxData.versions[`${major}.${minor}`] ||
+            sandboxData.versions[sandboxData.default];
           const file = sandboxData.files[hash];
           res.send(file);
         });

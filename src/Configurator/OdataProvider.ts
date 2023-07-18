@@ -7,19 +7,20 @@ export default {
   async wizard(): Promise<void> {
     try {
       const odataProxyValue = await this.quickPickOdataProxy();
-      if (odataProxyValue === 'Gateway') {
+      const sValue = odataProxyValue?.label;
+      if (sValue === 'Gateway') {
         await this.inputBoxGatewayUri();
         //@ts-ignore
-        await Config.server()?.update('odataProxy', odataProxyValue, ConfigurationTarget.Workspace);
+        await Config.server()?.update('odataProxy', sValue, ConfigurationTarget.Workspace);
 
-        Log.configurator(`Set odataProxy value to ${odataProxyValue}`);
-      } else if (odataProxyValue === 'Other') {
+        Log.configurator(`Set odataProxy value to ${sValue}`);
+      } else if (sValue === 'Other') {
         await this.inputBoxOtherUri();
         await this.inputBoxOdataMountPath();
         //@ts-ignore
-        await Config.server()?.update('odataProxy', odataProxyValue, ConfigurationTarget.Workspace);
+        await Config.server()?.update('odataProxy', sValue, ConfigurationTarget.Workspace);
 
-        Log.configurator(`Set odataProxy value to ${odataProxyValue}`);
+        Log.configurator(`Set odataProxy value to ${sValue}`);
       } else if (odataProxyValue) {
         await this.setDestination(odataProxyValue);
       }
@@ -29,7 +30,7 @@ export default {
     }
   },
 
-  async quickPickOdataProxy(): Promise<string> {
+  async quickPickOdataProxy(): Promise<QuickPickItem> {
     return new Promise(async (resolve, reject) => {
       const odataProviderValue = String(Config.server('odataProxy'));
 
@@ -66,7 +67,7 @@ export default {
       quickpick.canSelectMany = false;
       quickpick.onDidAccept(async () => {
         if (quickpick.selectedItems.length) {
-          const value = quickpick.selectedItems[0].label;
+          const value = quickpick.selectedItems[0];
           resolve(value);
         } else {
           const sMessage = Log.configurator('No odata proxy configured');
@@ -104,16 +105,18 @@ export default {
     });
   },
 
-  async getDestination(destinationName: string): Promise<{ name: string; type: string; url: string }> {
+  async getDestination(destinationName: QuickPickItem): Promise<{ name: string; type: string; url: string }> {
     let proxyDestination;
     const proxyDestinations: Array<any> | unknown = Config.server('proxyDestinations');
     if (Array.isArray(proxyDestinations)) {
-      proxyDestination = proxyDestinations.find((destination) => destination.name === destinationName);
+      proxyDestination = proxyDestinations.find(
+        ({ name, url }) => name === destinationName.label && url === destinationName.description
+      );
     }
     return proxyDestination;
   },
 
-  async setDestination(destinationName: string): Promise<void> {
+  async setDestination(destinationName: QuickPickItem): Promise<void> {
     const proxyDestination = await this.getDestination(destinationName);
     if (proxyDestination) {
       //@ts-ignore

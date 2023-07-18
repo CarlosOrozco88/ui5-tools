@@ -7,7 +7,7 @@ import path from 'path';
 import { getUi5Versions, getUrlForFramework, parseUi5Version } from '../Utils/Ui5';
 
 function versionToNum(version: string) {
-  const { major, minor, patch } = parseUi5Version(version);
+  const { major = 0, minor = 0, patch = 0 } = parseUi5Version(version);
   return major * 1000000 + minor * 1000 + patch;
 }
 
@@ -71,54 +71,12 @@ async function downloadSandbox() {
         });
       }
     }
+
     aVersionMap = aVersionMap.sort((v1, v2) => {
       if (v1.versionN > v2.versionN) return -1;
       if (v1.versionN < v2.versionN) return 1;
       return 0;
     });
-    const allMinorVersion = aVersionMap.filter((version) => version.version.startsWith(majorV.label));
-    const lastMinor = allMinorVersion.shift();
-
-    if (lastMinor) {
-      // const oVersion = parseUi5Version(lastMinor?.version);
-      // const { major, minor, patch } = oVersion;
-      // let emptyVersions = [];
-      // for (let i = patch; i >= 0; i--) {
-      //   const cVersion = `${major}.${minor}.${patch}`;
-      //   if (!sandboxComplete.versions[cVersion]) {
-      //     emptyVersions.push(cVersion);
-      //   } else {
-      //     emptyVersions.forEach((version) => {
-      //       sandboxComplete.versions[version] = sandboxComplete.versions[cVersion];
-      //       aVersionMap.push({
-      //         version: version,
-      //         hex: sandboxComplete.versions[cVersion],
-      //         versionN: versionToNum(version),
-      //       });
-      //     });
-      //     emptyVersions = [];
-      //   }
-      // }
-      const { major, minor, patch } = parseUi5Version(lastMinor.version);
-      let emptyVersions = [];
-      for (let i = patch; i >= 0; i--) {
-        const cVersion = `${major}.${minor}.${i}`;
-        if (!sandboxComplete.versions[cVersion]) {
-          emptyVersions.push(cVersion);
-        } else {
-          emptyVersions.forEach((version) => {
-            sandboxComplete.versions[version] = sandboxComplete.versions[cVersion];
-
-            aVersionMap.push({
-              version: version,
-              hex: sandboxComplete.versions[cVersion],
-              versionN: versionToNum(version),
-            });
-          });
-          emptyVersions = [];
-        }
-      }
-    }
   }
   aVersionMap = aVersionMap.sort((v1, v2) => {
     if (v1.versionN > v2.versionN) return -1;
@@ -129,11 +87,17 @@ async function downloadSandbox() {
     acc[version] = hex;
     return acc;
   }, {});
+  for (const version in oVersions) {
+    const [v, major] = version.split('.');
+    const majorVersion = `${v}.${major}`;
+    if (!oVersions[majorVersion]) {
+      oVersions[majorVersion] = oVersions[version];
+    }
+  }
   sandboxComplete.versions = oVersions;
 
   const [oLastVersion] = aVersionMap;
   sandboxComplete.default = oLastVersion.version;
-
   console.log(`Saving sandbox file...`);
   const fileStringified = JSON.stringify(sandboxComplete, null, 2);
 

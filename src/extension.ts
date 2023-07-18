@@ -1,4 +1,5 @@
-import { commands, ExtensionContext } from 'vscode';
+import { commands } from 'vscode';
+import type { ExtensionContext } from 'vscode';
 
 // import { ProjectsView } from './ActivityBar/ProjectsView';
 
@@ -75,10 +76,23 @@ export async function activate(context: ExtensionContext): Promise<void> {
     registerCommand('ui5-tools.configurator.uninstallRuntime', () => Ui5Provider.uninstallRuntimeWizard())
   );
 
-  subscriptions.push(registerCommand('ui5-tools.menu.builder.build', (oResource) => Menu.build(oResource)));
-  subscriptions.push(registerCommand('ui5-tools.menu.deployer.deploy', (oResource) => Menu.deploy(oResource)));
   subscriptions.push(
-    registerCommand('ui5-tools.menu.deployer.deployOnly', (oResource) => Menu.deploy(oResource, { skipBuild: true }))
+    registerCommand('ui5-tools.menu.builder.build', (oResource) => {
+      if (oResource) Menu.build(oResource);
+      else Builder.askProjectToBuild();
+    })
+  );
+  subscriptions.push(
+    registerCommand('ui5-tools.menu.deployer.deploy', (oResource) => {
+      if (oResource) Menu.deploy(oResource);
+      else Deployer.askProjectToDeploy();
+    })
+  );
+  subscriptions.push(
+    registerCommand('ui5-tools.menu.deployer.deployOnly', (oResource) => {
+      if (oResource) Menu.deploy(oResource, { skipBuild: true });
+      else Deployer.askProjectToDeploy({ skipBuild: true });
+    })
   );
 
   subscriptions.push(registerCommand('ui5-tools.general.showOutput', () => Log.showOutput()));

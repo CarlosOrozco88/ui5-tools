@@ -37,7 +37,7 @@ export default {
     const babelified = await this.transpileUri(tsUri, innerOptions);
     if (babelified?.code) {
       let tsString = babelified.code;
-      const jsPath = tsUri.fsPath.replace('.ts', '.js');
+      const jsPath = tsUri.fsPath.replace(/\.ts$/, '.js');
       const jsUri = Uri.file(jsPath);
       await workspace.fs.rename(tsUri, jsUri, { overwrite: true });
 

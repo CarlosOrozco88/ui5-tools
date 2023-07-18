@@ -30,7 +30,10 @@ const Projects = {
     const bCacheBuster = Server.isCachebusterOn();
     if (bCacheBuster) {
       const ui5ProjectCacheBusterIndex = cacheBusterIndex(ui5Project);
-      oConfigParams?.serverApp?.get(`${ui5Project.serverPath}sap-ui-cachebuster-info.json`, ui5ProjectCacheBusterIndex);
+      oConfigParams?.serverApp?.get(
+        `${ui5Project.serverPath}/sap-ui-cachebuster-info.json`,
+        ui5ProjectCacheBusterIndex
+      );
     }
   },
 

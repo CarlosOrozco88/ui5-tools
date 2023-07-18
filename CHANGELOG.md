@@ -1,3 +1,10 @@
+## 3.0.3 (18/07/2023)
+
+- Cleaned dependencies
+- Fixed Cachebuster simulation `ui5-tools.server.cacheBuster`
+- Improved sandbox file selection
+- Fixed build and deploy commands
+
 ## 3.0.2 (13/07/2023)
 
 - Fixed typescript sourceMaps
@@ -6,7 +13,7 @@
 
 - Fixed extension release version number from 2.2.3 to 3.0.1
 
-## 3.0.0 (12/07/2023)
+## 3.0.0 (12/07/2023) - 2.2.3
 
 - Updated default `ui5-tools.ui5Version` from 1.71.46 to 1.71.56
 - Typescript support: changed from old behaviour with dual combination of folders (`src --> webapp` and `src --> src-gen`) to new behaviour with simpler folders (`webapp` and `src`).
@@ -18,9 +25,6 @@
 - Due to Internet Explorer end of life, babel support has been dropped. For me, it only has sense in older computers with older sap gui versions and HTML Viewer inside. Consider upgrading and using new HTML Viewer (Edge), the only problem now is with sapevent + https, but it is going to be solved soon.
 - ❌ **Babel is now unsuported** (a.k.a. internet explorer 10 support)! **Breaking changes**:
   - Removed configuration properties `ui5-tools.server.babelSourcesLive` and `ui5-tools.builder.babelSourcesExclude`
-
-## 2.2.3 (11/07/2023)
-
 - Updated sandbox.js files
 - Dependencies upgrade
 
