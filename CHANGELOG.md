@@ -1,3 +1,9 @@
+## 3.0.4 (15/09/2023)
+
+- Added `/sap/bc/lrep/flex/` path to Gateway proxy
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 3.0.3 (18/07/2023)
 
 - Cleaned dependencies

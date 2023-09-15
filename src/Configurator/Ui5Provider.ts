@@ -535,58 +535,66 @@ export default {
     Log.configurator(`Uninstall SAPUI5 Runtime`);
     const fsPathRuntimeBase = Utils.getRuntimeFsPathBase();
     const uriFsPathRuntimeBase = Uri.file(fsPathRuntimeBase);
-    const aFoldersFiles = await workspace.fs.readDirectory(uriFsPathRuntimeBase);
-    const aFolders = aFoldersFiles.filter(({ 1: fileType }) => {
-      return fileType === FileType.Directory;
-    });
-    const aOptions = aFolders.map(([name]) => {
-      return { label: name, description: '' };
-    });
-    if (quickpick.items.length > 1) {
-      aOptions.push({
-        label: 'ALL',
-        description: 'Remove all SAPUI5 versions',
+    try {
+      const aFoldersFiles = await workspace.fs.readDirectory(uriFsPathRuntimeBase);
+      const aFolders = aFoldersFiles.filter(({ 1: fileType }) => {
+        return fileType === FileType.Directory;
       });
-    }
-    quickpick.items = aOptions;
-    quickpick.placeholder = 'Select SAPUI5 version to uninstall';
-    quickpick.ignoreFocusOut = true;
-    quickpick.step = 1;
-    quickpick.totalSteps = 1;
-    quickpick.canSelectMany = false;
-    quickpick.onDidAccept(async () => {
-      if (quickpick.selectedItems.length) {
-        const value = quickpick.selectedItems[0].label;
-        const folder = aFolders.find(([name]) => {
-          return name === value;
+      const aOptions = aFolders.map(([name]) => {
+        return { label: name, description: '' };
+      });
+      if (!aOptions.length) {
+        throw new Error('No SAPUI5 runtime versions installed');
+      }
+      if (aOptions.length > 1) {
+        aOptions.unshift({
+          label: 'ALL',
+          description: 'Remove all SAPUI5 versions',
         });
-        if (folder) {
-          const [name] = folder;
-          await this.uninstallUi5Runtime(name);
-        } else if (value === 'ALL') {
-          Log.configurator(`Uninstall SAPUI5 Runtime: Uninstall all SAPUI5 versions`);
-          try {
-            for (let i = 0; i < aFolders.length; i++) {
-              const [name] = aFolders[i];
-              await this.uninstallUi5Runtime(name);
-            }
+      }
+      quickpick.items = aOptions;
+      quickpick.placeholder = 'Select SAPUI5 version to uninstall';
+      quickpick.ignoreFocusOut = true;
+      quickpick.step = 1;
+      quickpick.totalSteps = 1;
+      quickpick.canSelectMany = false;
+      quickpick.onDidAccept(async () => {
+        if (quickpick.selectedItems.length) {
+          const value = quickpick.selectedItems[0].label;
+          const folder = aFolders.find(([name]) => {
+            return name === value;
+          });
+          if (folder) {
+            const [name] = folder;
+            await this.uninstallUi5Runtime(name);
+          } else if (value === 'ALL') {
+            Log.configurator(`Uninstall SAPUI5 Runtime: Uninstall all SAPUI5 versions`);
+            try {
+              for (let i = 0; i < aFolders.length; i++) {
+                const [name] = aFolders[i];
+                await this.uninstallUi5Runtime(name);
+              }
 
-            const sMessage = Log.configurator(
-              `Uninstall SAPUI5 Runtime: all SAPUI5 runtime versions uninstalled successfully`
-            );
-            window.showInformationMessage(sMessage);
-          } catch (oError) {
-            const sMessage = Log.configurator(
-              `Uninstall SAPUI5 Runtime: unable to uninstall SAPUI5 Runtime`,
-              Level.ERROR
-            );
-            window.showErrorMessage(sMessage);
+              const sMessage = Log.configurator(
+                `Uninstall SAPUI5 Runtime: all SAPUI5 runtime versions uninstalled successfully`
+              );
+              window.showInformationMessage(sMessage);
+            } catch (oError) {
+              const sMessage = Log.configurator(
+                `Uninstall SAPUI5 Runtime: unable to uninstall SAPUI5 Runtime`,
+                Level.ERROR
+              );
+              window.showErrorMessage(sMessage);
+            }
           }
         }
-      }
-      quickpick.hide();
-    });
-    quickpick.show();
+        quickpick.hide();
+      });
+      quickpick.show();
+    } catch (oError) {
+      const sMessage = Log.configurator(`Uninstall SAPUI5 Runtime: no SAPUI5 runtime versions installed`);
+      window.showInformationMessage(sMessage);
+    }
   },
 
   async uninstallUi5Runtime(ui5Version: string) {
