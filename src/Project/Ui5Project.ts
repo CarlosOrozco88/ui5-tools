@@ -363,6 +363,9 @@ export default class Ui5Project {
       increment += 20 * multiplier;
       if (createPreload) {
         progress?.report({ increment: increment, message: `${folderName} Building preload` });
+        if (!cleanFolder) {
+          await Preload.clean(this, sDestFolder);
+        }
         await Preload.build(this, sDestFolder, sDestFolder);
         increment = 0;
       }

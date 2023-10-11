@@ -1,3 +1,10 @@
+## 3.0.5 (11/10/2023)
+
+- Builder: added new step in order to clean components preloads when `cleanFolder` is `false`
+- Updated default `ui5-tools.ui5Version` from 1.71.46 to 1.71.59
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 3.0.4 (15/09/2023)
 
 - Added `/sap/bc/lrep/flex/` path to Gateway proxy
