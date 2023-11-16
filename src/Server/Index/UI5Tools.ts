@@ -90,6 +90,9 @@ export default {
 
   async getUi5ToolsFile({ isLaunchpadMounted }: ServerOptions) {
     const ui5Projects = await Finder.getAllUI5ProjectsArray();
+    const ui5ProjectsSorted = ui5Projects.sort((p1, p2) => {
+      return p1.folderName.localeCompare(p2.folderName);
+    });
     const ui5toolsData: Ui5ToolsData = {
       ...Ui5.getOptionsVersion(),
       readme: '',
@@ -100,11 +103,11 @@ export default {
       contributors: [],
       docs: { aTree: [], oHashes: {} },
       ui5Projects: {
-        all: ui5Projects,
-        application: ui5Projects.filter(({ type }) => type === 'application'),
-        component: ui5Projects.filter(({ type }) => type === 'component'),
-        library: ui5Projects.filter(({ type }) => type === 'library'),
-        card: ui5Projects.filter(({ type }) => type === 'card'),
+        all: ui5ProjectsSorted,
+        application: ui5ProjectsSorted.filter(({ type }) => type === 'application'),
+        component: ui5ProjectsSorted.filter(({ type }) => type === 'component'),
+        library: ui5ProjectsSorted.filter(({ type }) => type === 'library'),
+        card: ui5ProjectsSorted.filter(({ type }) => type === 'card'),
       },
       //@ts-ignore
       config: Config.general(),

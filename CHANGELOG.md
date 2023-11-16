@@ -1,3 +1,10 @@
+## 3.0.6 (16/11/2023)
+
+- Sorted projects in homescreen
+- Updated default `ui5-tools.ui5Version` from 1.71.59 to 1.71.60
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 3.0.5 (11/10/2023)
 
 - Builder: added new step in order to clean components preloads when `cleanFolder` is `false`

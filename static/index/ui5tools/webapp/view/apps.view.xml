@@ -152,10 +152,7 @@
                                 <Label text="Project" />
                             </Column>
                             <Column>
-                                <Label text="Working Folder" />
-                            </Column>
-                            <Column>
-                                <Label text="Served Folder" />
+                                <Label text="Source Folder" />
                             </Column>
                             <Column>
                                 <Label text="Dist Folder" />
