@@ -1,3 +1,11 @@
+## 3.1.0 (16/02/2023)
+
+- Projects of type `sap.app.type="component"` and `sap.flp.type:"plugin"` now loads like a plugin in local launchpad automatically.
+- Username configured in `.env` file is forced in launchpad (actually is DEFAULT_USER).
+- Updated default `ui5-tools.ui5Version` from 1.71.69 to 1.71.62
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 3.0.6 (16/11/2023)
 
 - Sorted projects in homescreen

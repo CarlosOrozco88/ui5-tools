@@ -6,6 +6,7 @@ import { ServerOptions } from '../../Types/Types';
 import { Request, Response } from 'express';
 import Finder from '../../Project/Finder';
 import Ui5 from '../../Utils/Ui5Vscode';
+import Utils from '../../Utils/ExtensionVscode';
 
 export default {
   async set(oConfigParams: ServerOptions): Promise<void> {
@@ -32,8 +33,33 @@ export default {
         const aTiles = [] as Array<Record<string, any>>;
         const aActions = {} as Record<string, any>;
         const ui5Projects = await Finder.getAllUI5Projects();
+
+        const oEnv = Utils.loadEnv();
+        const userKey = oEnv['UI5TOOLS_ODATA_USER'];
+
+        const bootstrapPlugins: Record<string, { component: string; url: string }> = {};
+        const ContainerAdapter: Record<string, any> =
+          userKey === undefined
+            ? {}
+            : {
+                Container: {
+                  adapter: {
+                    config: {
+                      id: userKey,
+                    },
+                  },
+                },
+              };
+
         ui5Projects.forEach((ui5Project) => {
           const hash = ui5Project.folderName.toLowerCase();
+
+          if (ui5Project.type === 'component' && ui5Project.manifest?.['sap.flp']?.type === 'plugin') {
+            bootstrapPlugins[ui5Project.folderName] = {
+              component: ui5Project.namespace,
+              url: `..${ui5Project.serverPath}`,
+            };
+          }
           //@ts-ignore
           aTiles.push({
             id: hash,
@@ -64,6 +90,7 @@ export default {
           };
         });
         const fioriSandboxConfig = {
+          bootstrapPlugins,
           services: {
             LaunchPage: {
               adapter: {
@@ -88,6 +115,7 @@ export default {
                 },
               },
             },
+            ...ContainerAdapter,
             NavTargetResolution: {
               config: {
                 enableClientSideTargetResolution: true,

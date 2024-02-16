@@ -60,9 +60,9 @@ export default {
     serverApp.get(`/${ui5ToolsIndex}/ui5tools.json`, async (req, res) => {
       const oConfigParams = Server.getServerOptions() as ServerOptions;
       const ui5toolsData = await this.getUi5ToolsFile(oConfigParams);
-      ui5toolsData.readme = marked((await this.readFile(path.join(baseDir, 'README.md'))) || '');
-      ui5toolsData.about = marked((await this.readFile(path.join(ui5ToolsPath, 'README.md'))) || '');
-      ui5toolsData.changelog = marked((await this.readFile(path.join(ui5ToolsPath, 'CHANGELOG.md'))) || '');
+      ui5toolsData.readme = await marked((await this.readFile(path.join(baseDir, 'README.md'))) || '');
+      ui5toolsData.about = await marked((await this.readFile(path.join(ui5ToolsPath, 'README.md'))) || '');
+      ui5toolsData.changelog = await marked((await this.readFile(path.join(ui5ToolsPath, 'CHANGELOG.md'))) || '');
       ui5toolsData.links = JSON.parse((await this.readFile(path.join(baseDir, 'links.json'))) || '[]');
       ui5toolsData.docs = await this.findDocs(baseDir, ui5toolsData.showTree);
       ui5toolsData.contributors = [
