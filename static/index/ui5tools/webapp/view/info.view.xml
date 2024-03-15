@@ -65,6 +65,8 @@
         <Text text="{ui5tools>/config/server/watchExtensions}" />
         <Label text="Port" />
         <Text text="{ui5tools>/config/server/port}" />
+        <Label text="Host" />
+        <Text text="{ui5tools>/config/server/host}" />
         <Label text="Start on launch" />
         <Text text="{ui5tools>/config/server/startOnLaunch}" />
         <Label text="Server timeout (ms)" />

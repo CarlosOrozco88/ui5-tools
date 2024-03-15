@@ -38,6 +38,7 @@ export default {
           ui5ProjectToDeployQp.items = qpOptions;
           ui5ProjectToDeployQp.placeholder = 'Select UI5 project to deploy';
           ui5ProjectToDeployQp.canSelectMany = false;
+          ui5ProjectToDeployQp.ignoreFocusOut = true;
           ui5ProjectToDeployQp.onDidAccept(async () => {
             if (ui5ProjectToDeployQp.selectedItems.length) {
               resolve(ui5ProjectToDeployQp.selectedItems[0]);
@@ -95,6 +96,7 @@ export default {
       selTransportOptionQp.items = askOptions;
       selTransportOptionQp.placeholder = ``;
       selTransportOptionQp.canSelectMany = false;
+      selTransportOptionQp.ignoreFocusOut = true;
       selTransportOptionQp.onDidAccept(async () => {
         if (selTransportOptionQp.selectedItems.length) {
           resolve(selTransportOptionQp.selectedItems[0]);
@@ -128,6 +130,7 @@ export default {
 
       ui5ProjectToDeployQp.placeholder = 'Select UI5 project to deploy';
       ui5ProjectToDeployQp.canSelectMany = true;
+      ui5ProjectToDeployQp.ignoreFocusOut = true;
       ui5ProjectToDeployQp.show();
 
       const ui5ProjectsToDeploy: readonly QuickPickItem[] = await new Promise((resolve, reject) => {

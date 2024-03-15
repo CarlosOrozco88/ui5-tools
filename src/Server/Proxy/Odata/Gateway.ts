@@ -22,7 +22,7 @@ const Gateway = {
         logProvider: Log.newLogProviderProxy,
       });
       serverApp.use(createAuthMiddleware());
-      serverApp.use(['/sap/opu/odata/', '/sap/public/bc/themes/', '/sap/bc/lrep/flex/'], proxy);
+      serverApp.use(['/sap/opu/odata/', '/sap/public/bc/themes/', '/sap/bc/'], proxy);
     }
   },
 };

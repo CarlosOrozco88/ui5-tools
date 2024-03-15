@@ -98,6 +98,7 @@ const Server = {
           baseDir: Utils.getWorkspaceRootPath(),
           ui5ToolsPath: Utils.getExtensionFsPath(),
           ui5ToolsIndex: Utils.getUi5ToolsIndexFolder(),
+          host: Config.server('host') as string,
           isLaunchpadMounted: Utils.isLaunchpadMounted(),
           bCacheBuster: [sServerMode, 'Allways'].includes(Config.server('cacheBuster') as string),
           restarting: !!oParameters?.restarting,
@@ -135,7 +136,7 @@ const Server = {
 
           if (openBrowser && !newConfigParams.restarting) {
             const ui5ToolsIndex = Utils.getUi5ToolsIndexFolder();
-            open(`${newConfigParams.protocol}://localhost:${newConfigParams.port}/${ui5ToolsIndex}/`);
+            open(`${newConfigParams.protocol}://${newConfigParams.host}:${newConfigParams.port}/${ui5ToolsIndex}/`);
           }
         });
       } catch (e: any) {

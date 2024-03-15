@@ -1,4 +1,12 @@
-## 3.1.0 (16/02/2023)
+## 3.1.1 (15/03/2024)
+
+- Added new configuration property `ui5-tools.server.host` wich defaults to `localhost`.
+- Added `/sap/bc/` path to Gateway proxy
+- Updated default `ui5-tools.ui5Version` from 1.71.62 to 1.71.64
+- Updated sandbox.js files
+- Dependencies upgrade
+
+## 3.1.0 (16/02/2024)
 
 - Projects of type `sap.app.type="component"` and `sap.flp.type:"plugin"` now loads like a plugin in local launchpad automatically.
 - Username configured in `.env` file is forced in launchpad (actually is DEFAULT_USER).
