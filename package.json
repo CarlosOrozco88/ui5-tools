@@ -6,7 +6,22 @@
   "publisher": "carlosorozcojimenez",
   "author": "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>",
   "contributors": [
-    "Carlos Orozco Jiménez <carlos.orozco.jimenez@gmail.com>"
+    {
+      "name": "Carlos Orozco Jiménez",
+      "url": "https://github.com/CarlosOrozco88"
+    },
+    {
+      "name": "David Perez Bris",
+      "url": "https://github.com/dperezbr"
+    },
+    {
+      "name": "Santiago de Arriba Cortijo",
+      "url": "https://github.com/Santi517"
+    },
+    {
+      "name": "Joaquim Monserrat Companys",
+      "url": "https://github.com/jeremies"
+    }
   ],
   "homepage": "https://github.com/CarlosOrozco88/ui5-tools/blob/master/README.md",
   "repository": {
