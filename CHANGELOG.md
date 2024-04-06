@@ -1,3 +1,11 @@
+## 3.1.2 (06/04/2024)
+
+- Fixed a bug with `rejectUnauthorized`. Thanks to [Santi517](https://github.com/Santi517)!!
+- Updated default `ui5-tools.ui5Version` from 1.71.64 to 1.71.63
+- Updated contributors and readme
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 3.1.1 (15/03/2024)
 
 - Added new configuration property `ui5-tools.server.host` wich defaults to `localhost`.

@@ -77,6 +77,11 @@ export default {
           url: 'https://github.com/dperezbr',
         },
         {
+          src: 'https://avatars.githubusercontent.com/u/145746607?v=4',
+          tooltip: 'Santiago de Arriba Cortijo',
+          url: 'https://github.com/Santi517',
+        },
+        {
           src: 'https://avatars.githubusercontent.com/u/18210819?v=4',
           tooltip: 'Joaquim Monserrat Companys',
           url: 'https://github.com/jeremies',

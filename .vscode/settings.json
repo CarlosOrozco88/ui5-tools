@@ -21,5 +21,7 @@
   "search.exclude": {
     "**/dist": true,
     "**/out": true
-  }
+  },
+  "ui5-tools.server.resourcesProxy": "CDN OpenUI5",
+  "ui5-tools.ui5Version": "1.71.64"
 }

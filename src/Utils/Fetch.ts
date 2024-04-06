@@ -35,7 +35,11 @@ const Fetch = {
     }
     return {
       restore: () => {
-        https.globalAgent.options.rejectUnauthorized = originalReject;
+        if (originalReject !== undefined) {
+          https.globalAgent.options.rejectUnauthorized = originalReject;
+        } else {
+          delete https.globalAgent.options.rejectUnauthorized;
+        }
       },
     };
   },

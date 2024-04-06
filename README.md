@@ -109,7 +109,7 @@ UI5TOOLS_IMPORT_PASSWORD=
 - `ui5-tools.appFolder`: Transpiled folder for applications (js) | default: `webapp`
 - `ui5-tools.libraryFolder`: Transpiled folder for libraries (js) | default: `src`
 - `ui5-tools.distFolder`: Destination folder in your project (final build) | default: `dist`
-- `ui5-tools.ui5Version`: UI5 library version for CDN proxy in server and build correct preload files: `1.71.56`
+- `ui5-tools.ui5Version`: UI5 library version for CDN proxy in server and build correct preload files: `1.71.63`
 - `ui5-tools.verbose`: Log al messages `false`
 
 #### Server Settings
@@ -202,6 +202,43 @@ UI5TOOLS_IMPORT_PASSWORD=
 - `ui5-tools.menu.builder.build`: Build option in project folder menu (right click)
 - `ui5-tools.menu.deployer.deploy`: Build and deploy option in project folder menu (right click)
 - `ui5-tools.menu.deployer.deployOnly`: Deploy option in project folder menu (right click)
+
+## Contributors
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%">
+        <a href="https://github.com/CarlosOrozco88">
+          <img src="https://avatars.githubusercontent.com/u/11719827?v=4&s=100" width="100px" alt="Carlos Orozco Jiménez">
+          <br />
+          <sub><b>Carlos Orozco Jiménez</b></sub>
+        </a>
+      </td>
+      <td align="center" valign="top" width="14.28%">
+        <a href="https://github.com/dperezbr">
+          <img src="https://avatars.githubusercontent.com/u/33299683?v=4&s=100" width="100px" alt="David Perez Bris">
+          <br />
+          <sub><b>David Perez Bris</b></sub>
+        </a>
+      </td>
+      <td align="center" valign="top" width="14.28%">
+        <a href="https://github.com/Santi517">
+          <img src="https://avatars.githubusercontent.com/u/145746607?v=4&s=100" width="100px" alt="Santiago de Arriba Cortijo">
+          <br />
+          <sub><b>Santiago de Arriba Cortijo</b></sub>
+        </a>
+      </td>
+      <td align="center" valign="top" width="14.28%">
+        <a href="https://github.com/jeremies">
+          <img src="https://avatars.githubusercontent.com/u/18210819?v=4&s=100" width="100px" alt="Joaquim Monserrat Companys">
+          <br />
+          <sub><b>Joaquim Monserrat Companys</b></sub>
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ## Credits
 
