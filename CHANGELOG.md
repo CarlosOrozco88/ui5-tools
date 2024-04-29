@@ -1,3 +1,9 @@
+## 3.1.3 (29/05/2024)
+
+- Fixed a bug with download SAPUI5 runtime.
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 3.1.2 (06/04/2024)
 
 - Fixed a bug with `rejectUnauthorized`. Thanks to [Santi517](https://github.com/Santi517)!!

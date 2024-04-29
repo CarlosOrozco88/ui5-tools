@@ -453,13 +453,11 @@ export default {
       async (progress) => {
         progress.report({ increment: 10, message: 'Accept or reject EULA...' });
         try {
-          await this.acceptLicence();
+          const headers = await this.acceptLicence();
 
           progress.report({ increment: 10, message: 'Downloading...' });
           const zipBuffer = await Fetch.buffer(version.url, {
-            headers: {
-              Cookie: 'eula_3_1_agreed=tools.hana.ondemand.com/developer-license-3_1.txt',
-            },
+            headers,
           });
           const zipFile = new AdmZip(zipBuffer);
 
@@ -480,14 +478,22 @@ export default {
     );
   },
 
-  async acceptLicence(): Promise<void> {
+  async acceptLicence(): Promise<{ Cookie: string }> {
     return new Promise(async (resolve, reject) => {
       const runtimeUrl = getRuntimeUrl();
       const document = await this.getRuntimeFile();
-      const eulaHeader = document.querySelector('#eula-dialog-header');
+
+      const scriptCode = document.getElementsByTagName('script')[1].text;
+
+      const [cookieName] = scriptCode.match(`(?<=eulaConst.devLicense.cookieName = ').*(?=')`) ?? [];
+      const [cookieValue] = scriptCode.match(`(?<=eulaConst.devLicense.cookieValue = ').*(?=')`) ?? [];
+      const [eulaHeaderId] = scriptCode.match(`(?<=eulaConst.devLicense.eulaDialogHeaderElement = ').*(?=')`) ?? [];
+      const [eulaTextId] = scriptCode.match(`(?<=eulaConst.devLicense.eulaTextElement = ').*(?=')`) ?? [];
+
+      const eulaHeader = document.querySelector(`#${eulaHeaderId}`);
       const eulaHeaderHtml = eulaHeader?.innerHTML.replace('src="./', `src="${runtimeUrl}`);
 
-      const eula = document.querySelector('#eula-text');
+      const eula = document.querySelector(`#${eulaTextId}`);
       const eulaText = eula?.innerText?.replace(/\n/g, '<br/>') ?? '';
 
       panelLicence?.dispose();
@@ -512,7 +518,9 @@ export default {
           reject(new Error(sMessage));
         } else {
           Log.configurator('SAPUI5 EULA Accepted', Level.INFO);
-          resolve();
+          resolve({
+            Cookie: `${cookieName}=${cookieValue}`,
+          });
         }
         panelLicence?.dispose();
       });
