@@ -1,5 +1,7 @@
 import fetch, { RequestInit } from 'node-fetch';
 import https from 'https';
+import { XMLParser } from 'fast-xml-parser';
+import { Headers } from 'node-fetch';
 const originalReject = https.globalAgent.options.rejectUnauthorized;
 
 const Fetch = {
@@ -22,10 +24,16 @@ const Fetch = {
   },
 
   async file(url: string, options: RequestInit = {}) {
-    const response = await Fetch.fetch(url, {
-      timeout: 5000,
-      ...options,
-    });
+    let response;
+    try {
+      response = await Fetch.fetch(url, {
+        timeout: 5000,
+        ...options,
+      });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
     return response.text();
   },
 
@@ -42,6 +50,40 @@ const Fetch = {
         }
       },
     };
+  },
+
+  async getXMLFile(url: string, oImportOptions: { user?: string; pwd?: string }) {
+    const data = await this.getFile(url, oImportOptions);
+    const res = Fetch.parseXML(data);
+    return res;
+  },
+
+  async getFile(url: string, oImportOptions: { user?: string; pwd?: string }) {
+    const headers = new Headers();
+    headers.set(
+      'Authorization',
+      'Basic ' + Buffer.from((oImportOptions.user ?? '') + ':' + (oImportOptions.pwd ?? '')).toString('base64')
+    );
+
+    const httpsAgent = new https.Agent({
+      rejectUnauthorized: false,
+    });
+
+    const { default: Config } = await import('../Utils/ConfigVscode');
+    const unaut = Fetch.setUnautorized(false, !!Config.deployer('rejectUnauthorized'));
+    const data = await Fetch.file(url, {
+      timeout: 0,
+      headers: headers,
+      agent: httpsAgent,
+    });
+    unaut.restore();
+    return data;
+  },
+
+  parseXML(XMLdata: string) {
+    const parser = new XMLParser({ ignoreAttributes: false });
+    const jsonData = parser.parse(XMLdata);
+    return jsonData;
   },
 };
 export default Fetch;

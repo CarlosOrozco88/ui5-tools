@@ -444,17 +444,15 @@ export default {
 
   async downloadRuntime(version: VersionsItem) {
     const sMessage = Log.configurator(`Installing SAPUI5 ${version.version} runtime`);
+    const headers = await this.acceptLicence();
     await window.withProgress(
       {
         title: sMessage,
         cancellable: false,
-        location: ProgressLocation.Window,
+        location: ProgressLocation.Notification,
       },
       async (progress) => {
-        progress.report({ increment: 10, message: 'Accept or reject EULA...' });
         try {
-          const headers = await this.acceptLicence();
-
           progress.report({ increment: 10, message: 'Downloading...' });
           const zipBuffer = await Fetch.buffer(version.url, {
             headers,

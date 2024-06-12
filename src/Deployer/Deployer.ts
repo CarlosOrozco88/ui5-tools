@@ -391,19 +391,79 @@ export default {
   async updateTransport(ui5Project: Ui5Project, oDeployOptions: DeployOptions, transportno?: string) {
     if (!transportno) {
       try {
-        transportno = await new Promise((resolve) => {
-          const inputBox = window.createInputBox();
-          inputBox.title = 'ui5-tools > Deployer > Update transport > Enter transport number';
-          inputBox.placeholder = 'Enter the transport number';
-          inputBox.ignoreFocusOut = true;
-          inputBox.onDidAccept(() => {
-            resolve(inputBox.value);
-            inputBox.hide();
-          });
-          inputBox.show();
+        const uri = oDeployOptions.conn.server;
+        const client = oDeployOptions.conn.client;
+
+        const orders: any[] = await new Promise((resolve) => {
+          window.withProgress(
+            {
+              location: ProgressLocation.Notification,
+              title: `ui5-tools > Importing Transports List...`,
+              cancellable: false,
+            },
+            async () => {
+              Log.deployer(`Getting Transports list from ${uri}...`);
+              const transportDataXML = await Fetch.getXMLFile(
+                `${uri}/sap/bc/adt/cts/transportrequests?targets=false&user=*&sap-client=${client}`,
+                oDeployOptions.auth
+              );
+              resolve(transportDataXML?.['tm:root']?.['tm:workbench']?.['tm:modifiable']?.['tm:request'] ?? []);
+            }
+          );
         });
+        if (!orders.length) {
+          Log.deployer(`There are no transports.`, Level.ERROR);
+          throw new Error('No transports found');
+        }
+
+        const selTransportOption: QuickPickItem = await new Promise(async (resolve, reject) => {
+          const selTransportOptionQp = await window.createQuickPick();
+          selTransportOptionQp.title = 'ui5-tools > Deployer > Select existing transport';
+          selTransportOptionQp.items = orders.map((order: any) => {
+            return {
+              label: `${order['@_tm:desc']} - ${order['@_tm:owner']}`,
+              description: order['@_tm:number'],
+            };
+          });
+          selTransportOptionQp.placeholder = `Select a transport for ${ui5Project.folderName} project`;
+          selTransportOptionQp.canSelectMany = false;
+          if (Config.deployer('autoPrefixBSP')) {
+            selTransportOptionQp.value = `${oDeployOptions.ui5.bspcontainer}: `;
+          }
+          selTransportOptionQp.ignoreFocusOut = true;
+          selTransportOptionQp.onDidAccept(async () => {
+            if (selTransportOptionQp.selectedItems.length) {
+              resolve(selTransportOptionQp.selectedItems[0]);
+            } else {
+              reject('No UI5 project selected');
+            }
+            selTransportOptionQp.hide();
+          });
+          selTransportOptionQp.show();
+        });
+
+        transportno = selTransportOption.description;
       } catch (oError) {
         transportno = undefined;
+      }
+
+      if (!transportno) {
+        Log.deployer(`Asking to enter transportno`, Level.ERROR);
+        try {
+          transportno = await new Promise((resolve) => {
+            const inputBox = window.createInputBox();
+            inputBox.title = 'ui5-tools > Deployer > Update transport > Enter transport number';
+            inputBox.placeholder = 'Enter the transport number';
+            inputBox.ignoreFocusOut = true;
+            inputBox.onDidAccept(() => {
+              resolve(inputBox.value);
+              inputBox.hide();
+            });
+            inputBox.show();
+          });
+        } catch (oError) {
+          transportno = undefined;
+        }
       }
     }
 

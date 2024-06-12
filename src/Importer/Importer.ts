@@ -1,16 +1,13 @@
 import { window, ProgressLocation, QuickPickItem, workspace, Uri } from 'vscode';
 import Config from '../Utils/ConfigVscode';
 import Log from '../Utils/LogVscode';
-import { Headers } from 'node-fetch';
-import Fetch from '../Utils/Fetch';
-import https from 'https';
 import Utils from '../Utils/ExtensionVscode';
 import { BSPData, ImportOptions, Level, Ui5ToolsConfiguration } from '../Types/Types';
-import { XMLParser } from 'fast-xml-parser';
 import { URL } from 'url';
 import path from 'path';
 import ImporterProvider from '../Configurator/ImporterProvider';
 import Finder from '../Project/Finder';
+import Fetch from '../Utils/Fetch';
 
 export default {
   async askBSPToImport(): Promise<void> {
@@ -63,14 +60,14 @@ export default {
     return new Promise((resolve) => {
       window.withProgress(
         {
-          location: ProgressLocation.Window,
+          location: ProgressLocation.Notification,
           title: `ui5-tools > Importing BSP List...`,
           cancellable: false,
         },
         async () => {
-          const bspDataXML = await this.getXMLFile(
+          const bspDataXML = await Fetch.getXMLFile(
             `${uri}/sap/bc/adt/filestore/ui5-bsp/objects?sap-client=${client}`,
-            oImportOptions
+            oImportOptions.auth
           );
 
           const bspData = bspDataXML['atom:feed']['atom:entry'].map((oEntry: Record<string, any>) => {
@@ -151,7 +148,7 @@ export default {
 
   async importProject(oBSP: BSPData, oImportOptions: ImportOptions): Promise<void> {
     Log.importer(`Importing BSP ${oBSP.title}...`);
-    const bspInfo = await this.getXMLFile(oBSP.url, oImportOptions);
+    const bspInfo = await Fetch.getXMLFile(oBSP.url, oImportOptions.auth);
 
     await this.processEntry(bspInfo['atom:feed']['atom:entry'], oBSP, oImportOptions);
 
@@ -202,32 +199,6 @@ export default {
     }
   },
 
-  async getXMLFile(url: string, oImportOptions: ImportOptions) {
-    const data = await this.getFile(url, oImportOptions);
-    const res = this.parseXML(data);
-    return res;
-  },
-
-  async getFile(url: string, oImportOptions: ImportOptions) {
-    const headers = new Headers();
-    headers.set(
-      'Authorization',
-      'Basic ' + Buffer.from(oImportOptions.auth.user + ':' + oImportOptions.auth.pwd).toString('base64')
-    );
-
-    const httpsAgent = new https.Agent({
-      rejectUnauthorized: false,
-    });
-    const unaut = Fetch.setUnautorized(oImportOptions.conn?.useStrictSSL, !!Config.deployer('rejectUnauthorized'));
-    const data = await Fetch.file(url, {
-      timeout: 0,
-      headers: headers,
-      agent: httpsAgent,
-    });
-    unaut.restore();
-    return data;
-  },
-
   async processEntry(aData: any, oBSP: BSPData, oImportOptions: ImportOptions) {
     if (Array.isArray(aData)) {
       for (let i = 0; i < aData.length; i++) {
@@ -253,12 +224,12 @@ export default {
       Log.importer(`Creating folder ${uriFsPath}...`);
       await workspace.fs.createDirectory(uriFsPath);
 
-      const data = await this.getXMLFile(sPath, oImportOptions);
+      const data = await Fetch.getXMLFile(sPath, oImportOptions.auth);
 
       await this.processEntry(data['atom:feed']['atom:entry'], oBSP, oImportOptions);
     } else {
       Log.importer(`Creating file ${uriFsPath}...`);
-      const filedata = await this.getFile(sPath, oImportOptions);
+      const filedata = await Fetch.getFile(sPath, oImportOptions.auth);
       workspace.fs.writeFile(uriFsPath, Buffer.from(filedata));
     }
   },
@@ -302,11 +273,5 @@ export default {
       }
       oImportOptions.auth.pwd = sPwd;
     }
-  },
-
-  parseXML(XMLdata: string) {
-    const parser = new XMLParser({ ignoreAttributes: false });
-    const jsonData = parser.parse(XMLdata);
-    return jsonData;
   },
 };
