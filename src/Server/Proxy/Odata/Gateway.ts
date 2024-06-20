@@ -2,7 +2,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import { ServerOptions } from '../../../Types/Types';
 import Config from '../../../Utils/ConfigVscode';
 import Log from '../../../Utils/LogVscode';
-import { createAuthMiddleware } from './Middlewares';
+import { getODATAAuth } from './Middlewares';
 
 const Gateway = {
   set({ serverApp }: ServerOptions) {
@@ -18,11 +18,13 @@ const Gateway = {
         target: targets[0],
         secure: !!Config.server('odataSecure'),
         changeOrigin: true,
-        logLevel: 'error',
-        logProvider: Log.newLogProviderProxy,
+        autoRewrite: true,
+        xfwd: true,
+        logger: Log.newLogProviderProxy(),
+        auth: getODATAAuth() ?? undefined,
+        pathFilter: ['/sap/opu/odata/**', '/sap/public/bc/themes/**', '/sap/bc/**'],
       });
-      serverApp.use(createAuthMiddleware());
-      serverApp.use(['/sap/opu/odata/', '/sap/public/bc/themes/', '/sap/bc/'], proxy);
+      serverApp.use(proxy);
     }
   },
 };

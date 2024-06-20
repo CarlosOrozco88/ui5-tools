@@ -2,7 +2,6 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import Ui5Provider from '../../../Configurator/Ui5Provider';
 import Config from '../../../Utils/ConfigVscode';
 import Log from '../../../Utils/LogVscode';
-import { noCache } from './Middlewares';
 import { ServerOptions } from '../../../Types/Types';
 
 const Gateway = {
@@ -20,19 +19,22 @@ const Gateway = {
       Log.server(`Creating resourcesProxy with ui5Version ${ui5Version} to Gateway ${targetUri}`);
 
       serverApp.use(
-        ['/resources', '/**/resources'],
-        noCache,
         createProxyMiddleware({
           pathRewrite(path) {
             const basePath = '/sap/public/bc/ui5_ui5/1';
             const resourcesPath = path.slice(path.indexOf('/resources/'), path.length);
             return `${basePath}${resourcesPath}`;
           },
+          pathFilter: ['/resources/**', '/**/resources/**'],
+          headers: {
+            'cache-control': 'no-cache',
+          },
+          changeOrigin: true,
+          autoRewrite: true,
+          xfwd: true,
+          logger: Log.newLogProviderProxy(),
           target: targetUri,
           secure: !!Config.server('resourcesSecure'),
-          changeOrigin: true,
-          logLevel: 'error',
-          logProvider: Log.newLogProviderProxy,
         })
       );
     }

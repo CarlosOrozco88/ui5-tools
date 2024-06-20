@@ -1,18 +1,18 @@
-import { RequestHandler } from 'express';
+// import { RequestHandler } from 'express';
 import Utils from '../../../Utils/ExtensionVscode';
 
-export function createAuthMiddleware(index?: number): RequestHandler {
-  return function (req, res, next): void {
-    const userPass = getODATAAuth(index);
-    if (userPass) {
-      const sAuth = Buffer.from(userPass).toString('base64');
-      req.headers.authorization = `Basic ${sAuth}`;
-    }
-    next();
-  };
-}
+// export function createAuthMiddleware(index?: number): RequestHandler {
+//   return function (req, res, next): void {
+//     const userPass = getODATAAuth(index);
+//     if (userPass) {
+//       const sAuth = Buffer.from(userPass).toString('base64');
+//       req.headers.authorization = `Basic ${sAuth}`;
+//     }
+//     next();
+//   };
+// }
 
-function getODATAAuth(index?: number) {
+export function getODATAAuth(index?: number) {
   const oEnv = Utils.loadEnv();
   let auth = '';
 

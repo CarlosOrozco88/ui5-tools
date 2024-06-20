@@ -1,3 +1,10 @@
+## 3.1.5 (20/06/2024)
+
+- Changed cachebuster behaviour: formatted token/timestamp like GW Systems
+- Upgraded `http-proxy-middleware`
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 3.1.4 (12/06/2024)
 
 - **New feature**: when deploying an application to the Gateway, in the `update existing transport` option, the system will attempt to read the transport orders and list them below. If there are no orders or the service is not activated, it will ask for the transport number as it does currently.

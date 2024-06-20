@@ -4,6 +4,17 @@ import Ui5Project from '../../Project/Ui5Project';
 import Finder from '../../Project/Finder';
 import Server from '../Server';
 
+function formatDateToString(date: Date) {
+  return (
+    date.getFullYear().toString() +
+    (date.getMonth() + 1).toString().padStart(2, '0') +
+    date.getDate().toString().padStart(2, '0') +
+    date.getHours().toString().padStart(2, '0') +
+    date.getMinutes().toString().padStart(2, '0') +
+    date.getSeconds().toString().padStart(2, '0')
+  );
+}
+
 export function cacheBusterIndex(ui5Project: Ui5Project) {
   return async function ui5ProjectCacheBusterIndex(req: Request, res: Response) {
     const oCacheBuster: Record<string, string> = {
@@ -15,12 +26,14 @@ export function cacheBusterIndex(ui5Project: Ui5Project) {
     const aTimes: Array<Thenable<FileStat>> = [];
     const aPaths = aUris.map((oUri) => {
       aTimes.push(workspace.fs.stat(oUri));
-      return Finder.fsPathToServerPath(oUri.fsPath);
+      return Finder.fsPathToServerPath(oUri.fsPath).replace('.ts', '.js').replace('.less', '.css');
     });
     const aTimesRes = await Promise.all(aTimes);
     aTimesRes.forEach((oTime, i) => {
-      const sPath = aPaths[i].replace(ui5Project.serverPath, '');
-      oCacheBuster[sPath] = String(oTime.mtime || oTime.mtime);
+      const sPath = aPaths[i].replace(`${ui5Project.serverPath}/`, '');
+      const date = new Date(oTime.mtime || oTime.mtime);
+      const sDate = formatDateToString(date);
+      oCacheBuster[sPath] = sDate;
     });
     res.set('Cache-control', 'no-cache');
 

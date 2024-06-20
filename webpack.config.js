@@ -1,3 +1,5 @@
+//@ts-check
+
 'use strict';
 
 const path = require('path');
@@ -7,6 +9,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 /**@type {import('webpack').Configuration}*/
 module.exports = {
   target: 'node',
+  // mode: 'none',
 
   entry: './src/extension.ts',
   output: {
@@ -46,5 +49,8 @@ module.exports = {
       },
     ],
   },
+  // infrastructureLogging: {
+  //   level: 'log', // enables logging required for problem matchers
+  // },
   plugins: [new webpack.ProgressPlugin(), new CleanWebpackPlugin()],
 };

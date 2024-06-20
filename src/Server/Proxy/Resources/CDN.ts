@@ -5,7 +5,6 @@ import Config from '../../../Utils/ConfigVscode';
 import Fetch from '../../../Utils/Fetch';
 import Log from '../../../Utils/LogVscode';
 import Utils from '../../../Utils/ExtensionVscode';
-import { noCache } from './Middlewares';
 
 const CDN = {
   set({ serverApp }: ServerOptions) {
@@ -17,18 +16,21 @@ const CDN = {
       Log.server(`Creating resourcesProxy with ui5Version ${ui5Version} to CDN ${targetUri}`);
 
       serverApp.use(
-        ['/resources', '/**/resources'],
-        noCache,
         createProxyMiddleware({
           pathRewrite(path) {
             const resourcesPath = path.slice(path.indexOf('/resources/'), path.length);
             return resourcesPath;
           },
+          headers: {
+            'cache-control': 'no-cache',
+          },
+          changeOrigin: true,
+          autoRewrite: true,
+          xfwd: true,
+          logger: Log.newLogProviderProxy(),
+          pathFilter: ['/resources/**', '/**/resources/**'],
           target: targetUri,
           secure: !!Config.server('resourcesSecure'),
-          changeOrigin: true,
-          logLevel: 'error',
-          logProvider: Log.newLogProviderProxy,
         })
       );
     }
