@@ -1,3 +1,9 @@
+## 3.2.0 (04/10/2024)
+
+- Changed `node-fetch` with native fetch
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 3.1.5 (20/06/2024)
 
 - Changed cachebuster behaviour: formatted token/timestamp like GW Systems

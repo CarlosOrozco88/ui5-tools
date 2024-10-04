@@ -1,4 +1,4 @@
-import chokidar from 'chokidar';
+import chokidar, { FSWatcher } from 'chokidar';
 import path from 'path';
 import Menu from '../Menu/Menu';
 import Finder from '../Project/Finder';
@@ -9,7 +9,7 @@ import Utils from '../Utils/ExtensionVscode';
 import ConfigVscode from '../Utils/ConfigVscode';
 import Extension from '../Utils/ExtensionVscode';
 
-let watchApps: chokidar.FSWatcher | undefined;
+let watchApps: FSWatcher | undefined;
 const awaiter: Record<string, ReturnType<typeof setTimeout>> = {};
 
 export default {

@@ -1,7 +1,6 @@
-import fetch, { RequestInit } from 'node-fetch';
 import https from 'https';
 import { XMLParser } from 'fast-xml-parser';
-import { Headers } from 'node-fetch';
+import { Agent } from 'undici';
 const originalReject = https.globalAgent.options.rejectUnauthorized;
 
 const Fetch = {
@@ -20,14 +19,15 @@ const Fetch = {
 
   async buffer(url: string, options: RequestInit = {}) {
     const response = await Fetch.fetch(url, options);
-    return response.buffer();
+    const buffer = await response.arrayBuffer();
+    return Buffer.from(buffer);
   },
 
   async file(url: string, options: RequestInit = {}) {
     let response;
     try {
       response = await Fetch.fetch(url, {
-        timeout: 5000,
+        signal: AbortSignal.timeout(5000),
         ...options,
       });
     } catch (error) {
@@ -65,16 +65,17 @@ const Fetch = {
       'Basic ' + Buffer.from((oImportOptions.user ?? '') + ':' + (oImportOptions.pwd ?? '')).toString('base64')
     );
 
-    const httpsAgent = new https.Agent({
-      rejectUnauthorized: false,
+    const httpsAgent = new Agent({
+      connect: {
+        rejectUnauthorized: false,
+      },
     });
 
     const { default: Config } = await import('../Utils/ConfigVscode');
     const unaut = Fetch.setUnautorized(false, !!Config.deployer('rejectUnauthorized'));
     const data = await Fetch.file(url, {
-      timeout: 0,
       headers: headers,
-      agent: httpsAgent,
+      dispatcher: httpsAgent,
     });
     unaut.restore();
     return data;
