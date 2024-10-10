@@ -212,6 +212,9 @@ export default {
   },
 
   async processItem(item: any, oBSP: BSPData, oImportOptions: ImportOptions) {
+    if (!item) {
+      return;
+    }
     const title = item['atom:title'];
     const src = item['atom:content']['@_src'];
     const type = item['atom:category']['@_term'];

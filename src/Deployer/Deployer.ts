@@ -394,7 +394,7 @@ export default {
         const uri = oDeployOptions.conn.server;
         const client = oDeployOptions.conn.client;
 
-        const orders: any[] = await new Promise((resolve) => {
+        const orders: any[] = await new Promise((resolve, reject) => {
           window.withProgress(
             {
               location: ProgressLocation.Notification,
@@ -403,11 +403,15 @@ export default {
             },
             async () => {
               Log.deployer(`Getting Transports list from ${uri}...`);
-              const transportDataXML = await Fetch.getXMLFile(
-                `${uri}/sap/bc/adt/cts/transportrequests?targets=false&user=*&sap-client=${client}`,
-                oDeployOptions.auth
-              );
-              resolve(transportDataXML?.['tm:root']?.['tm:workbench']?.['tm:modifiable']?.['tm:request'] ?? []);
+              try {
+                const transportDataXML = await Fetch.getXMLFile(
+                  `${uri}/sap/bc/adt/cts/transportrequests?targets=false&user=*&sap-client=${client}`,
+                  oDeployOptions.auth
+                );
+                resolve(transportDataXML?.['tm:root']?.['tm:workbench']?.['tm:modifiable']?.['tm:request'] ?? []);
+              } catch (oError: any) {
+                resolve([]);
+              }
             }
           );
         });

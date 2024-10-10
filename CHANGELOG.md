@@ -1,3 +1,10 @@
+## 3.2.1 (10/10/2024)
+
+- Fix importing bps
+- Fix error handling in Deployer: listing gateway transports
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 3.2.0 (04/10/2024)
 
 - Changed `node-fetch` with native fetch
