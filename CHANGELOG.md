@@ -1,3 +1,9 @@
+## 3.2.2 (21/10/2024)
+
+- Added odata4 path to gateway proxy. Thanks `sergio-gracia`!
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 3.2.1 (10/10/2024)
 
 - Fix importing bps
