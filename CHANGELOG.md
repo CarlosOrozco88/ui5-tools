@@ -1,6 +1,6 @@
 ## 3.2.2 (21/10/2024)
 
-- Added odata4 path to gateway proxy. Thanks `sergio-gracia`!
+- Added odata4 path to gateway proxy. Thanks [sergio-gracia](https://github.com/sergio-gracia)!
 - Updated sandbox.js files
 - Dependencies upgrade
 

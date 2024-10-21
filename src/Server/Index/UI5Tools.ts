@@ -77,6 +77,11 @@ export default {
           url: 'https://github.com/dperezbr',
         },
         {
+          src: 'https://avatars.githubusercontent.com/u/9425120?v=4',
+          tooltip: 'Sergio Gracia Diaz',
+          url: 'https://github.com/sergio-gracia',
+        },
+        {
           src: 'https://avatars.githubusercontent.com/u/145746607?v=4',
           tooltip: 'Santiago de Arriba Cortijo',
           url: 'https://github.com/Santi517',

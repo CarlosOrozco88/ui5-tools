@@ -223,6 +223,13 @@ UI5TOOLS_IMPORT_PASSWORD=
         </a>
       </td>
       <td align="center" valign="top" width="14.28%">
+        <a href="https://github.com/sergio-gracia">
+          <img src="https://avatars.githubusercontent.com/u/9425120?v=4&s=100" width="100px" alt="Sergio Gracia Diaz">
+          <br />
+          <sub><b>Sergio Gracia Diaz</b></sub>
+        </a>
+      </td>
+      <td align="center" valign="top" width="14.28%">
         <a href="https://github.com/Santi517">
           <img src="https://avatars.githubusercontent.com/u/145746607?v=4&s=100" width="100px" alt="Santiago de Arriba Cortijo">
           <br />
