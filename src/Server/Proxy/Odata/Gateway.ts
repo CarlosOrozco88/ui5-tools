@@ -22,7 +22,7 @@ const Gateway = {
         xfwd: true,
         logger: Log.newLogProviderProxy(),
         auth: getODATAAuth() ?? undefined,
-        pathFilter: ['/sap/opu/odata/**', '/sap/public/bc/themes/**', '/sap/bc/**'],
+        pathFilter: ['/sap/opu/odata/**', '/sap/opu/odata4/**', '/sap/public/bc/themes/**', '/sap/bc/**'],
       });
       serverApp.use(proxy);
     }
