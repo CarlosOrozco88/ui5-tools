@@ -390,14 +390,13 @@ export default {
     Log.configurator(`Downloading runtime versions list`);
 
     const document = await this.getRuntimeFile();
-    const tables = document.querySelectorAll('table.plain');
-    const table = tables[9];
-    const rows = table.querySelectorAll('tbody tr');
+    const table = document.querySelector('#sapui5_tools_content table.plain');
+    const rows = table?.querySelectorAll('tbody tr');
 
     const versionsTreeArray: Array<VersionTree> = [];
     const versionsTreeHash: VersionsTree = {};
 
-    rows.forEach(async (row) => {
+    rows?.forEach(async (row) => {
       const firstCol = row.querySelectorAll('td');
       if (firstCol?.[0]?.innerHTML === 'Runtime') {
         const ui5Version = firstCol?.[1]?.innerHTML;

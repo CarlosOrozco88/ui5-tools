@@ -26,7 +26,9 @@ const Runtime = {
       maxAge: '0',
       cacheControl: false,
     });
-    serverApp.use(['/resources', '/**/resources'], removeCacheBusterString, (req, res, next) => {
+    serverApp.use(['/resources', '/*path/resources'], (req, res, next) => {
+      removeCacheBusterString(req, res, next);
+
       if (req.originalUrl.split('/resources').length > 2) {
         req.url = req.originalUrl.slice(req.originalUrl.indexOf('/resources/') + 10, req.originalUrl.length);
       }

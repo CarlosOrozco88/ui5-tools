@@ -75,6 +75,7 @@ const Fetch = {
     const unaut = Fetch.setUnautorized(false, !!Config.deployer('rejectUnauthorized'));
     const data = await Fetch.file(url, {
       headers: headers,
+      //@ts-ignore
       dispatcher: httpsAgent,
     });
     unaut.restore();

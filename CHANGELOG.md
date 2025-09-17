@@ -1,3 +1,8 @@
+## 3.2.3 (17/09/2025)
+
+- Fixed runtime donwload
+- Dependencies upgrade
+
 ## 3.2.2 (21/10/2024)
 
 - Added odata4 path to gateway proxy. Thanks [sergio-gracia](https://github.com/sergio-gracia)!
