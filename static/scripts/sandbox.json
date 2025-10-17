@@ -31,11 +31,15 @@
     "e1a37c27e5dc4d308a3c7975f3d02bf384614837f89f9f62dd89d6494a63da72": "this.sap=this.sap||{};(function(){\"use strict\";sap.ushell=sap.ushell||{};function e(i,t,a){var s=a?JSON.parse(JSON.stringify(t)):t;if(typeof t!==\"object\"){return}Object.keys(s).forEach(function(t){if(Object.prototype.toString.apply(i[t])===\"[object Object]\"&&Object.prototype.toString.apply(s[t])===\"[object Object]\"){e(i[t],s[t],false);return}i[t]=s[t]})}function i(i){var t,a,s,o;function n(e){var i=[],t;if(!e||!e.applications||typeof e.applications!==\"object\"){return i}for(t in e.applications){if(e.applications.hasOwnProperty(t)&&t!==\"\"){i.push(t)}}return i}function r(e,i,t){var a=e.title||e.additionalInformation.replace(\"SAPUI5.Component=\",\"\").split(\".\").pop();return{id:\"sap_ushell_generated_tile_id_\"+i,title:a,size:\"1x1\",tileType:\"sap.ushell.ui.tile.StaticTile\",properties:{chipId:\"sap_ushell_generated_chip_id\",title:a,info:e.description,targetURL:\"#\"+t}}}t=n(i);if(t.length){a=jQuery.sap.getObject(\"services.LaunchPage.adapter.config\",0,i);if(!a.groups){a.groups=[]}o={id:\"sap_ushell_generated_group_id\",title:\"Generated Group\",tiles:[]};a.groups.unshift(o);t.forEach(function(e,t){o.tiles.push(r(i.applications[e],t,e))});s=jQuery.sap.getObject(\"services.NavTargetResolution.adapter.config.applications\",0,i);e(s,i.applications,true);delete i.applications}return i}function t(i){var t=jQuery.sap.endsWithIgnoreCase(i,\".json\")?i:i+\".json\",a;jQuery.sap.log.info(\"Mixing/Overwriting sandbox configuration from \"+t+\".\");a=jQuery.sap.sjax({url:t,dataType:\"json\"});if(a.success){jQuery.sap.log.debug(\"Evaluating fiori launchpad sandbox config JSON: \"+JSON.stringify(a.data));e(window[\"sap-ushell-config\"],a.data,true)}else if(a.statusCode!==404){jQuery.sap.log.error(\"Failed to load Fiori Launchpad Sandbox configuration from \"+t+\": status: \"+a.status+\"; error: \"+a.error)}}function a(){var e,i,t,a;i=window.document.getElementById(\"sap-ushell-bootstrap\");if(!i){e=window.document.getElementsByTagName(\"script\");i=e[e.length-1]}t=i.src;a=t.split(\"?\")[0].split(\"/\").slice(0,-1).join(\"/\")+\"/\";return a}function s(e){var i=window[\"sap-ushell-config\"],t;if(typeof e===\"string\"&&e!==\"\"){i.defaultRenderer=e}t=jQuery.sap.getObject(\"services.NavTargetResolution.adapter.config.applications\",5,i);if(typeof t===\"object\"&&i.defaultRenderer!==\"fiorisandbox\"){delete t[\"\"]}}function o(e){var o=jQuery.sap.getUriParameters().get(\"sap-ushell-sandbox-config\",true),n=jQuery.sap.getUriParameters().get(\"sap-ushell-sandbox-renderer\"),r,p,l,u;jQuery.sap.require(\"sap.ushell.services.Container\");jQuery.sap.registerModulePath(\"sap.ushell.renderers.fiorisandbox\",a()+\"../renderers/fiorisandbox/\");t(a()+\"../shells/sandbox/fioriSandboxConfig.json\");if(o&&o.length>0){for(r=0;r<o.length;r=r+1){t(o[r])}}else{t(\"/appconfig/fioriSandboxConfig.json\")}s(n);window[\"sap-ushell-config\"]=i(window[\"sap-ushell-config\"]);l=jQuery.sap.getObject(\"renderers.fiori2.componentData.config\",0,window[\"sap-ushell-config\"]);if(!l.rootIntent){l.rootIntent=\"Shell-home\"}u=jQuery.sap.getObject(\"services.Ui5ComponentLoader.config\",0,window[\"sap-ushell-config\"]);if(!u.hasOwnProperty(\"amendedLoading\")){u.amendedLoading=false}p=jQuery.sap.getObject(\"services.ClientSideTargetResolution.adapter.config\",0,window[\"sap-ushell-config\"]);p.applications=jQuery.sap.getObject(\"services.NavTargetResolution.adapter.config.applications\",undefined,window[\"sap-ushell-config\"]);sap.ushell.bootstrap(\"local\").done(e)}window[\"sap-ui-config\"]={\"xx-bootTask\":o};sap.ushell.__sandbox__=sap.ushell.__sandbox__||{};sap.ushell.__sandbox__._adjustApplicationConfiguration=i;sap.ushell.__sandbox__._applyJsonApplicationConfig=t;sap.ushell.__sandbox__._evaluateCustomRenderer=s;sap.ushell.__sandbox__._bootstrap=o})();"
   },
   "versions": {
+    "1.141.1": "429203a22b76c88ab033ce8b7b54566a7126e07b51c85ef7fc973426143e64a1",
+    "1.141.0": "429203a22b76c88ab033ce8b7b54566a7126e07b51c85ef7fc973426143e64a1",
     "1.140.0": "429203a22b76c88ab033ce8b7b54566a7126e07b51c85ef7fc973426143e64a1",
+    "1.139.1": "11ab844a07bd19465ec0e5db6c9a3b646a7f30a5e83eb9bfec3356b4e3de5c1b",
     "1.139.0-legacy-free": "11ab844a07bd19465ec0e5db6c9a3b646a7f30a5e83eb9bfec3356b4e3de5c1b",
     "1.139.0": "11ab844a07bd19465ec0e5db6c9a3b646a7f30a5e83eb9bfec3356b4e3de5c1b",
     "1.138.1": "11ab844a07bd19465ec0e5db6c9a3b646a7f30a5e83eb9bfec3356b4e3de5c1b",
     "1.138.0": "11ab844a07bd19465ec0e5db6c9a3b646a7f30a5e83eb9bfec3356b4e3de5c1b",
+    "1.136.9": "11ab844a07bd19465ec0e5db6c9a3b646a7f30a5e83eb9bfec3356b4e3de5c1b",
     "1.136.8": "11ab844a07bd19465ec0e5db6c9a3b646a7f30a5e83eb9bfec3356b4e3de5c1b",
     "1.136.7": "11ab844a07bd19465ec0e5db6c9a3b646a7f30a5e83eb9bfec3356b4e3de5c1b",
     "1.136.6": "11ab844a07bd19465ec0e5db6c9a3b646a7f30a5e83eb9bfec3356b4e3de5c1b",
@@ -112,6 +116,8 @@
     "1.121.2": "77cd7a264ac5095cf953028fa821be645df0abf17d577346ff704d954bca6973",
     "1.121.1": "77cd7a264ac5095cf953028fa821be645df0abf17d577346ff704d954bca6973",
     "1.121.0": "77cd7a264ac5095cf953028fa821be645df0abf17d577346ff704d954bca6973",
+    "1.120.38": "947536dba1c91b64eabddf1862c18d066cdd4d4c3526604dc8bba7e51052d916",
+    "1.120.37": "947536dba1c91b64eabddf1862c18d066cdd4d4c3526604dc8bba7e51052d916",
     "1.120.36": "947536dba1c91b64eabddf1862c18d066cdd4d4c3526604dc8bba7e51052d916",
     "1.120.35": "947536dba1c91b64eabddf1862c18d066cdd4d4c3526604dc8bba7e51052d916",
     "1.120.34": "947536dba1c91b64eabddf1862c18d066cdd4d4c3526604dc8bba7e51052d916",
@@ -198,6 +204,7 @@
     "1.109.2": "35e8f17e15b7da6a2d9e651893c619986eb3eaaa05481c180e763017a9e0dabd",
     "1.109.1": "35e8f17e15b7da6a2d9e651893c619986eb3eaaa05481c180e763017a9e0dabd",
     "1.109.0": "35e8f17e15b7da6a2d9e651893c619986eb3eaaa05481c180e763017a9e0dabd",
+    "1.108.47": "c3019d2c75354a42c1997bf0c9efc275792c6c6d19a5830a444b7ba287ce06b7",
     "1.108.46": "c3019d2c75354a42c1997bf0c9efc275792c6c6d19a5830a444b7ba287ce06b7",
     "1.108.45": "c3019d2c75354a42c1997bf0c9efc275792c6c6d19a5830a444b7ba287ce06b7",
     "1.108.44": "c3019d2c75354a42c1997bf0c9efc275792c6c6d19a5830a444b7ba287ce06b7",
@@ -293,6 +300,7 @@
     "1.97.2": "6e4dd7f9a116d9fdd02ce58502ebcc9a9e1a0829ba31c9c6ba036aeb47bf6fff",
     "1.97.1": "6e4dd7f9a116d9fdd02ce58502ebcc9a9e1a0829ba31c9c6ba036aeb47bf6fff",
     "1.97.0": "6e4dd7f9a116d9fdd02ce58502ebcc9a9e1a0829ba31c9c6ba036aeb47bf6fff",
+    "1.96.44": "9ac8f0b159480362f69d6a2a118cdba4855ddccccd0f6e7375df7e72ce034679",
     "1.96.43": "9ac8f0b159480362f69d6a2a118cdba4855ddccccd0f6e7375df7e72ce034679",
     "1.96.42": "9ac8f0b159480362f69d6a2a118cdba4855ddccccd0f6e7375df7e72ce034679",
     "1.96.41": "9ac8f0b159480362f69d6a2a118cdba4855ddccccd0f6e7375df7e72ce034679",
@@ -391,6 +399,7 @@
     "1.85.2": "1dce5c27d289c5bc02f549f79041a5f6b3a014878020f37588054eed236370b1",
     "1.85.1": "1dce5c27d289c5bc02f549f79041a5f6b3a014878020f37588054eed236370b1",
     "1.85.0": "1dce5c27d289c5bc02f549f79041a5f6b3a014878020f37588054eed236370b1",
+    "1.84.56": "63a9b80f8845ce47ae7aa7f46592d02db707b7fae9f855fd0dc6e32b78f915db",
     "1.84.55": "63a9b80f8845ce47ae7aa7f46592d02db707b7fae9f855fd0dc6e32b78f915db",
     "1.84.54": "63a9b80f8845ce47ae7aa7f46592d02db707b7fae9f855fd0dc6e32b78f915db",
     "1.84.53": "63a9b80f8845ce47ae7aa7f46592d02db707b7fae9f855fd0dc6e32b78f915db",
@@ -515,6 +524,7 @@
     "1.72.2": "b0390924e6d90af31590d4720e41aee1c6092a213a25ade5ea6a405d7b1a1eff",
     "1.72.1": "b0390924e6d90af31590d4720e41aee1c6092a213a25ade5ea6a405d7b1a1eff",
     "1.72.0": "b0390924e6d90af31590d4720e41aee1c6092a213a25ade5ea6a405d7b1a1eff",
+    "1.71.77": "3ee5c5e1f59b0b961085ce246423345aa6cb5b8e00418fdb2ae5e66f9f4ffd81",
     "1.71.76": "3ee5c5e1f59b0b961085ce246423345aa6cb5b8e00418fdb2ae5e66f9f4ffd81",
     "1.71.75": "3ee5c5e1f59b0b961085ce246423345aa6cb5b8e00418fdb2ae5e66f9f4ffd81",
     "1.71.74": "3ee5c5e1f59b0b961085ce246423345aa6cb5b8e00418fdb2ae5e66f9f4ffd81",
@@ -1118,7 +1128,8 @@
     "1.133": "fd89c10d169a286b4072ba5795f7df9a3126c8ec1c7d06c5fabec1ac4a6af35c",
     "1.132": "fd89c10d169a286b4072ba5795f7df9a3126c8ec1c7d06c5fabec1ac4a6af35c",
     "1.131": "fd89c10d169a286b4072ba5795f7df9a3126c8ec1c7d06c5fabec1ac4a6af35c",
-    "1.130": "fd89c10d169a286b4072ba5795f7df9a3126c8ec1c7d06c5fabec1ac4a6af35c"
+    "1.130": "fd89c10d169a286b4072ba5795f7df9a3126c8ec1c7d06c5fabec1ac4a6af35c",
+    "1.141": "429203a22b76c88ab033ce8b7b54566a7126e07b51c85ef7fc973426143e64a1"
   },
-  "default": "1.140.0"
+  "default": "1.141.1"
 }

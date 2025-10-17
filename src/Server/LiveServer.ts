@@ -42,8 +42,14 @@ export default {
           //@ts-ignore
           liveServer = http.createServer(this.serveLiveReloadScript);
         } else {
+          const certData = Utils.getHttpsCert();
+          if (!certData) {
+            throw new Error(
+              'HTTPS protocol selected but no certificate files found in cert/server.pem and cert/server.key'
+            );
+          }
           //@ts-ignore
-          liveServer = https.createServer(Utils.getHttpsCert(), this.serveLiveReloadScript);
+          liveServer = https.createServer(certData, this.serveLiveReloadScript);
         }
         liveServer.listen(portLiveReload);
 

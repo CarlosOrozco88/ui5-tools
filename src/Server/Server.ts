@@ -122,7 +122,13 @@ const Server = {
         await IndexUI5Tools.set(oConfigParams);
 
         if (oConfigParams.protocol === 'https') {
-          server = https.createServer(Utils.getHttpsCert(), serverApp);
+          const certData = Utils.getHttpsCert();
+          if (!certData) {
+            throw new Error(
+              'HTTPS protocol selected but no certificate files found in cert/server.pem and cert/server.key'
+            );
+          }
+          server = https.createServer(certData, serverApp);
         } else {
           server = http.createServer(serverApp);
         }

@@ -1,3 +1,10 @@
+## 3.2.4 (17/10/2025)
+
+- Use of custom cert in https mode `cert/server.pem` and `cert/server.key`. No default certs are provided now
+- Fixed dbg file names in controllers
+- Updated sandbox.js files
+- Dependencies upgrade
+
 ## 3.2.3 (17/09/2025)
 
 - Fixed runtime donwload

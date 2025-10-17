@@ -121,7 +121,7 @@ UI5TOOLS_IMPORT_PASSWORD=
 - `ui5-tools.server.watch`: Activate live reload | default: `true`
 - `ui5-tools.server.timeout`: Server timeout (ms), 0 for disable timeout | default: `60000`
 - `ui5-tools.server.watchExtensions`: Extensions to listen for live reload | default: `css,js,json,xml,html,properties`
-- `ui5-tools.server.protocol`: Should use http or https | default: `http`
+- `ui5-tools.server.protocol`: Should use http or https. HTTPS requires `cert/server.pem` and `cert/server.key` | default: `http`
 - `ui5-tools.server.odataProxy`: Proxy all odata calls to a server | default: `None`
 - `ui5-tools.server.odataUri`: Your odata server uri url (example: `http://srvaspgwd.com:8080/`). odataProxy `Other` accepts multiple uris (example: `http://srvaspgwd.com:8080/, http://srvaspgwd.com:8080/`)
 - `ui5-tools.server.odataSecure`: Verify odataProxy SSL Certs | default: `false`

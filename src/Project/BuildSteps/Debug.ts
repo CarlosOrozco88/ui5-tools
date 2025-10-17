@@ -15,8 +15,16 @@ export default {
         const jsFiles = await workspace.findFiles(patternJs);
 
         for (let i = 0; i < jsFiles.length; i++) {
-          const uriOrigJs = Uri.file(jsFiles[i].fsPath);
-          const uriDestJs = Uri.file(jsFiles[i].fsPath.replace(srcPath, folderPath).replace('.js', '-dbg.js'));
+          const sPath = jsFiles[i].fsPath;
+          const uriOrigJs = Uri.file(sPath);
+          let uriString = sPath.replace(srcPath, folderPath);
+          if (uriString.endsWith('.controller.js')) {
+            uriString = uriString.replace('.controller.js', '-dbg.controller.js');
+          } else {
+            uriString = uriString.replace('.js', '-dbg.js');
+          }
+
+          const uriDestJs = Uri.file(uriString);
           await workspace.fs.copy(uriOrigJs, uriDestJs, {
             overwrite: true,
           });

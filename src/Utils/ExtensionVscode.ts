@@ -54,11 +54,17 @@ const Extension = {
   },
 
   getHttpsCert() {
-    const ui5ToolsPath = Extension.getExtensionFsPath() || '';
-    return {
-      key: fs.readFileSync(path.join(ui5ToolsPath, 'static', 'cert', 'server.key')),
-      cert: fs.readFileSync(path.join(ui5ToolsPath, 'static', 'cert', 'server.cert')),
-    };
+    const baseDir = Extension.getWorkspaceRootPath();
+    const serverCert = path.join(baseDir, 'cert', 'server.pem');
+    const serverKey = path.join(baseDir, 'cert', 'server.key');
+    if (fs.existsSync(serverCert) && fs.existsSync(serverKey)) {
+      return {
+        key: fs.readFileSync(serverKey),
+        cert: fs.readFileSync(serverCert),
+      };
+    }
+
+    return undefined;
   },
 
   getFramework() {
