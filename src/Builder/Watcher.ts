@@ -26,7 +26,11 @@ export default {
   async start(): Promise<void> {
     await this.close();
 
-    const sWorkspaceRootPath = path.join(Utils.getWorkspaceRootPath());
+    const sWorkspaceRootRaw = Utils.getWorkspaceRootPath();
+    if (!sWorkspaceRootRaw) {
+      return;
+    }
+    const sWorkspaceRootPath = path.join(sWorkspaceRootRaw);
 
     const excludedFiles = await ConfigVscode.getExcludedFiles();
     this.watchApps = chokidar.watch([sWorkspaceRootPath], {
