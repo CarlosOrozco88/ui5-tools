@@ -4,6 +4,10 @@ on:
       - published
 
 name: Deploy Extension
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy-eclipse:
     runs-on: ubuntu-latest
