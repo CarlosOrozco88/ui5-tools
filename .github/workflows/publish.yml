@@ -20,6 +20,7 @@ jobs:
         id: publishToOpenVSX
         with:
           pat: ${{ secrets.OPEN_VSX_TOKEN }}
+          dependencies: false
   deploy-vscode:
     runs-on: ubuntu-latest
     steps:
@@ -35,3 +36,4 @@ jobs:
         with:
           pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
           registryUrl: https://marketplace.visualstudio.com
+          dependencies: false

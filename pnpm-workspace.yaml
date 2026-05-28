@@ -1,3 +1,6 @@
 allowBuilds:
   bufferutil: true
   utf-8-validate: true
+
+overrides:
+  axios: ^1.7.0

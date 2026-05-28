@@ -1,4 +1,4 @@
-## 3.2.5 (28/05/2026)
+## 3.2.5b (28/05/2026)
 
 - Dependencies upgrade
 - Changed from npm to pnpm
