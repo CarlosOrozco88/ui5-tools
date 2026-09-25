@@ -465,7 +465,8 @@
             "**/*.view.json",
             "**/*.view.xml",
             "**/*.properties",
-            "!**/*-dbg.js"
+            "!**/*-dbg.js",
+            "!**/*-dbg.controller.js"
           ],
           "description": "Array with all patterns to include/exclude in Component-preload.js"
         },
