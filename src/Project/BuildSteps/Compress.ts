@@ -4,7 +4,7 @@ import Log from '../../Utils/LogVscode';
 
 import { minify, MinifyOutput } from 'terser';
 import { pd as prettyData } from 'pretty-data';
-import path from 'path';
+import { isDebugFilePath } from './Debug';
 const xmlHtmlPrePattern = /<(?:\w+:)?pre>/;
 
 export default {
@@ -34,7 +34,7 @@ export default {
       const jsFiles = await workspace.findFiles(patternJs, uglifySourcesExclude);
 
       for (const uri of jsFiles) {
-        if (!path.basename(uri.fsPath).endsWith('-dbg.js')) {
+        if (!isDebugFilePath(uri.fsPath)) {
           const jsFileRaw = await workspace.fs.readFile(uri);
 
           const jsFileMinified: MinifyOutput = await minify(jsFileRaw.toString());
