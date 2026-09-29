@@ -1,3 +1,8 @@
+## 3.2.6 (29/09/2026)
+
+- fix: keep -dbg.controller.js files unminified and out of the preload. Thanks to [duszaspc](https://github.com/duszaspc)
+- Dependencies upgrade
+
 ## 3.2.5 (28/05/2026)
 
 - Dependencies upgrade
